@@ -1,6 +1,7 @@
 from host.host_agent import dispatch
 from host.protocol import Frame
 from host.measurements import parse_meas
+from pathlib import Path
 import unittest
 
 class SecurityTests(unittest.TestCase):
@@ -21,3 +22,7 @@ class SecurityTests(unittest.TestCase):
 
   def test_measurement_parser_only_accepts_numeric_meas_lines(self):
     self.assertEqual(parse_meas("gain_db = -3.25\nbw_hz = 1200\nnoise = nope\n"), {"gain_db": -3.25, "bw_hz": 1200.0})
+
+  def test_host_source_forbids_shell_true(self):
+    source = "\n".join(path.read_text(errors="ignore") for path in Path("host").rglob("*.py"))
+    self.assertNotIn("shell=True", source)
