@@ -14,6 +14,11 @@ class SecurityTests(unittest.TestCase):
   def test_risky_action_requires_confirm(self):
     self.assertEqual(dispatch(Frame(1, "CLOSE_PROJECT", {})).fields["code"], "physical_confirm_required")
 
+  def test_virtual_run_can_explicitly_open_project_first(self):
+    response = dispatch(Frame(1, "RUN_SIMULATION", {"project": "amplifier", "open": "1"}), virtual=True)
+    self.assertEqual(response.verb, "DONE")
+    self.assertIn("opened", response.fields)
+
   def test_real_simulation_fails_closed_without_ngspice(self):
     result = dispatch(Frame(1, "RUN_SIMULATION", {"project": "amplifier"}))
     self.assertIn(result.verb, {"DONE", "ERR"})

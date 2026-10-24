@@ -39,8 +39,18 @@ def dispatch(frame: Frame, confirm: bool = False, virtual: bool = False) -> Fram
             netlist = project / f"{project.name}.cir"
             if not netlist.is_file():
                 return Frame(frame.seq, "ERR", {"code": "netlist_missing"})
+            opened = False
+            if frame.fields.get("open") == "1":
+                try:
+                    launch_project(project, dry_run=virtual)
+                    opened = True
+                except RuntimeError:
+                    return Frame(frame.seq, "ERR", {"code": "opener_unavailable"})
             if virtual:
-                return Frame(frame.seq, "DONE", {"status": "ok", "project": project.name, "gain_db": "TARGET", "bw_hz": "TARGET", "label": "SIMULATED"})
+                fields = {"status": "ok", "project": project.name, "gain_db": "TARGET", "bw_hz": "TARGET", "label": "SIMULATED"}
+                if opened:
+                    fields["opened"] = "1"
+                return Frame(frame.seq, "DONE", fields)
             if not shutil.which("ngspice"):
                 return Frame(frame.seq, "ERR", {"code": "ngspice_unavailable"})
             log = project / "results.log"
