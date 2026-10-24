@@ -1,7 +1,7 @@
 {
   "provenance": {
-    "generated_at_utc": "2026-10-24T10:27:10.336648+00:00",
-    "git_commit": "2bd4ccdf6f7fbeb20734f23d28be541230cf97e6",
+    "generated_at_utc": "2026-10-24T10:28:23.387635+00:00",
+    "git_commit": "6010b9d2647b0c6cd09513d90e4d12d47b5ca9ce",
     "config": {
       "input": "bench/timing_study.csv"
     }
