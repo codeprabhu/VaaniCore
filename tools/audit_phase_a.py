@@ -1,9 +1,12 @@
 """Audit Phase-A repository state without upgrading scaffolds into claims."""
 from __future__ import annotations
-import argparse, json, pathlib, shutil, re
-from tools.provenance import generated_provenance
+import argparse, json, pathlib, shutil, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.provenance import generated_provenance
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Audit VaaniCore Phase-A evidence state")
