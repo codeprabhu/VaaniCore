@@ -1,6 +1,6 @@
 """Safe host-side action dispatcher for VaaniCore's virtual and serial transports."""
 from __future__ import annotations
-import argparse, json, os, pathlib, shutil, subprocess, sys, time
+import argparse, json, os, pathlib, re, shutil, subprocess, sys, time
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -14,6 +14,14 @@ from host.launcher import launch_project
 ALLOWED = {"PING", "OPEN_PROJECT", "RUN_SIMULATION", "SHOW_RESULT", "CLOSE_PROJECT"}
 RISKY = {"CLOSE_PROJECT"}
 PROJECTS = {"amplifier": ROOT / "projects/amplifier", "filter": ROOT / "projects/filter", "regulator": ROOT / "projects/regulator"}
+
+
+def _protocol_nack(raw: bytes, error: Exception) -> Frame:
+    """Build a bounded NACK while recovering only a decimal sequence prefix."""
+    match = re.match(rb"^@([0-9]{1,3}):", raw)
+    seq = int(match.group(1)) % 256 if match else 0
+    reason = "crc" if "CRC" in str(error).upper() else "malformed"
+    return Frame(seq, "NACK", {"reason": reason})
 
 def _project(name: str) -> pathlib.Path:
     if name not in PROJECTS or pathlib.Path(name).name != name:
@@ -87,6 +95,10 @@ def main() -> int:
             for response in responses:
                 append_frame(args.log, "host_to_device", response)
             return b"".join(encode(frame) for frame in responses)
+        except ValueError as exc:
+            nack = _protocol_nack(line, exc)
+            append_frame(args.log, "host_to_device", nack, str(exc))
+            return encode(nack)
         except Exception as exc:
             append_frame(args.log, "host_error", Frame(0, "ERR", {"code": type(exc).__name__}), str(exc))
             return encode(Frame(0, "ERR", {"code": type(exc).__name__}))
