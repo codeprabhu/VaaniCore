@@ -1,0 +1,9 @@
+test_id,evidence,status
+T-MISREC,tests/test_security.py::test_risky_action_requires_confirm,VERIFIED_SOFTWARE
+T-SEC,tests/test_security.py,VERIFIED_HOST
+T-USB,tests/test_protocol.py,VERIFIED_SOFTWARE
+T-WDT,firmware/main/main.c,PLANNED_HARDWARE
+T-POWER,hardware/power_budget.py,ESTIMATE_ONLY
+T-PRIVACY,firmware/main/ui.c,PLANNED_HARDWARE
+T-ESD,hardware/kicad/drc_checklist.md,PLANNED_DESIGN_REVIEW
+T-THERMAL,hardware/power_budget.py,ESTIMATE_ONLY

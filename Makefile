@@ -19,6 +19,7 @@ smoke:
 
 audit:
 	PYTHONPATH=. $(PYTHON) tools/audit_phase_a.py
+	PYTHONPATH=. $(PYTHON) tools/validate_fmea.py
 
 dsp-test:
 	$(CC) -std=c11 -O2 -Ifirmware/components/dsp tests/dsp_parity.c firmware/components/dsp/mfcc.c -lm -o /tmp/vaanicore_dsp_test
