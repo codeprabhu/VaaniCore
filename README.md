@@ -4,6 +4,8 @@ Bootstrap implementation for the Stage-2 embedded edge-AI coprocessor. The verif
 
 `typed intent → CRC16 frame → allow-list/path-jail host dispatcher → typed status`
 
+Repository root: `/home/shrivathssp/Desktop/VaaniCore`.
+
 Run:
 
 - `make test` — standard-library security and protocol tests.

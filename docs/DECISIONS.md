@@ -2,7 +2,7 @@
 
 | Date | Decision | Alternatives | Reason |
 |---|---|---|---|
-| 2026-10-24 | Use `/home/shrivathssp/Desktop` as repository root | wait for a separate repo | Current workspace is not a Git checkout. |
+| 2026-10-24 | Use `/home/shrivathssp/Desktop/VaaniCore` as repository root | leave project files on Desktop | Keeps the user's Desktop uncluttered; unrelated folders remain untouched. |
 | 2026-10-24 | Python 3.11-compatible standard-library protocol core first | hardware-first | Enables an auditable vertical slice without hardware. |
 | 2026-10-24 | ESP-IDF target is v5.x; exact patch version remains `[[HUMAN: pin after toolchain install]]` | Arduino core | Required RTOS, GDMA and TinyUSB architecture. |
 | 2026-10-24 | PTT is the Day-14 wake path; wake word is SHOULD | custom wake word first | Protects the demo deadline. |

@@ -1,6 +1,6 @@
 # VaaniCore — execution prompt
 
-This repository implements the VaaniCore Embedded Edge-AI Coprocessor Stage-2 specification supplied in the task conversation. The complete master specification is the governing source for scope, honesty labels, hardware boundaries, protocol, evaluation, and deck generation.
+This repository implements the VaaniCore Embedded Edge-AI Coprocessor Stage-2 specification supplied in the task conversation. The complete master specification is the governing source for scope, honesty labels, hardware boundaries, protocol, evaluation, and deck generation. Repository root is `/home/shrivathssp/Desktop/VaaniCore`; do not place project artifacts directly on the Desktop.
 
 Inputs required in `inputs/`:
 
