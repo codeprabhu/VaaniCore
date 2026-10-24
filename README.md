@@ -14,3 +14,5 @@ Run:
 - `make deck-draft` — checks data/placeholder state; the official PPTX is still required for a real deck.
 
 See `TODO_HUMAN.md` for the first human actions. No hardware, audio dataset, official template, citations, prices, photos, mentor sign-off, or measured result is fabricated here.
+
+For a requirement-level audit, see `docs/PHASE_A_STATUS.md`.
