@@ -3,7 +3,8 @@ from __future__ import annotations
 import argparse, csv, json, pathlib, statistics
 
 def analyze(path: pathlib.Path) -> dict[str, object]:
-    rows = list(csv.DictReader(path.open(newline="")))
+    with path.open(newline="") as stream:
+        rows = list(csv.DictReader(stream))
     valid = []
     for row in rows:
         try:
