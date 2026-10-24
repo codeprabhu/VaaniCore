@@ -1,0 +1,3 @@
+{
+  "classes": ["open_amplifier", "open_filter", "open_regulator", "open_last", "open_yesterday", "run_sim", "open_amp_run_sim", "open_yday_run_sim", "show_result", "cancel", "confirm", "close_project", "_unknown_", "_silence_"]
+}

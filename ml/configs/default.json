@@ -1,0 +1,10 @@
+{
+  "sample_rate": 16000,
+  "frame_samples": 512,
+  "hop_samples": 256,
+  "mfcc_coefficients": 10,
+  "command_window_seconds": 2,
+  "confidence_threshold": 0.8,
+  "split": "leave_one_speaker_out",
+  "seed": 0
+}
