@@ -49,7 +49,7 @@ def replace_text(xml: bytes, title: str, body: str) -> bytes:
         nodes[1].text = body
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
-def build() -> None:
+def build(summary: dict) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     if not TEMPLATE.is_file():
         raise SystemExit("deck build blocked: official template missing under inputs/")
@@ -61,8 +61,14 @@ def build() -> None:
         # Reusing that relationship preserves the template's visual structure.
         members["ppt/media/image11.png"] = architecture_png.read_bytes()
     slide_names = sorted((n for n in members if re.fullmatch(r"ppt/slides/slide\d+\.xml", n)), key=lambda n: int(re.search(r"\d+", n).group()))
-    for index, name in enumerate(slide_names[:len(SLIDES)]):
-        members[name] = replace_text(members[name], *SLIDES[index])
+    slide_specs = list(SLIDES)
+    provenance = summary.get("provenance", {})
+    virtual_n = provenance.get("n", "unknown")
+    virtual_label = provenance.get("label", "UNKNOWN")
+    title, body = slide_specs[6]
+    slide_specs[6] = (title, body + f" | Current benchmark source: {virtual_label}, N={virtual_n}; not a hardware measurement.")
+    for index, name in enumerate(slide_names[:len(slide_specs)]):
+        members[name] = replace_text(members[name], *slide_specs[index])
     for name in (n for n in members if re.fullmatch(r"ppt/notesSlides/notesSlide\d+\.xml", n)):
         members[name] = replace_text(members[name], "VaaniCore speaker notes", "Talk track: explain only verified evidence and label targets or simulations explicitly.")
     pres = ET.fromstring(members["ppt/presentation.xml"])
@@ -78,7 +84,7 @@ def build() -> None:
     qa.mkdir(parents=True, exist_ok=True)
     (qa / "STRUCTURE_QA.txt").write_text(
         "VaaniCore draft QA\n"
-        f"template={TEMPLATE.name}\nslides_written={len(SLIDES)}\n"
+        f"template={TEMPLATE.name}\nslides_written={len(slide_specs)}\n"
         "zip_integrity=verified by unzip -t\n"
         "visible_template_copy=removed from first 18 slides by OOXML text replacement\n"
         "raster_render=NOT RUN: LibreOffice headless conversion unavailable in sandbox\n"
@@ -94,8 +100,9 @@ def main() -> int:
     placeholders = placeholder_count()
     if args.final and placeholders:
         raise SystemExit(f"deck-final blocked: {placeholders} [[HUMAN]] placeholders remain")
-    build()
-    status = {"template_present": True, "slides_written": len(SLIDES), "placeholder_count": placeholders, "mode": "final" if args.final else "draft", "measurements": json.loads((ROOT / "results/summary.json").read_text()).get("provenance", {})}
+    summary = json.loads((ROOT / "results/summary.json").read_text())
+    build(summary)
+    status = {"template_present": True, "slides_written": len(SLIDES), "placeholder_count": placeholders, "mode": "final" if args.final else "draft", "measurements": summary.get("provenance", {})}
     (OUT / "DRAFT_STATUS.md").write_text("# VaaniCore deck build\n\n" + json.dumps(status, indent=2) + "\n")
     print(OUTPUT)
     return 0
