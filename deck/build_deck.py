@@ -27,7 +27,7 @@ SLIDES = [
     ("Roadmap", "14-day evaluation-board sprint plus deliberately compressed 10-week custom-PCB track. Stage-3 commitment: custom PCB running MUST scope with published measurements."),
     ("Technical Challenges", "Speaker/noise accuracy; audio overruns; PSRAM latency; Python/C MFCC parity; USB OS differences; LAST/YESTERDAY ambiguity. Metrics: [[HUMAN: measured]]."),
     ("Risk Mitigation", "PTT fallback; DMA double buffering; core pinning; overrun counters; golden vectors; virtual device; time sync; confirm-on-ambiguity."),
-    ("References & Sources", "Verified URLs required before final. Current source ledger is intentionally placeholder-only; own renders/photos only unless attribution is added."),
+    ("References & Sources", "Verified primary-source ledger: ESP-IDF, esp-tflite-micro, ESP-DSP, TinyUSB, TFLM, device datasheets, ngspice, KiCad, CadQuery, datasets and local-ASR baselines."),
     ("Authorship & Status", "AI-assisted development tools were used; all code reviewed, tested and understood by the team. Current verified: host tests + virtual loop; hardware unrun."),
 ]
 
@@ -48,7 +48,7 @@ DETAILS = {
     14: ["Days 1–6: bring-up + virtual loop", "Days 7–11: context + measurements", "Days 12–14: CAD + deck + freeze", "Weeks 3–12: compressed custom PCB", "Stage 3: measured custom-PCB demo"],
     15: ["Accuracy across speakers/noise", "Audio overruns", "PSRAM latency", "Python/C parity", "USB OS differences", "Context ambiguity", "Observed metrics: [[HUMAN: measure]]"],
     16: ["PTT fallback", "Augmentation + speaker holdout", "DMA buffers + counters", "SRAM/PSRAM comparison", "Golden vectors", "Virtual device", "Time sync + confirm"],
-    17: ["ESP-IDF: [[HUMAN: verify URL]]", "ESP-NN/TFLM: [[HUMAN: verify URL]]", "TinyUSB: [[HUMAN: verify URL]]", "INMP441/INA219: [[HUMAN: datasheets]]", "ngspice/KiCad/CadQuery: [[HUMAN: verify URL]]", "Own renders/photos only"],
+    17: ["ESP-IDF / ESP32-S3 I2S + USB — verified", "esp-tflite-micro / ESP-DSP — verified", "TinyUSB CDC — verified", "INMP441 / INA219 datasheets — verified", "ngspice / KiCad / CadQuery — verified", "Speech Commands / Hello Edge / ESC-50 — verified", "Vosk / faster-whisper — baseline sources", "Own renders/photos only; attribution remains human check"],
     18: ["Verified software: protocol, context, MFCC, safety", "Simulated only: virtual trials", "Written, not built: ESP-IDF", "AI-assisted development tools were used; all code reviewed, tested and understood by the team.", "Final review: [[HUMAN: team sign-off]]"],
 }
 

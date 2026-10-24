@@ -3,7 +3,7 @@
 {
   "template_present": true,
   "slides_written": 18,
-  "placeholder_count": 46,
+  "placeholder_count": 45,
   "mode": "draft",
   "measurements": {
     "generated_at_utc": "2026-10-24T10:35:35.674197+00:00",
