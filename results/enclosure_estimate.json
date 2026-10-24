@@ -1,0 +1,13 @@
+{
+  "label": "ESTIMATE",
+  "model": "cantilever strain epsilon=3*t*y/(2*L^2)",
+  "inputs_mm": {
+    "thickness_mm": 2.0,
+    "cantilever_mm": 12.0,
+    "deflection_mm": 1.0,
+    "output": "results/enclosure_estimate.json"
+  },
+  "snap_fit_strain": 0.020833333333333332,
+  "allowable_strain": null,
+  "status": "requires PETG datasheet verification"
+}

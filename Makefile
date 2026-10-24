@@ -10,6 +10,9 @@ sim-demo:
 bench:
 	PYTHONPATH=. $(PYTHON) bench/run_benchmarks.py
 
+smoke:
+	PYTHONPATH=. $(PYTHON) ml/smoke_test.py
+
 deck-draft:
 	PYTHONPATH=. $(PYTHON) deck/build_deck.py --draft
 

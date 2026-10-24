@@ -1,0 +1,10 @@
+{
+  "label": "PIPELINE_SMOKE_TEST \u2014 NOT A RESULT",
+  "seed": 0,
+  "input": "synthetic silence",
+  "feature_shape": [
+    61,
+    10
+  ],
+  "accuracy": null
+}
