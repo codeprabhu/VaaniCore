@@ -1,7 +1,7 @@
-.PHONY: test sim-demo bench audit hardware-check deck-draft deck-final phase-a
+.PHONY: test sim-demo bench audit hardware-check intent-test deck-draft deck-final phase-a
 PYTHON ?= python3
 
-test: protocol-test context-test dsp-test
+test: protocol-test context-test dsp-test intent-test
 	PYTHONPATH=. $(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v
 
 sim-demo:
@@ -36,6 +36,10 @@ protocol-test:
 context-test:
 	$(CC) -std=c11 -O2 -Ifirmware/components/context tests/context_c.c firmware/components/context/context.c -o /tmp/vaanicore_context_test
 	/tmp/vaanicore_context_test
+
+intent-test:
+	$(CC) -std=c11 -O2 -Ifirmware/main tests/intents_c.c firmware/main/intents.c -o /tmp/vaanicore_intent_test
+	/tmp/vaanicore_intent_test
 
 deck-draft:
 	PYTHONPATH=. $(PYTHON) deck/build_deck.py --draft
