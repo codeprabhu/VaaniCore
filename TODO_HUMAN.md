@@ -1,6 +1,6 @@
 # Human task list
 
-- [ ] Add the official template PPTX and idea PDF under `inputs/`.
+- [x] Add the official template PPTX and idea PDF under `inputs/` (verified present in this workspace).
 - [ ] Supply application ID, institution, track, mentor, repository URL, and actual Stage-2 deadline.
 - [ ] Install ESP-IDF v5.x and build/flash the firmware on two ESP32-S3 boards.
 - [ ] Record the 3-speaker dataset and run the leave-one-speaker-out ML evaluation.

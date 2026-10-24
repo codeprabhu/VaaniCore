@@ -1,7 +1,7 @@
 {
   "provenance": {
-    "generated_at_utc": "2026-10-24T10:42:00.262148+00:00",
-    "git_commit": "c9dcd5d570ab2aa75067c2d92defd36c889e9f57",
+    "generated_at_utc": "2026-10-24T10:42:13.244536+00:00",
+    "git_commit": "cd14710cac3cd57161f47e4f0691872e3452190f",
     "config": {
       "required_count": 7
     }
@@ -40,6 +40,7 @@
         "docs/AUTHORSHIP.md",
         "docs/DECISIONS.md",
         "docs/PHASE_A_STATUS.md",
+        "docs/SUBMISSION_CHECKLIST.md",
         "docs/references.md",
         "docs/protocol.md"
       ]

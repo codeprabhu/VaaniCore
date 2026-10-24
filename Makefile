@@ -60,4 +60,5 @@ phase-a:
 	$(MAKE) bench
 	$(MAKE) audit
 	$(MAKE) hardware-check
+	$(MAKE) cad-check
 	$(MAKE) deck-draft

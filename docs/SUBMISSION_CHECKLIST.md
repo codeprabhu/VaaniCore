@@ -1,15 +1,39 @@
-# Submission checklist
+# VaaniCore Stage-2 submission checklist — draft
 
-This checklist is intentionally incomplete until human evidence exists.
+This is a live checklist. A checked software item means the repository contains the artifact and its automated check passed; it does not mean hardware validation occurred.
 
-- [x] Source code, tests, protocol vectors, host safety checks
-- [x] Official template and idea PDF stored under `inputs/`
-- [x] Draft 18-slide PPTX generated from supplied template assets
-- [x] Virtual path and labelled benchmark artifacts
-- [ ] ESP-IDF firmware build and hardware demo evidence
-- [ ] Real dataset, `results/ml_eval.json`, and model export
-- [ ] N≥30 measurements per condition in `results/summary.json`
-- [ ] Verified citations and vendor pricing/lead times
-- [ ] KiCad `.kicad_sch`/`.kicad_pcb`, STEP/STL, renders and DRC/ERC logs
-- [ ] ID-badge photos, mentor sign-off, application ID, institution, track
-- [ ] Human visual QA of every deck slide and final placeholder-free build
+## Verified in this workspace
+
+- [x] Official template PPTX and idea PDF are present under `inputs/`.
+- [x] Python protocol, CRC, retry, malformed-frame, and fuzz tests pass.
+- [x] C protocol, context, intent, and MFCC parity tests pass.
+- [x] Virtual device → host allow-list → simulation-status loop passes.
+- [x] `shell=True` security check and project path-jail tests pass.
+- [x] Draft deck archive has 18 active slides and structural QA passes.
+- [x] Benchmark artifacts are explicitly labelled `SIMULATED`, not hardware evidence.
+- [x] Pin-map, power-budget, FMEA, and analytical enclosure checks generate provenance-bearing artifacts.
+
+## Required before final submission
+
+- [ ] Install ESP-IDF v5.x; build, flash, and test the ESP32-S3 firmware.
+- [ ] Record the three-speaker dataset; train/export/evaluate the int8 model with leave-one-speaker-out splits.
+- [ ] Collect real P1/P2/P3 latency, CPU/RAM, USB traffic, power, reliability, and timing-study data.
+- [ ] Draw and review the KiCad schematic/layout; commit native `.kicad_sch` and `.kicad_pcb` files.
+- [ ] Generate and inspect native STEP/STL files; add real renders and fit evidence.
+- [ ] Verify BOM vendors, prices, and lead times; retain source evidence.
+- [ ] Add application ID, institution, track, mentor, repository URL, photos, and sign-offs.
+- [ ] Render every deck slide in PowerPoint/LibreOffice and fix visual overflow/overlap.
+- [ ] Replace all `[[HUMAN: ...]]` placeholders, then run `make deck-final`.
+
+## Final commands
+
+```sh
+make test
+make sim-demo
+make bench
+make audit
+make hardware-check
+make deck-final
+```
+
+`make deck-final` is intentionally expected to fail until the human-only evidence above is supplied.
