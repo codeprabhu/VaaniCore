@@ -11,6 +11,7 @@
 | MFCC Python/C parity | `make dsp-test`, max error 0.0139313 | VERIFIED_HOST_COMPILED |
 | I2S/GDMA/RTOS firmware | `firmware/main/` source scaffold | WRITTEN_NOT_BUILT — `[[HUMAN: install ESP-IDF and build]]` |
 | TFLite-Micro int8 classifier | model/export interfaces only | NOT_IMPLEMENTED — `[[HUMAN: record/train/export model]]` |
+| Human audio capture tool | `tools/record_dataset.py --help`; backend-gated WAV/metadata writer | VERIFIED_TOOLING_ONLY — microphone and `sounddevice` still required |
 | OLED/physical buttons/LEDs | GPIO scaffold; OLED absent | PARTIAL — `[[HUMAN: wire and validate hardware]]` |
 | N≥30 benchmark harness | `results/virtual_trials.csv`, 30 rows | VERIFIED_SIMULATED_ONLY |
 | Real P1/P2/P3 measurements | no hardware result files | BLOCKED_HUMAN_HARDWARE |
