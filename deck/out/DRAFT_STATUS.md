@@ -3,7 +3,7 @@
 {
   "template_present": true,
   "slides_written": 18,
-  "placeholder_count": 25,
+  "placeholder_count": 45,
   "mode": "draft",
   "measurements": {
     "label": "SIMULATED",

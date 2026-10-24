@@ -31,6 +31,27 @@ SLIDES = [
     ("Authorship & Status", "AI-assisted development tools were used; all code reviewed, tested and understood by the team. Current verified: host tests + virtual loop; hardware unrun."),
 ]
 
+DETAILS = {
+    1: ["Application ID: [[HUMAN: Vishwakarma Application ID]]", "Institution: [[HUMAN: institution]]", "Track: [[HUMAN: track]]", "Faculty mentor: [[HUMAN: mentor]]"],
+    2: ["Core innovation", "Offline local processing", "Measured local-versus-host partitioning", "Allow-listed desktop actions"],
+    3: ["Beneficiary: electronics and embedded engineering students", "Multi-tool workflow", "Context is hard to recall", "Cloud adds connectivity/privacy cost", "Question: what belongs on edge versus host?"],
+    4: ["1 Remember project", "2 Browse folders", "3 Open EDA", "4 Configure", "5 Run", "6 Find result", "Time/actions: [[HUMAN: timing study]]"],
+    5: ["1 Speak", "2 LED listening", "3 OLED parsed intent", "4 Host action", "5 OLED result", "Offline: TARGET", "USB bytes: TARGET"],
+    6: ["P1 Full-edge", "P2 Hybrid", "P3 Host-only", "I2S + GDMA", "MFCC + VAD + int8", "NVS context", "USB-CDC + CRC16", "Allow-listed host"],
+    7: ["Audio: 16 kHz / 16-bit — TARGET", "Inference: ≤100 ms — TARGET", "End-to-end: ≤500 ms — TARGET", "Accuracy: ≥92% — TARGET", "Model: ≤200 KB / ≤120 KB — TARGET", "Power: ≤0.6 W — TARGET", "FreeRTOS dual-core + TWDT"],
+    8: ["PETG case — TARGET", "Mic acoustic port", "OLED window", "USB-C cutout", "Mute switch", "LED light pipes", "4× M2 bosses"],
+    9: ["PETG / PLA / ABS comparison: [[HUMAN: verify datasheets]]", "Snap strain: ESTIMATE", "Boss bending: ESTIMATE", "FEM: not run", "CAD export: [[HUMAN: team native files]]"],
+    10: ["Power: USB-C → fuse → 3V3 LDO", "MCU: ESP32-S3", "Audio: INMP441 I2S", "Display/sense: OLED + INA219 I2C", "Safety: mute, buttons, LEDs", "Pin map: firmware/main/pins.h"],
+    11: ["Phase 1 budget ≤ ₹6,000 — ESTIMATE", "Phase 2 budget ≤ ₹6,000 — ESTIMATE", "ESP32-S3 DevKit", "INMP441", "SSD1306", "INA219", "Vendor/lead time: [[HUMAN: verify]]"],
+    12: ["Day evidence: [[HUMAN: photos]]", "KiCad: [[HUMAN: screenshots + ERC/DRC]]", "CAD: [[HUMAN: renders]]", "Repository: [[HUMAN: URL]]", "Authorship ledger maintained", "Mentor: [[HUMAN: sign-off]]"],
+    13: ["Mis-recognition → confirm gate", "Injection → allow-list/path jail", "USB fault → CRC/timeout", "Hang → TWDT", "Brown-out → BOD/fuse", "ESD → USB TVS", "Privacy → mute/LED", "Thermal → LDO check"],
+    14: ["Days 1–6: bring-up + virtual loop", "Days 7–11: context + measurements", "Days 12–14: CAD + deck + freeze", "Weeks 3–12: compressed custom PCB", "Stage 3: measured custom-PCB demo"],
+    15: ["Accuracy across speakers/noise", "Audio overruns", "PSRAM latency", "Python/C parity", "USB OS differences", "Context ambiguity", "Observed metrics: [[HUMAN: measure]]"],
+    16: ["PTT fallback", "Augmentation + speaker holdout", "DMA buffers + counters", "SRAM/PSRAM comparison", "Golden vectors", "Virtual device", "Time sync + confirm"],
+    17: ["ESP-IDF: [[HUMAN: verify URL]]", "ESP-NN/TFLM: [[HUMAN: verify URL]]", "TinyUSB: [[HUMAN: verify URL]]", "INMP441/INA219: [[HUMAN: datasheets]]", "ngspice/KiCad/CadQuery: [[HUMAN: verify URL]]", "Own renders/photos only"],
+    18: ["Verified software: protocol, context, MFCC, safety", "Simulated only: virtual trials", "Written, not built: ESP-IDF", "AI-assisted development tools were used; all code reviewed, tested and understood by the team.", "Final review: [[HUMAN: team sign-off]]"],
+}
+
 def placeholder_count() -> int:
     total = 0
     for path in ROOT.rglob("*"):
@@ -38,7 +59,7 @@ def placeholder_count() -> int:
             total += len(re.findall(r"\[\[HUMAN", path.read_text(errors="ignore")))
     return total
 
-def replace_text(xml: bytes, title: str, body: str) -> bytes:
+def replace_text(xml: bytes, title: str, body: str, extras: list[str] | None = None) -> bytes:
     root = ET.fromstring(xml)
     nodes = root.findall(".//a:t", NS)
     for node in nodes:
@@ -47,6 +68,8 @@ def replace_text(xml: bytes, title: str, body: str) -> bytes:
         nodes[0].text = title
     if len(nodes) > 1:
         nodes[1].text = body
+    for node, value in zip(nodes[2:], extras or []):
+        node.text = value
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
 def build(summary: dict) -> None:
@@ -68,7 +91,7 @@ def build(summary: dict) -> None:
     title, body = slide_specs[6]
     slide_specs[6] = (title, body + f" | Current benchmark source: {virtual_label}, N={virtual_n}; not a hardware measurement.")
     for index, name in enumerate(slide_names[:len(slide_specs)]):
-        members[name] = replace_text(members[name], *slide_specs[index])
+        members[name] = replace_text(members[name], *slide_specs[index], DETAILS.get(index + 1, []))
     for name in (n for n in members if re.fullmatch(r"ppt/notesSlides/notesSlide\d+\.xml", n)):
         members[name] = replace_text(members[name], "VaaniCore speaker notes", "Talk track: explain only verified evidence and label targets or simulations explicitly.")
     pres = ET.fromstring(members["ppt/presentation.xml"])
