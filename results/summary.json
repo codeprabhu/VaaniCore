@@ -3,11 +3,27 @@
     "label": "SIMULATED",
     "condition": "SIMULATED_PIPELINE_TEST",
     "n": 30,
-    "duration_s": 0.0024487972259521484
+    "source": "results/virtual_trials.csv",
+    "note": "Virtual device only; never a hardware result."
   },
   "metrics": {
     "virtual_success_rate": {
-      "value": 0.0,
+      "value": 1.0,
+      "label": "SIMULATED",
+      "n": 30
+    },
+    "virtual_latency_ms": {
+      "median": 0.061333,
+      "p95": 0.091991,
+      "iqr": 0.0036650000000000085,
+      "n": 30,
+      "label": "SIMULATED"
+    },
+    "virtual_usb_bytes": {
+      "median": 41.0,
+      "p95": 41.0,
+      "iqr": 1.0,
+      "n": 30,
       "label": "SIMULATED"
     },
     "inference_ms": {
