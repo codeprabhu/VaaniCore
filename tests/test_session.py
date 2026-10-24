@@ -16,3 +16,12 @@ class SessionTests(unittest.TestCase):
         frames = HostSession(virtual=False).handle(Frame(4, "RUN_SIMULATION", {"project": "amplifier"}))
         self.assertEqual(frames[0].verb, "ACK")
         self.assertNotIn("PROJECT_EVENT", [frame.verb for frame in frames])
+
+    def test_show_result_requires_and_then_returns_cached_result(self):
+        session = HostSession(virtual=True)
+        before = session.handle(Frame(8, "SHOW_RESULT", {}))
+        self.assertEqual(before[1].fields["code"], "no_result_available")
+        session.handle(Frame(9, "RUN_SIMULATION", {"project": "amplifier"}))
+        after = session.handle(Frame(10, "SHOW_RESULT", {}))
+        self.assertEqual(after[1].verb, "DONE")
+        self.assertEqual(after[1].fields["project"], "amplifier")

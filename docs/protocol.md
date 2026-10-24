@@ -13,5 +13,7 @@ The Python implementation in `host/protocol.py` is the executable reference. The
 For a combined spoken request, `RUN_SIMULATION:project=amplifier,open=1` asks the host to perform the allow-listed
 project launch before simulation. The response reports only the bounded flag `opened=1`; it never places a host path or
 launcher command in the frame.
+`SHOW_RESULT` returns the host session's most recent successful simulation metrics, or `ERR:code=no_result_available`
+when no result has been produced in that session.
 
 Reliability policy: sequence numbers, idempotent handling, retransmit after 300 ms up to three attempts, 30 s task timeout, CRC failure → NACK, and garbage/oversize frames dropped with counters. `host/reliability.py` is the executable bounded retry policy. Cross-device clock estimation error remains `[[HUMAN: measure on hardware]]`.

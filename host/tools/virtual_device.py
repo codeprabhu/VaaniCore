@@ -24,7 +24,7 @@ def run() -> None:
     for frame in session.connect_frames():
         device.handle(frame)
         print(encode(frame).decode().rstrip())
-    for request in (Frame(1, "PING", {}), intent, Frame(3, "RUN_SIMULATION", {"project": args.project})):
+    for request in (Frame(1, "PING", {}), intent, Frame(3, "SHOW_RESULT", {}), Frame(4, "RUN_SIMULATION", {"project": args.project}), Frame(5, "SHOW_RESULT", {})):
         for response in session.handle(request):
             device.handle(response)
             print(encode(response).decode().rstrip())
