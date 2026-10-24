@@ -1,5 +1,6 @@
 from host.host_agent import dispatch
 from host.protocol import Frame
+from host.measurements import parse_meas
 import unittest
 
 class SecurityTests(unittest.TestCase):
@@ -17,3 +18,6 @@ class SecurityTests(unittest.TestCase):
     self.assertIn(result.verb, {"DONE", "ERR"})
     if result.verb == "ERR":
       self.assertEqual(result.fields["code"], "ngspice_unavailable")
+
+  def test_measurement_parser_only_accepts_numeric_meas_lines(self):
+    self.assertEqual(parse_meas("gain_db = -3.25\nbw_hz = 1200\nnoise = nope\n"), {"gain_db": -3.25, "bw_hz": 1200.0})

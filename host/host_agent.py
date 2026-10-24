@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse, json, os, pathlib, shutil, subprocess, sys, time
 from host.protocol import Frame, encode, decode
+from host.measurements import parse_meas
 
 ALLOWED = {"PING", "OPEN_PROJECT", "RUN_SIMULATION", "SHOW_RESULT", "CLOSE_PROJECT"}
 RISKY = {"CLOSE_PROJECT"}
@@ -40,7 +41,12 @@ def dispatch(frame: Frame, confirm: bool = False, virtual: bool = False) -> Fram
             completed = subprocess.run(["ngspice", "-b", "-o", str(log), str(netlist)], cwd=project, check=False, capture_output=True, text=True)
             if completed.returncode != 0:
                 return Frame(frame.seq, "ERR", {"code": "simulation_failed"})
-            return Frame(frame.seq, "DONE", {"status": "ok", "project": project.name, "label": "MEASURED", "note": "parse .meas log before reporting metrics"})
+            values = parse_meas(log.read_text(errors="replace")) if log.is_file() else {}
+            fields = {"status": "ok", "project": project.name, "label": "MEASURED"}
+            for key in ("gain_db", "bw_hz"):
+                if key in values:
+                    fields[key] = str(values[key])
+            return Frame(frame.seq, "DONE", fields)
         return Frame(frame.seq, "DONE", {"status": "ok", "project": project.name})
     return Frame(frame.seq, "DONE", {"status": "ok"})
 
