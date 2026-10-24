@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse, json, os, pathlib, shutil, subprocess, sys, time
 from host.protocol import Frame, encode, decode
 from host.measurements import parse_meas
+from host.transport import discover_port, serve_serial
 
 ALLOWED = {"PING", "OPEN_PROJECT", "RUN_SIMULATION", "SHOW_RESULT", "CLOSE_PROJECT"}
 RISKY = {"CLOSE_PROJECT"}
@@ -51,15 +52,24 @@ def dispatch(frame: Frame, confirm: bool = False, virtual: bool = False) -> Fram
     return Frame(frame.seq, "DONE", {"status": "ok"})
 
 def main() -> int:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="VaaniCore allow-listed host agent")
     parser.add_argument("--stdio", action="store_true", help="read newline-delimited frames from stdin")
+    parser.add_argument("--port", help="USB serial port; auto-detection is used if omitted")
+    parser.add_argument("--baud", type=int, default=115200)
     args = parser.parse_args()
+    def handler(line: bytes) -> bytes:
+        try:
+            return encode(dispatch(decode(line)))
+        except Exception as exc:
+            return encode(Frame(0, "ERR", {"code": type(exc).__name__}))
     if args.stdio:
         for line in sys.stdin.buffer:
-            try:
-                print(encode(dispatch(decode(line))).decode(), end="", flush=True)
-            except Exception as exc:
-                print(encode(Frame(0, "ERR", {"code": type(exc).__name__})).decode(), end="", flush=True)
+            sys.stdout.buffer.write(handler(line)); sys.stdout.buffer.flush()
+    else:
+        port = args.port or discover_port()
+        if not port:
+            raise SystemExit("no VaaniCore serial port found; provide --port or use --stdio")
+        serve_serial(port, handler, args.baud)
     return 0
 
 if __name__ == "__main__":
