@@ -5,7 +5,7 @@
 | Python/C protocol + CRC16 vectors | `make protocol-test`, `tests/protocol/vectors.json` | VERIFIED_HOST_COMPILED |
 | ACK/NACK/retry policy | `host/session.py`, `host/reliability.py`, unit tests | VERIFIED_SOFTWARE |
 | Allow-list/path jail/no shell | `host/host_agent.py`, security tests | VERIFIED_HOST |
-| Virtual intent → host action loop | `make sim-demo` | VERIFIED_SIMULATED |
+| Virtual intent → host action loop | `make sim-demo` including `host_agent.py --stdio --virtual` | VERIFIED_SIMULATED |
 | TIME_SYNC/PROJECT_EVENT lifecycle | `host/session.py`, session tests | VERIFIED_SOFTWARE |
 | LAST/YESTERDAY context | Python and C context tests | VERIFIED_HOST_COMPILED |
 | MFCC Python/C parity | `make dsp-test`, max error 0.0139313 | VERIFIED_HOST_COMPILED |

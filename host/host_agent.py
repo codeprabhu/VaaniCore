@@ -66,8 +66,9 @@ def main() -> int:
     parser.add_argument("--port", help="USB serial port; auto-detection is used if omitted")
     parser.add_argument("--baud", type=int, default=115200)
     parser.add_argument("--log", default="logs/host_agent.jsonl", help="JSONL audit log path")
+    parser.add_argument("--virtual", action="store_true", help="use simulated project actions; CI/demo only")
     args = parser.parse_args()
-    session = HostSession(virtual=False)
+    session = HostSession(virtual=args.virtual)
     def handler(line: bytes) -> bytes:
         try:
             request = decode(line)

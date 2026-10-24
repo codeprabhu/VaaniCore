@@ -6,6 +6,7 @@ test: protocol-test context-test dsp-test
 
 sim-demo:
 	PYTHONPATH=. $(PYTHON) -m host.tools.virtual_device --project amplifier
+	PYTHONPATH=. $(PYTHON) host/tools/stdio_demo.py
 
 bench:
 	PYTHONPATH=. $(PYTHON) bench/run_benchmarks.py
