@@ -1,0 +1,6 @@
+{
+  "status": "BLOCKED_HUMAN",
+  "label": "NOT_A_RESULT",
+  "reason": "numeric manual and voice timing rows are required",
+  "input": "bench/timing_study.csv"
+}
