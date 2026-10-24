@@ -2,7 +2,10 @@
 from __future__ import annotations
 import argparse, json, pathlib
 import numpy as np
-from ml.features import mfcc
+try:
+    from ml.features import mfcc
+except ModuleNotFoundError:
+    from features import mfcc
 
 def main() -> int:
     p=argparse.ArgumentParser(description='Run a synthetic MFCC shape smoke test'); p.add_argument('--output', default='results/ml_smoke.json'); a=p.parse_args()

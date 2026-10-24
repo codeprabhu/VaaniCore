@@ -1,6 +1,9 @@
 from __future__ import annotations
 import argparse, json, pathlib
-from ml.dataset import read_metadata, summary
+try:
+    from ml.dataset import read_metadata, summary
+except ModuleNotFoundError:
+    from dataset import read_metadata, summary
 def main():
     p=argparse.ArgumentParser(description='Validate speaker metadata before evaluation'); p.add_argument('--metadata'); p.add_argument('--output', default='results/ml_metadata_check.json'); a=p.parse_args()
     if not a.metadata:

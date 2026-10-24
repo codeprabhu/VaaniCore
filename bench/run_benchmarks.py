@@ -1,9 +1,15 @@
 """Run the hardware-free virtual benchmark with explicit SIMULATED provenance."""
 from __future__ import annotations
-import argparse, csv, json, pathlib, statistics, time
-from host.host_agent import dispatch
-from host.intent_nlu import phrase_to_frame
-from host.protocol import encode
+import argparse, csv, json, pathlib, statistics, time, sys
+try:
+    from host.host_agent import dispatch
+    from host.intent_nlu import phrase_to_frame
+    from host.protocol import encode
+except ModuleNotFoundError:
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+    from host.host_agent import dispatch
+    from host.intent_nlu import phrase_to_frame
+    from host.protocol import encode
 
 def percentile(values: list[float], fraction: float) -> float:
     ordered = sorted(values)
