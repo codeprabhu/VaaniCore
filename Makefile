@@ -28,5 +28,8 @@ context-test:
 deck-draft:
 	PYTHONPATH=. $(PYTHON) deck/build_deck.py --draft
 
+figures:
+	$(PYTHON) deck/figures/generate_figures.py
+
 deck-final:
 	PYTHONPATH=. $(PYTHON) deck/build_deck.py --final

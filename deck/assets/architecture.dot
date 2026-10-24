@@ -1,0 +1,16 @@
+digraph VaaniCore {
+  graph [rankdir=LR, bgcolor="transparent", pad="0.2"];
+  node [shape=box, style="rounded,filled", fontname="Arial", color="#263238", fillcolor="#E8F1F5"];
+  mic [label="INMP441\nI2S mic"];
+  dma [label="GDMA\ndouble buffer"];
+  dsp [label="VAD + MFCC10\nint8 classifier"];
+  ctx [label="Intent +\nNVS context"];
+  usb [label="USB-CDC\nCRC16"];
+  host [label="Allow-listed\nhost agent"];
+  sim [label="ngspice\nproject result"];
+  mic -> dma -> dsp -> ctx -> usb -> host -> sim;
+  p1 [label="P1 full-edge", shape=note, fillcolor="#D9F2D9"];
+  p2 [label="P2 hybrid", shape=note, fillcolor="#FFF0C2"];
+  p3 [label="P3 host-only", shape=note, fillcolor="#F8D7DA"];
+  {rank=same; p1; p2; p3;}
+}
