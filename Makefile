@@ -10,6 +10,7 @@ sim-demo:
 
 bench:
 	PYTHONPATH=. $(PYTHON) bench/run_benchmarks.py
+	PYTHONPATH=. $(PYTHON) bench/validate_summary.py
 	PYTHONPATH=. $(PYTHON) bench/analyze.py --figures
 	PYTHONPATH=. $(PYTHON) bench/analyze_timing.py
 
