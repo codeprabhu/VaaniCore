@@ -1,0 +1,15 @@
+day,date,goal,owner,status
+1,2026-10-26,repo toolchain BOM CDC echo,A,PLANNED
+2,2026-10-27,I2S DMA WAV and protocol,B,PLANNED
+3,2026-10-28,host allow-list ngspice virtual demo,C,DONE_VIRTUAL
+4,2026-10-29,dataset and MFCC parity,B,PLANNED
+5,2026-10-30,train/export/inference,B,PLANNED
+6,2026-10-31,first physical end-to-end demo,A,DUE_HUMAN
+7,2026-11-01,context store,A,PLANNED
+8,2026-11-02,VAD/wake fallback,B,PLANNED
+9,2026-11-03,safety and fault tests,C,PLANNED
+10,2026-11-04,benchmark dry run,C,PLANNED
+11,2026-11-05,full measurements,ALL,DUE_HUMAN
+12,2026-11-06,enclosure and schematic,ALL,PLANNED
+13,2026-11-07,deck and rehearsal,ALL,BLOCKED_INPUTS
+14,2026-11-08,freeze and submit,ALL,BLOCKED_INPUTS

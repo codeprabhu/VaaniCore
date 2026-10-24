@@ -1,0 +1,38 @@
+{
+  "provenance": {
+    "label": "SIMULATED",
+    "condition": "SIMULATED_PIPELINE_TEST",
+    "n": 30,
+    "duration_s": 0.0010046958923339844
+  },
+  "metrics": {
+    "virtual_success_rate": {
+      "value": 1.0,
+      "label": "SIMULATED"
+    },
+    "inference_ms": {
+      "value": 100,
+      "label": "TARGET"
+    },
+    "e2e_latency_ms": {
+      "value": 500,
+      "label": "TARGET"
+    },
+    "usb_bytes_p1": {
+      "value": 80,
+      "label": "TARGET"
+    },
+    "usb_bytes_p2": {
+      "value": 64000,
+      "label": "TARGET"
+    },
+    "host_idle_cpu_percent": {
+      "value": null,
+      "label": "TARGET"
+    },
+    "average_power_w": {
+      "value": 0.6,
+      "label": "TARGET"
+    }
+  }
+}

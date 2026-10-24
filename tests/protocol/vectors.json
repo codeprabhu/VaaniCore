@@ -1,0 +1,4 @@
+[
+  {"frame": "@1:PINGECA9\n", "seq": 1, "verb": "PING", "fields": {}},
+  {"frame": "@2:RUN_SIMULATION:project=amplifierDDCD\n", "seq": 2, "verb": "RUN_SIMULATION", "fields": {"project": "amplifier"}}
+]

@@ -1,0 +1,4 @@
+projects:
+  amplifier: {path: projects/amplifier, netlist: amplifier.cir}
+  filter: {path: projects/filter, netlist: filter.cir}
+  regulator: {path: projects/regulator, netlist: regulator.cir}

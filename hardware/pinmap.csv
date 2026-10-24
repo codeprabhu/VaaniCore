@@ -1,0 +1,14 @@
+name,gpio,role,notes
+I2S_BCLK,4,I2S clock,
+I2S_WS,5,I2S word select,
+I2S_DIN,6,I2S data,
+I2C_SDA,8,I2C,
+I2C_SCL,9,I2C,
+BUTTON_CONFIRM,15,button,
+BUTTON_ABORT,16,button,
+MUTE_SENSE,17,privacy switch,
+LED_LISTEN,18,LED,
+LED_BUSY,21,LED,
+LED_ERR,47,LED,
+USB_DM,19,native USB,reserved
+USB_DP,20,native USB,reserved

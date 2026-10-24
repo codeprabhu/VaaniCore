@@ -1,0 +1,6 @@
+verbs:
+  PING: {risky: false}
+  OPEN_PROJECT: {risky: false}
+  RUN_SIMULATION: {risky: false}
+  SHOW_RESULT: {risky: false}
+  CLOSE_PROJECT: {risky: true}

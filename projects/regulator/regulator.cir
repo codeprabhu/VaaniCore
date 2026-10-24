@@ -1,0 +1,6 @@
+* Target project placeholder; values are not measurements.
+Vinput in 0 5
+Rload out 0 1k
+.op
+.meas op output_v FIND v(out)
+.end

@@ -1,0 +1,13 @@
+# class,verb,project,risky
+open_amplifier,OPEN_PROJECT,amplifier,0
+open_filter,OPEN_PROJECT,filter,0
+open_regulator,OPEN_PROJECT,regulator,0
+open_last,OPEN_PROJECT,LAST,0
+open_yesterday,OPEN_PROJECT,YESTERDAY,0
+run_sim,RUN_SIMULATION,LAST,0
+open_amp_run_sim,RUN_SIMULATION,amplifier,0
+open_yday_run_sim,RUN_SIMULATION,YESTERDAY,0
+show_result,SHOW_RESULT,LAST,0
+cancel,CANCEL,,0
+confirm,CONFIRM,,0
+close_project,CLOSE_PROJECT,LAST,1

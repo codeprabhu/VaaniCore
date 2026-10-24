@@ -1,0 +1,7 @@
+id,hazard,mitigation,test_id,status
+F1,mis-recognition causes wrong action,confidence gate plus physical confirm,T-MISREC,PLANNED
+F2,command injection,allow-list and path jail; no shell,T-SEC,VERIFIED_HOST
+F3,USB unplug/corrupt frame,CRC timeout and resync,T-USB,PLANNED
+F4,firmware hang,TWDT reboot,T-WDT,PLANNED
+F5,brown-out/overcurrent,BOD and resettable fuse,T-POWER,PLANNED
+F6,privacy leak,hardware mute and listening LED,T-PRIVACY,PLANNED

@@ -1,0 +1,6 @@
+phase,component,part,qty,source_or_lead_time,cost_inr,label
+1,MCU board,ESP32-S3-DevKitC-1 N16R8,2,[[HUMAN: verify vendor and lead time]],,ESTIMATE
+1,microphone,INMP441 breakout,2,[[HUMAN: verify vendor and lead time]],,ESTIMATE
+1,display,SSD1306 0.96 I2C,1,[[HUMAN: verify vendor and lead time]],,ESTIMATE
+1,power monitor,INA219 breakout,1,[[HUMAN: verify vendor and lead time]],,ESTIMATE
+2,custom PCB,ESP32-S3-WROOM-1-N16R8 Rev A,1,[[HUMAN: verify LCSC/LionCircuits]],,ESTIMATE
