@@ -1,0 +1,3 @@
+projects_root: projects
+editor: [[HUMAN: choose fixed editor command or file manager policy]]
+serial: auto

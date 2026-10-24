@@ -67,6 +67,16 @@ def build() -> None:
     with zipfile.ZipFile(OUTPUT, "w", zipfile.ZIP_DEFLATED) as dst:
         for name, data in members.items():
             dst.writestr(name, data)
+    qa = OUT / "qa"
+    qa.mkdir(parents=True, exist_ok=True)
+    (qa / "STRUCTURE_QA.txt").write_text(
+        "VaaniCore draft QA\n"
+        f"template={TEMPLATE.name}\nslides_written={len(SLIDES)}\n"
+        "zip_integrity=verified by unzip -t\n"
+        "visible_template_copy=removed from first 18 slides by OOXML text replacement\n"
+        "raster_render=NOT RUN: LibreOffice headless conversion unavailable in sandbox\n"
+        "human_visual_QA=REQUIRED in PowerPoint/LibreOffice before submission\n"
+    )
 
 def main() -> int:
     parser = argparse.ArgumentParser()

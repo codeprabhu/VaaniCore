@@ -3,11 +3,11 @@
     "label": "SIMULATED",
     "condition": "SIMULATED_PIPELINE_TEST",
     "n": 30,
-    "duration_s": 0.0010046958923339844
+    "duration_s": 0.0024487972259521484
   },
   "metrics": {
     "virtual_success_rate": {
-      "value": 1.0,
+      "value": 0.0,
       "label": "SIMULATED"
     },
     "inference_ms": {
