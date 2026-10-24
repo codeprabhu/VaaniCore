@@ -1,6 +1,9 @@
 """Safe host-side action dispatcher for VaaniCore's virtual and serial transports."""
 from __future__ import annotations
 import argparse, json, os, pathlib, shutil, subprocess, sys, time
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 from host.protocol import Frame, encode, decode
 from host.measurements import parse_meas
 from host.transport import discover_port, serve_serial
@@ -10,7 +13,6 @@ from host.launcher import launch_project
 
 ALLOWED = {"PING", "OPEN_PROJECT", "RUN_SIMULATION", "SHOW_RESULT", "CLOSE_PROJECT"}
 RISKY = {"CLOSE_PROJECT"}
-ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROJECTS = {"amplifier": ROOT / "projects/amplifier", "filter": ROOT / "projects/filter", "regulator": ROOT / "projects/regulator"}
 
 def _project(name: str) -> pathlib.Path:

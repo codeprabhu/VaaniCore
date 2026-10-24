@@ -1,6 +1,10 @@
 """Analyze manual-vs-voice timing data while refusing placeholder rows."""
 from __future__ import annotations
 import argparse, csv, json, pathlib, statistics
+import sys
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 from tools.provenance import generated_provenance
 
 def analyze(path: pathlib.Path) -> dict[str, object]:
