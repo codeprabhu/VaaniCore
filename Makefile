@@ -9,6 +9,7 @@ sim-demo:
 
 bench:
 	PYTHONPATH=. $(PYTHON) bench/run_benchmarks.py
+	PYTHONPATH=. $(PYTHON) bench/analyze.py --figures
 
 smoke:
 	PYTHONPATH=. $(PYTHON) ml/smoke_test.py
