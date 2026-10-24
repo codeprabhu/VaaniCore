@@ -1,0 +1,52 @@
+{
+  "provenance": {
+    "generated_at_utc": "2026-10-24T10:27:56.016689+00:00",
+    "git_commit": "0e65e20fb61d46174c4a0e615e8a3566ba08511c",
+    "config": {
+      "required_count": 7
+    }
+  },
+  "label": "AUDIT",
+  "checks": {
+    "required_files": {
+      "status": "PASS",
+      "missing": []
+    },
+    "official_template": {
+      "status": "PRESENT"
+    },
+    "idea_pdf": {
+      "status": "PRESENT"
+    },
+    "idf": {
+      "status": "UNAVAILABLE"
+    },
+    "ngspice": {
+      "status": "UNAVAILABLE"
+    },
+    "python_pptx": {
+      "status": "UNAVAILABLE"
+    },
+    "intentional_human_placeholders": {
+      "status": "PRESENT",
+      "files": [
+        "PROMPT.md",
+        "hardware/bom.csv",
+        "host/config.yaml",
+        "ml/model_card.md",
+        "bench/timing_study.csv",
+        "tools/audit_phase_a.py",
+        "deck/build_deck.py",
+        "docs/AUTHORSHIP.md",
+        "docs/DECISIONS.md",
+        "docs/PHASE_A_STATUS.md",
+        "docs/references.md",
+        "docs/protocol.md"
+      ]
+    },
+    "simulated_summary": {
+      "status": "EXPLICITLY_LABELLED",
+      "path": "results/summary.json"
+    }
+  }
+}
