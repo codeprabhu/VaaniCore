@@ -1,7 +1,7 @@
 {
   "provenance": {
-    "generated_at_utc": "2026-10-24T10:34:10.970757+00:00",
-    "git_commit": "3529adb304e9aec34aa6de64e9a13ee859f971d1",
+    "generated_at_utc": "2026-10-24T10:35:35.674197+00:00",
+    "git_commit": "8311f929387428920e515d6e2263061407632ba9",
     "config": {
       "trials": 30
     },
@@ -18,9 +18,9 @@
       "n": 30
     },
     "virtual_latency_ms": {
-      "median": 0.0725375,
-      "p95": 0.097547,
-      "iqr": 0.008601999999999999,
+      "median": 0.064075,
+      "p95": 0.100407,
+      "iqr": 0.0032380000000000048,
       "n": 30,
       "label": "SIMULATED"
     },

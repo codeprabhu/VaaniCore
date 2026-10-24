@@ -1,4 +1,4 @@
-.PHONY: test sim-demo bench deck-draft deck-final
+.PHONY: test sim-demo bench audit deck-draft deck-final phase-a
 PYTHON ?= python3
 
 test: protocol-test context-test dsp-test
@@ -41,3 +41,10 @@ figures:
 
 deck-final:
 	PYTHONPATH=. $(PYTHON) deck/build_deck.py --final
+
+phase-a:
+	$(MAKE) test
+	$(MAKE) sim-demo
+	$(MAKE) bench
+	$(MAKE) audit
+	$(MAKE) deck-draft

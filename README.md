@@ -12,6 +12,7 @@ Run:
 - `make sim-demo` — virtual device loop; outputs are `SIMULATED`, not hardware measurements.
 - `make bench` — writes a labelled simulated benchmark summary.
 - `make deck-draft` — checks data/placeholder state; the official PPTX is still required for a real deck.
+- `make phase-a` — runs the complete hardware-free Phase-A verification workflow in order.
 - CI installs `requirements-dev.txt` and runs `make test`, `make sim-demo`, `make bench`, `make audit`, and `make deck-draft`.
 
 See `TODO_HUMAN.md` for the first human actions. No hardware, audio dataset, official template, citations, prices, photos, mentor sign-off, or measured result is fabricated here.
