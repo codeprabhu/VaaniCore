@@ -5,6 +5,7 @@ try:
     from host.host_agent import dispatch
     from host.intent_nlu import phrase_to_frame
     from host.protocol import encode
+from tools.provenance import generated_provenance
 except ModuleNotFoundError:
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
     from host.host_agent import dispatch
@@ -41,7 +42,7 @@ def main() -> None:
     csv_path = output.with_name("virtual_trials.csv")
     with csv_path.open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=rows[0]); writer.writeheader(); writer.writerows(rows)
-    data = {"provenance": {"label": "SIMULATED", "condition": "SIMULATED_PIPELINE_TEST", "n": args.trials, "source": str(csv_path), "note": "Virtual device only; never a hardware result."}, "metrics": {
+    data = {"provenance": {**generated_provenance({"trials": args.trials}), "label": "SIMULATED", "condition": "SIMULATED_PIPELINE_TEST", "n": args.trials, "source": str(csv_path), "note": "Virtual device only; never a hardware result."}, "metrics": {
         "virtual_success_rate": {"value": sum(row["success"] for row in rows) / args.trials, "label": "SIMULATED", "n": args.trials},
         "virtual_latency_ms": distribution(latencies),
         "virtual_usb_bytes": distribution([float(value) for value in bytes_sent]),

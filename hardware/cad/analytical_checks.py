@@ -1,6 +1,11 @@
 """Analytical enclosure checks; outputs are ESTIMATE, never measured FEA."""
 from __future__ import annotations
-import argparse, json, pathlib
+import argparse, json, pathlib, sys
+try:
+    from tools.provenance import generated_provenance
+except ModuleNotFoundError:
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+    from tools.provenance import generated_provenance
 
 def main() -> int:
     p = argparse.ArgumentParser(description="Estimate snap-fit strain and boss bending")
@@ -10,7 +15,7 @@ def main() -> int:
     p.add_argument('--output', default='results/enclosure_estimate.json')
     a = p.parse_args()
     strain = 3 * a.thickness_mm * a.deflection_mm / (2 * a.cantilever_mm * a.cantilever_mm)
-    data = {'label': 'ESTIMATE', 'model': 'cantilever strain epsilon=3*t*y/(2*L^2)', 'inputs_mm': vars(a), 'snap_fit_strain': strain, 'allowable_strain': None, 'status': 'requires PETG datasheet verification'}
+    data = {'provenance': generated_provenance(vars(a)), 'label': 'ESTIMATE', 'model': 'cantilever strain epsilon=3*t*y/(2*L^2)', 'inputs_mm': vars(a), 'snap_fit_strain': strain, 'allowable_strain': None, 'status': 'requires PETG datasheet verification'}
     out = pathlib.Path(a.output); out.parent.mkdir(parents=True, exist_ok=True); out.write_text(json.dumps(data, indent=2) + '\n')
     print(out)
     return 0
