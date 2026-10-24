@@ -6,6 +6,7 @@ from host.measurements import parse_meas
 from host.transport import discover_port, serve_serial
 from host.session import HostSession
 from host.audit_log import append_frame
+from host.launcher import launch_project
 
 ALLOWED = {"PING", "OPEN_PROJECT", "RUN_SIMULATION", "SHOW_RESULT", "CLOSE_PROJECT"}
 RISKY = {"CLOSE_PROJECT"}
@@ -50,7 +51,11 @@ def dispatch(frame: Frame, confirm: bool = False, virtual: bool = False) -> Fram
                 if key in values:
                     fields[key] = str(values[key])
             return Frame(frame.seq, "DONE", fields)
-        return Frame(frame.seq, "DONE", {"status": "ok", "project": project.name})
+        try:
+            opener = launch_project(project, dry_run=virtual)
+        except RuntimeError:
+            return Frame(frame.seq, "ERR", {"code": "opener_unavailable"})
+        return Frame(frame.seq, "DONE", {"status": "ok", "project": project.name, "opener": opener, "label": "SIMULATED" if virtual else "MEASURED"})
     return Frame(frame.seq, "DONE", {"status": "ok"})
 
 def main() -> int:
