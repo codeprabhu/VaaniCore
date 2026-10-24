@@ -55,6 +55,11 @@ def build() -> None:
         raise SystemExit("deck build blocked: official template missing under inputs/")
     with zipfile.ZipFile(TEMPLATE) as src:
         members = {name: src.read(name) for name in src.namelist()}
+    architecture_png = ROOT / "deck/assets/architecture.png"
+    if architecture_png.is_file():
+        # The official template's slide 6 rId3 is its full-slide architecture image.
+        # Reusing that relationship preserves the template's visual structure.
+        members["ppt/media/image11.png"] = architecture_png.read_bytes()
     slide_names = sorted((n for n in members if re.fullmatch(r"ppt/slides/slide\d+\.xml", n)), key=lambda n: int(re.search(r"\d+", n).group()))
     for index, name in enumerate(slide_names[:len(SLIDES)]):
         members[name] = replace_text(members[name], *SLIDES[index])
