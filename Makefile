@@ -21,6 +21,10 @@ protocol-test:
 	$(CC) -std=c11 -O2 -Ifirmware/components/protocol tests/protocol_c.c firmware/components/protocol/protocol.c firmware/components/protocol/crc16.c -o /tmp/vaanicore_protocol_test
 	/tmp/vaanicore_protocol_test
 
+context-test:
+	$(CC) -std=c11 -O2 -Ifirmware/components/context tests/context_c.c firmware/components/context/context.c -o /tmp/vaanicore_context_test
+	/tmp/vaanicore_context_test
+
 deck-draft:
 	PYTHONPATH=. $(PYTHON) deck/build_deck.py --draft
 
