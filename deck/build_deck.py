@@ -58,6 +58,8 @@ def build() -> None:
     slide_names = sorted((n for n in members if re.fullmatch(r"ppt/slides/slide\d+\.xml", n)), key=lambda n: int(re.search(r"\d+", n).group()))
     for index, name in enumerate(slide_names[:len(SLIDES)]):
         members[name] = replace_text(members[name], *SLIDES[index])
+    for name in (n for n in members if re.fullmatch(r"ppt/notesSlides/notesSlide\d+\.xml", n)):
+        members[name] = replace_text(members[name], "VaaniCore speaker notes", "Talk track: explain only verified evidence and label targets or simulations explicitly.")
     pres = ET.fromstring(members["ppt/presentation.xml"])
     slide_list = pres.find("p:sldIdLst", NS)
     if slide_list is not None:
