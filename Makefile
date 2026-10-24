@@ -17,6 +17,10 @@ dsp-test:
 	$(CC) -std=c11 -O2 -Ifirmware/components/dsp tests/dsp_parity.c firmware/components/dsp/mfcc.c -lm -o /tmp/vaanicore_dsp_test
 	/tmp/vaanicore_dsp_test
 
+protocol-test:
+	$(CC) -std=c11 -O2 -Ifirmware/components/protocol tests/protocol_c.c firmware/components/protocol/protocol.c firmware/components/protocol/crc16.c -o /tmp/vaanicore_protocol_test
+	/tmp/vaanicore_protocol_test
+
 deck-draft:
 	PYTHONPATH=. $(PYTHON) deck/build_deck.py --draft
 
