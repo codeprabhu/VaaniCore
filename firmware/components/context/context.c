@@ -18,7 +18,7 @@ void vc_history_append(vc_history_t *history, const char *project_id, const char
   if (history->count < VAANICORE_HISTORY_CAPACITY) history->count++;
 }
 
-int vc_history_resolve(const vc_history_t *history, const char *selector, int32_t today, vc_event_t *out) {
+static int resolve_internal(const vc_history_t *history, const char *selector, int32_t today, vc_event_t *out, int confirmed_fallback) {
   if (!history || !selector || !out || history->count == 0) return 0;
   if (strcmp(selector, "LAST") == 0) { *out = *at(history, history->count - 1); return 1; }
   if (strcmp(selector, "YESTERDAY") == 0) {
@@ -27,7 +27,17 @@ int vc_history_resolve(const vc_history_t *history, const char *selector, int32_
       const vc_event_t *event = at(history, i - 1);
       if (event->local_day == today - 1) { if (found) return 0; *out = *event; found = 1; }
     }
-    return found;
+    if (found) return 1;
+    if (confirmed_fallback) { *out = *at(history, history->count - 1); return 1; }
+    return 0;
   }
   return 0;
+}
+
+int vc_history_resolve(const vc_history_t *history, const char *selector, int32_t today, vc_event_t *out) {
+  return resolve_internal(history, selector, today, out, 0);
+}
+
+int vc_history_resolve_confirmed(const vc_history_t *history, const char *selector, int32_t today, vc_event_t *out) {
+  return resolve_internal(history, selector, today, out, 1);
 }
