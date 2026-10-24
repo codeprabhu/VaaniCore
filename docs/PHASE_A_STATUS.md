@@ -10,7 +10,7 @@
 | LAST/YESTERDAY context | Python and C context tests | VERIFIED_HOST_COMPILED |
 | MFCC Python/C parity | `make dsp-test`, max error 0.0139313 | VERIFIED_HOST_COMPILED |
 | I2S/GDMA/RTOS firmware | `firmware/main/` source scaffold | WRITTEN_NOT_BUILT — `[[HUMAN: install ESP-IDF and build]]` |
-| TFLite-Micro int8 classifier | `ml/model.py`, gated training and int8 export paths | BLOCKED_INPUT/TOOLCHAIN — `[[HUMAN: record/train/export model]]` |
+| TFLite-Micro int8 classifier | `ml/model.py`, gated training/int8 export/evaluation status paths | BLOCKED_INPUT/TOOLCHAIN — `[[HUMAN: record/train/export model]]` |
 | Human audio capture tool | `tools/record_dataset.py --help`; backend-gated WAV/metadata writer | VERIFIED_TOOLING_ONLY — microphone and `sounddevice` still required |
 | OLED/physical buttons/LEDs | GPIO scaffold; OLED absent | PARTIAL — `[[HUMAN: wire and validate hardware]]` |
 | N≥30 benchmark harness | `results/virtual_trials.csv`, 30 rows | VERIFIED_SIMULATED_ONLY |
