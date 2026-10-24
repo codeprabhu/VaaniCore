@@ -13,6 +13,10 @@ bench:
 smoke:
 	PYTHONPATH=. $(PYTHON) ml/smoke_test.py
 
+dsp-test:
+	$(CC) -std=c11 -O2 -Ifirmware/components/dsp tests/dsp_parity.c firmware/components/dsp/mfcc.c -lm -o /tmp/vaanicore_dsp_test
+	/tmp/vaanicore_dsp_test
+
 deck-draft:
 	PYTHONPATH=. $(PYTHON) deck/build_deck.py --draft
 
