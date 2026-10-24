@@ -1,7 +1,7 @@
 {
   "provenance": {
-    "generated_at_utc": "2026-10-24T10:36:02.722121+00:00",
-    "git_commit": "72bbb0d3e5710e8f4995b9aec8466693826afb9f",
+    "generated_at_utc": "2026-10-24T10:41:32.151748+00:00",
+    "git_commit": "0c7a0780e0c84b9fb079f228c0d5ed6bd37651ed",
     "config": {
       "input": "hardware/pinmap.csv"
     }
