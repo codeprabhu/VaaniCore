@@ -5,6 +5,7 @@ from host.protocol import Frame, encode, decode
 from host.measurements import parse_meas
 from host.transport import discover_port, serve_serial
 from host.session import HostSession
+from host.audit_log import append_frame
 
 ALLOWED = {"PING", "OPEN_PROJECT", "RUN_SIMULATION", "SHOW_RESULT", "CLOSE_PROJECT"}
 RISKY = {"CLOSE_PROJECT"}
@@ -57,12 +58,19 @@ def main() -> int:
     parser.add_argument("--stdio", action="store_true", help="read newline-delimited frames from stdin")
     parser.add_argument("--port", help="USB serial port; auto-detection is used if omitted")
     parser.add_argument("--baud", type=int, default=115200)
+    parser.add_argument("--log", default="logs/host_agent.jsonl", help="JSONL audit log path")
     args = parser.parse_args()
     session = HostSession(virtual=False)
     def handler(line: bytes) -> bytes:
         try:
-            return b"".join(encode(frame) for frame in session.handle(decode(line)))
+            request = decode(line)
+            append_frame(args.log, "device_to_host", request)
+            responses = session.handle(request)
+            for response in responses:
+                append_frame(args.log, "host_to_device", response)
+            return b"".join(encode(frame) for frame in responses)
         except Exception as exc:
+            append_frame(args.log, "host_error", Frame(0, "ERR", {"code": type(exc).__name__}), str(exc))
             return encode(Frame(0, "ERR", {"code": type(exc).__name__}))
     if args.stdio:
         for line in sys.stdin.buffer:

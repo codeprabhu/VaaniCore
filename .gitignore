@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *.log
+logs/*.jsonl
 dataset/
 deck/out/qa/
 projects/*/results.log
