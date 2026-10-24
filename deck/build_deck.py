@@ -103,16 +103,47 @@ def build(summary: dict) -> None:
     with zipfile.ZipFile(OUTPUT, "w", zipfile.ZIP_DEFLATED) as dst:
         for name, data in members.items():
             dst.writestr(name, data)
+    qa_result = _structural_qa(OUTPUT, len(slide_specs))
     qa = OUT / "qa"
     qa.mkdir(parents=True, exist_ok=True)
     (qa / "STRUCTURE_QA.txt").write_text(
         "VaaniCore draft QA\n"
         f"template={TEMPLATE.name}\nslides_written={len(slide_specs)}\n"
-        "zip_integrity=verified by unzip -t\n"
+        f"zip_integrity={qa_result['zip_integrity']}\n"
+        f"slide_count={qa_result['slide_count']}\n"
+        f"forbidden_template_text={qa_result['forbidden_template_text']}\n"
         "visible_template_copy=removed from first 18 slides by OOXML text replacement\n"
         "raster_render=NOT RUN: LibreOffice headless conversion unavailable in sandbox\n"
         "human_visual_QA=REQUIRED in PowerPoint/LibreOffice before submission\n"
     )
+
+
+def _structural_qa(path: pathlib.Path, expected_slides: int) -> dict[str, object]:
+    """Verify archive and text invariants before reporting a draft as built."""
+    with zipfile.ZipFile(path) as archive:
+        bad_member = archive.testzip()
+        all_slide_names = [
+            name for name in archive.namelist()
+            if re.fullmatch(r"ppt/slides/slide\d+\.xml", name)
+        ]
+        presentation = ET.fromstring(archive.read("ppt/presentation.xml"))
+        slide_list = presentation.find("p:sldIdLst", NS)
+        active_count = len(list(slide_list)) if slide_list is not None else 0
+        # This template's active slides are the first numbered slide parts;
+        # unused example/instruction parts may remain as ZIP members.
+        slide_names = sorted(all_slide_names, key=lambda name: int(re.search(r"\d+", name).group()))[:active_count]
+        visible_text = "\n".join(
+            archive.read(name).decode("utf-8", errors="ignore") for name in slide_names
+        )
+    forbidden = [term for term in ("Example:", "Instruction", "example project") if term in visible_text]
+    result = {
+        "zip_integrity": "PASS" if bad_member is None else f"FAIL:{bad_member}",
+        "slide_count": active_count,
+        "forbidden_template_text": "PASS" if not forbidden else ",".join(forbidden),
+    }
+    if bad_member is not None or active_count != expected_slides or forbidden:
+        raise RuntimeError(f"deck structural QA failed: {result}")
+    return result
 
 def main() -> int:
     parser = argparse.ArgumentParser()
