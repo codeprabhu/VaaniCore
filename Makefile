@@ -1,4 +1,4 @@
-.PHONY: test sim-demo bench audit deck-draft deck-final phase-a
+.PHONY: test sim-demo bench audit hardware-check deck-draft deck-final phase-a
 PYTHON ?= python3
 
 test: protocol-test context-test dsp-test
@@ -20,6 +20,10 @@ smoke:
 audit:
 	PYTHONPATH=. $(PYTHON) tools/audit_phase_a.py
 	PYTHONPATH=. $(PYTHON) tools/validate_fmea.py
+
+hardware-check:
+	PYTHONPATH=. $(PYTHON) hardware/validate_pinmap.py
+	PYTHONPATH=. $(PYTHON) hardware/power_budget.py
 
 dsp-test:
 	$(CC) -std=c11 -O2 -Ifirmware/components/dsp tests/dsp_parity.c firmware/components/dsp/mfcc.c -lm -o /tmp/vaanicore_dsp_test
@@ -47,4 +51,5 @@ phase-a:
 	$(MAKE) sim-demo
 	$(MAKE) bench
 	$(MAKE) audit
+	$(MAKE) hardware-check
 	$(MAKE) deck-draft

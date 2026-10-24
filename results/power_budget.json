@@ -1,0 +1,14 @@
+{
+  "provenance": {
+    "generated_at_utc": "2026-10-24T10:36:02.773031+00:00",
+    "git_commit": "72bbb0d3e5710e8f4995b9aec8466693826afb9f",
+    "config": {
+      "mcu_w": 0.4,
+      "peripherals_w": 0.2
+    }
+  },
+  "label": "TARGET",
+  "mcu_w": 0.4,
+  "peripherals_w": 0.2,
+  "total_power_w": 0.6000000000000001
+}
