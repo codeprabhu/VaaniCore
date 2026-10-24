@@ -1,4 +1,5 @@
 from host.protocol import Frame, crc16, decode, encode
+from host.reliability import request_with_retries
 import unittest
 import json
 from pathlib import Path
@@ -32,3 +33,16 @@ class ProtocolTests(unittest.TestCase):
         decode(raw)
       except (ValueError, UnicodeDecodeError):
         pass
+
+  def test_retry_recovers_after_two_timeouts(self):
+    calls = []
+    def transport(payload, timeout):
+      calls.append((payload, timeout))
+      return None if len(calls) < 3 else encode(Frame(1, "DONE", {"status": "ok"}))
+    result = request_with_retries(Frame(1, "PING", {}), transport)
+    self.assertEqual(result.verb, "DONE")
+    self.assertEqual(len(calls), 3)
+
+  def test_retry_rejects_more_than_three_attempts(self):
+    with self.assertRaises(ValueError):
+      request_with_retries(Frame(1, "PING", {}), lambda *_: None, attempts=4)
