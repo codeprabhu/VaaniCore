@@ -5,12 +5,13 @@ try:
     from host.host_agent import dispatch
     from host.intent_nlu import phrase_to_frame
     from host.protocol import encode
-from tools.provenance import generated_provenance
+    from tools.provenance import generated_provenance
 except ModuleNotFoundError:
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
     from host.host_agent import dispatch
     from host.intent_nlu import phrase_to_frame
     from host.protocol import encode
+    from tools.provenance import generated_provenance
 
 def percentile(values: list[float], fraction: float) -> float:
     ordered = sorted(values)

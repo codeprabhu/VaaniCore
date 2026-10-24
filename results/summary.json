@@ -1,5 +1,10 @@
 {
   "provenance": {
+    "generated_at_utc": "2026-10-24T10:27:08.901661+00:00",
+    "git_commit": "2bd4ccdf6f7fbeb20734f23d28be541230cf97e6",
+    "config": {
+      "trials": 30
+    },
     "label": "SIMULATED",
     "condition": "SIMULATED_PIPELINE_TEST",
     "n": 30,
@@ -13,9 +18,9 @@
       "n": 30
     },
     "virtual_latency_ms": {
-      "median": 0.061024999999999996,
-      "p95": 0.08806,
-      "iqr": 0.006303999999999997,
+      "median": 0.0765895,
+      "p95": 0.087607,
+      "iqr": 0.012425999999999993,
       "n": 30,
       "label": "SIMULATED"
     },
