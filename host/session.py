@@ -25,5 +25,5 @@ class HostSession:
         response = dispatch(request, confirm=confirm, virtual=self.virtual)
         frames = [ack, response]
         if response.verb == "DONE" and response.fields.get("project") and request.verb in {"OPEN_PROJECT", "RUN_SIMULATION"}:
-            frames.append(Frame(request.seq, "PROJECT_EVENT", {"action": request.verb, "project": response.fields["project"]}))
+            frames.append(Frame(request.seq, "PROJECT_EVENT", {"action": request.verb, "project": response.fields["project"], "epoch": str(int(time.time()))}))
         return frames
