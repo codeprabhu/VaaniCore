@@ -5,3 +5,5 @@ logs/*.jsonl
 dataset/
 deck/out/qa/
 projects/*/results.log
+PROMPT.md
+TODO_HUMAN.md
