@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+*.log
+dataset/
+deck/out/qa/
+projects/*/results.log
