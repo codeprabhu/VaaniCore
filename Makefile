@@ -1,7 +1,7 @@
 .PHONY: test sim-demo bench deck-draft deck-final
 PYTHON ?= python3
 
-test:
+test: protocol-test context-test dsp-test
 	PYTHONPATH=. $(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v
 
 sim-demo:
