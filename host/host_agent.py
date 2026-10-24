@@ -4,6 +4,7 @@ import argparse, json, os, pathlib, shutil, subprocess, sys, time
 from host.protocol import Frame, encode, decode
 from host.measurements import parse_meas
 from host.transport import discover_port, serve_serial
+from host.session import HostSession
 
 ALLOWED = {"PING", "OPEN_PROJECT", "RUN_SIMULATION", "SHOW_RESULT", "CLOSE_PROJECT"}
 RISKY = {"CLOSE_PROJECT"}
@@ -57,9 +58,10 @@ def main() -> int:
     parser.add_argument("--port", help="USB serial port; auto-detection is used if omitted")
     parser.add_argument("--baud", type=int, default=115200)
     args = parser.parse_args()
+    session = HostSession(virtual=False)
     def handler(line: bytes) -> bytes:
         try:
-            return encode(dispatch(decode(line)))
+            return b"".join(encode(frame) for frame in session.handle(decode(line)))
         except Exception as exc:
             return encode(Frame(0, "ERR", {"code": type(exc).__name__}))
     if args.stdio:
@@ -69,7 +71,10 @@ def main() -> int:
         port = args.port or discover_port()
         if not port:
             raise SystemExit("no VaaniCore serial port found; provide --port or use --stdio")
-        serve_serial(port, handler, args.baud)
+        # Send TIME_SYNC immediately after opening the serial link, then process requests.
+        def connected_handler(line: bytes) -> bytes:
+            return handler(line)
+        serve_serial(port, connected_handler, args.baud, on_connect=lambda: b"".join(encode(frame) for frame in session.connect_frames()))
     return 0
 
 if __name__ == "__main__":
