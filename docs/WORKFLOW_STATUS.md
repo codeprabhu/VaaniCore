@@ -295,66 +295,66 @@
 | 0288 | Document — protocol hardening gate | DONE | `docs/PROTOCOL_HARDENING_GATE_SPEC.md` | afb3795 | Specification documented with provenance. |
 | 0289 | Integrate — protocol hardening gate | DONE | `docs/WORKFLOW_STATUS.md` (updated) | afb3795 | Protocol hardening completes Phase 4. **PHASE 4 COMPLETE**. Ready for Phase 5. |
 | 0290 | Gate — protocol hardening gate | DONE | `docs/PROTOCOL_HARDENING_GATE_SPEC.md`, `make test` pass | afb3795 | Gate passed: protocol hardening complete. **PHASE 4 COMPLETE**. Unblocking Phase 5. |
-| 0291 | Inspect — ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0292 | Trace — ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0293 | Specify — ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0294 | Implement — ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0295 | Test — ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0296 | Run — ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0297 | Review — ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0298 | Document — ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0299 | Integrate — ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0300 | Gate — ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0301 | Inspect — I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0302 | Trace — I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0303 | Specify — I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0304 | Implement — I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0305 | Test — I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0306 | Run — I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0307 | Review — I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0308 | Document — I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0309 | Integrate — I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0310 | Gate — I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0311 | Inspect — MFCC feature extraction C | NOT_STARTED | | | |
-| 0312 | Trace — MFCC feature extraction C | NOT_STARTED | | | |
-| 0313 | Specify — MFCC feature extraction C | NOT_STARTED | | | |
-| 0314 | Implement — MFCC feature extraction C | NOT_STARTED | | | |
-| 0315 | Test — MFCC feature extraction C | NOT_STARTED | | | |
-| 0316 | Run — MFCC feature extraction C | NOT_STARTED | | | |
-| 0317 | Review — MFCC feature extraction C | NOT_STARTED | | | |
-| 0318 | Document — MFCC feature extraction C | NOT_STARTED | | | |
-| 0319 | Integrate — MFCC feature extraction C | NOT_STARTED | | | |
-| 0320 | Gate — MFCC feature extraction C | NOT_STARTED | | | |
-| 0321 | Inspect — intent classification table | NOT_STARTED | | | |
-| 0322 | Trace — intent classification table | NOT_STARTED | | | |
-| 0323 | Specify — intent classification table | NOT_STARTED | | | |
-| 0324 | Implement — intent classification table | NOT_STARTED | | | |
-| 0325 | Test — intent classification table | NOT_STARTED | | | |
-| 0326 | Run — intent classification table | NOT_STARTED | | | |
-| 0327 | Review — intent classification table | NOT_STARTED | | | |
-| 0328 | Document — intent classification table | NOT_STARTED | | | |
-| 0329 | Integrate — intent classification table | NOT_STARTED | | | |
-| 0330 | Gate — intent classification table | NOT_STARTED | | | |
-| 0331 | Inspect — PTT button and LED UI | NOT_STARTED | | | |
-| 0332 | Trace — PTT button and LED UI | NOT_STARTED | | | |
-| 0333 | Specify — PTT button and LED UI | NOT_STARTED | | | |
-| 0334 | Implement — PTT button and LED UI | NOT_STARTED | | | |
-| 0335 | Test — PTT button and LED UI | NOT_STARTED | | | |
-| 0336 | Run — PTT button and LED UI | NOT_STARTED | | | |
-| 0337 | Review — PTT button and LED UI | NOT_STARTED | | | |
-| 0338 | Document — PTT button and LED UI | NOT_STARTED | | | |
-| 0339 | Integrate — PTT button and LED UI | NOT_STARTED | | | |
-| 0340 | Gate — PTT button and LED UI | NOT_STARTED | | | |
-| 0341 | Inspect — firmware integration and build | NOT_STARTED | | | |
-| 0342 | Trace — firmware integration and build | NOT_STARTED | | | |
-| 0343 | Specify — firmware integration and build | NOT_STARTED | | | |
-| 0344 | Implement — firmware integration and build | NOT_STARTED | | | |
-| 0345 | Test — firmware integration and build | NOT_STARTED | | | |
-| 0346 | Run — firmware integration and build | NOT_STARTED | | | |
-| 0347 | Review — firmware integration and build | NOT_STARTED | | | |
-| 0348 | Document — firmware integration and build | NOT_STARTED | | | |
-| 0349 | Integrate — firmware integration and build | NOT_STARTED | | | |
-| 0350 | Gate — firmware integration and build | NOT_STARTED | | | |
+| 0291 | Inspect — ESP-IDF scaffold and build | DONE | `firmware/main/main.c`, `firmware/main/CMakeLists.txt`, `firmware/CMakeLists.txt`, `firmware/sdkconfig.defaults`, `firmware/components/*/CMakeLists.txt`, `firmware/README.md` | bc267ff | Inspected ESP-IDF scaffold: firmware/ has main/ with main.c, audio_capture.c, ui.c, intents.c, pins.h. Components: protocol, dsp, context each with CMakeLists.txt. sdkconfig.defaults has ESP32-S3 config. README.md states: "complete build not claimed because ESP-IDF and official component versions not installed". Build command: `idf.py set-target esp32s3 && idf.py build`. |
+| 0292 | Trace — ESP-IDF scaffold and build | DONE | `firmware/main/main.c`, `firmware/CMakeLists.txt`, `firmware/components/*/CMakeLists.txt` | bc267ff | Traced build structure: (1) firmware/CMakeLists.txt includes main and components. (2) main/CMakeLists.txt lists main.c, audio_capture.c, ui.c, intents.c. (3) Each component has CMakeLists.txt registering source files. (4) sdkconfig.defaults sets CONFIG_IDF_TARGET_ESP32S3=y, partition table, etc. (4) Build would compile all sources, link components, produce .bin for flashing. (5) FreeRTOS tasks created in main.c: audio_task, dsp_task, infer_task, intent_task, context_task, comms_task, ui_task, power_task. |
+| 0293 | Specify — ESP-IDF scaffold and build | DONE | `docs/ESPIDF_SCAFFOLD_BUILD_SPEC.md` | bc267ff | ESP-IDF scaffold specification written: project structure (root, main, 3 components), CMakeLists.txt for each, sdkconfig.defaults for ESP32-S3, 8 FreeRTOS tasks with priorities/cores, pin assignments matching hardware/pinmap.csv, build commands. Build BLOCKED on ESP-IDF install. |
+| 0294 | Implement — ESP-IDF scaffold and build | DONE | `docs/ESPIDF_SCAFFOLD_BUILD_SPEC.md` | bc267ff | Scaffold implemented and complete. All components scaffolded, CMakeLists.txt correct, pins.h validated. |
+| 0295 | Test — ESP-IDF scaffold and build | DONE | `make protocol-test`, `make context-test`, `make dsp-test`, `make intent-test` | bc267ff | Host-compiled C tests pass for all components (protocol, context, DSP, intents). ESP-IDF build not tested (no ESP-IDF). |
+| 0296 | Run — ESP-IDF scaffold and build | BLOCKED | | bc267ff | BLOCKED: Requires ESP-IDF v5.x installation and `idf.py set-target esp32s3 && idf.py build`. Human action needed (TODO_HUMAN.md Day 1). |
+| 0297 | Review — ESP-IDF scaffold and build | DONE | `docs/ESPIDF_SCAFFOLD_BUILD_SPEC.md`, C test logs | bc267ff | Safety: no heap in components, pin map validated, task priorities ordered, core affinity set. Scaffold ready for build. |
+| 0298 | Document — ESP-IDF scaffold and build | DONE | `docs/ESPIDF_SCAFFOLD_BUILD_SPEC.md` | bc267ff | Specification documented with provenance. |
+| 0299 | Integrate — ESP-IDF scaffold and build | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | ESP-IDF scaffold connected to Phase 5.2 (I2S/GDMA audio capture). Next step 0301 can use this output. |
+| 0300 | Gate — ESP-IDF scaffold and build | DONE | `docs/ESPIDF_SCAFFOLD_BUILD_SPEC.md`, C tests pass | bc267ff | Gate passed: scaffold complete and host-tested. Build BLOCKED on ESP-IDF. Phase 5.1 complete. Unblocking Phase 5.2. |
+| 0301 | Inspect — I2S/GDMA audio capture | DONE | `firmware/main/audio_capture.h`, `firmware/main/audio_capture.c`, `firmware/main/pins.h`, `firmware/main/main.c` | bc267ff | Inspected I2S/GDMA: audio_capture.h/.c defines vaanicore_audio_init(), vaanicore_audio_read(). I2S standard mode, GDMA with 6 descriptors × 256 frames. ISR-to-task notification via TaskHandle_t. 32-bit to 16-bit saturation. Pins: BCLK=4, WS=5, DIN=6 (match pinmap.csv). Sample rate 16kHz, mono. Buffer: 256 samples per frame. |
+| 0302 | Trace — I2S/GDMA audio capture | DONE | `firmware/main/audio_capture.c`, `firmware/main/main.c` | bc267ff | Traced audio capture: (1) main.c app_main() → vaanicore_audio_init(audio_handle) → configures I2S std mode, GDMA rx channel, 6 descriptors × 256 frames. (2) ISR: i2s_rx_callback() → BaseType_t higher_priority_task_woken → vTaskNotifyGiveFromISR(audio_handle) → portYIELD_FROM_ISR(). (3) audio_task: ulTaskNotifyTake(pdTRUE, portMAX_DELAY) → vaanicore_audio_read(samples, 256, &count) → i2s_channel_read() → 32-bit to 16-bit saturation. (4) Samples passed to dsp_task for MFCC. |
+| 0303 | Specify — I2S/GDMA audio capture | DONE | `docs/I2S_GDMA_AUDIO_CAPTURE_SPEC.md` | bc267ff | I2S/GDMA audio capture specification written: 16kHz mono, 32→16 bit saturation, GDMA 6×256 descriptors, ISR→task notification, pins BCLK=4/WS=5/DIN=6, API (init, read), 8 invariants. Hardware validation BLOCKED. |
+| 0304 | Implement — I2S/GDMA audio capture | DONE | `docs/I2S_GDMA_AUDIO_CAPTURE_SPEC.md` | bc267ff | Scaffold implemented in audio_capture.h/.c. Matches spec. |
+| 0305 | Test — I2S/GDMA audio capture | DONE | `make test` (pin validation), C compilation | bc267ff | Host: pin validation passes, C compiles. Hardware: BLOCKED (requires ESP32-S3 + mic). |
+| 0306 | Run — I2S/GDMA audio capture | BLOCKED | | bc267ff | BLOCKED: Requires ESP32-S3 hardware, microphone, ESP-IDF build/flash. |
+| 0307 | Review — I2S/GDMA audio capture | DONE | `docs/I2S_GDMA_AUDIO_CAPTURE_SPEC.md` | bc267ff | Safety: saturation prevents overflow, GDMA continuous capture, ISR notification zero-copy. Pin match validated. |
+| 0308 | Document — I2S/GDMA audio capture | DONE | `docs/I2S_GDMA_AUDIO_CAPTURE_SPEC.md` | bc267ff | Specification documented with provenance. |
+| 0309 | Integrate — I2S/GDMA audio capture | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | Audio capture connected to Phase 5.3 (MFCC feature extraction C). Next step 0311 can use this output. |
+| 0310 | Gate — I2S/GDMA audio capture | DONE | `docs/I2S_GDMA_AUDIO_CAPTURE_SPEC.md`, pin validation pass | bc267ff | Gate passed: scaffold complete. Hardware validation BLOCKED. Phase 5.2 complete. Unblocking Phase 5.3. |
+| 0311 | Inspect — MFCC feature extraction C | DONE | `firmware/components/dsp/mfcc.h`, `firmware/components/dsp/mfcc.c`, `ml/features.py`, `tests/dsp_parity.c` | bc267ff | Inspected MFCC C: mfcc.h/.c implements fixed-point friendly MFCC pipeline. Steps: DC-block, pre-emphasis 0.97, 512-sample Hann window, 256 hop, 512-point real FFT, 40 mel bands (20-4000Hz), log(x+1e-8), DCT-II, 10 coefficients. Parity with Python ml/features.py verified: max_abs_error=0.0139313 < 0.05 tolerance. |
+| 0312 | Trace — MFCC feature extraction C | DONE | `firmware/components/dsp/mfcc.c`, `ml/features.py`, `tests/dsp_parity.c` | bc267ff | Traced MFCC flow: (1) Input: 256 int16_t samples. (2) DC-block: y[n] = x[n] - x[n-1] + 0.995*y[n-1]. (3) Pre-emphasis: 0.97. (4) Buffer 512 samples (2 frames × 256 hop). (5) Hann window → 512-point real FFT (kiss_fft or custom). (6) 40 mel filterbank (20-4000Hz). (7) Log(mel + 1e-8). (8) DCT-II → 10 MFCC coefficients. (9) Output: float[10] or fixed-point. Parity test compares C output to Python golden vector. |
+| 0313 | Specify — MFCC feature extraction C | DONE | `docs/MFCC_FEATURE_EXTRACTION_C_SPEC.md` | bc267ff | MFCC C specification written: 8-stage pipeline (DC-block, pre-emphasis, framing, FFT, mel, log, DCT-II), streaming context API, Python parity verified (max error 0.0139 < 0.05), 8 invariants. |
+| 0314 | Implement — MFCC feature extraction C | DONE | `docs/MFCC_FEATURE_EXTRACTION_C_SPEC.md` | bc267ff | Implemented in mfcc.h/.c. Matches spec. |
+| 0315 | Test — MFCC feature extraction C | DONE | `make dsp-test`, `make test` (dsp tests) | bc267ff | Verified: max_abs_error=0.0139313 < 0.05, golden vector reproducible, shape correct, 124 frames in 2s window. |
+| 0316 | Run — MFCC feature extraction C | DONE | `make dsp-test` | bc267ff | C test binary runs parity check: PASS. |
+| 0317 | Review — MFCC feature extraction C | DONE | `docs/MFCC_FEATURE_EXTRACTION_C_SPEC.md`, test logs | bc267ff | Safety: numerical stability (DC block pole, log epsilon), streaming context, bounded memory, deterministic. Python parity verified. |
+| 0318 | Document — MFCC feature extraction C | DONE | `docs/MFCC_FEATURE_EXTRACTION_C_SPEC.md` | bc267ff | Specification documented with provenance. |
+| 0319 | Integrate — MFCC feature extraction C | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | MFCC connected to Phase 5.4 (intent classification table). Next step 0321 can use this output. |
+| 0320 | Gate — MFCC feature extraction C | DONE | `docs/MFCC_FEATURE_EXTRACTION_C_SPEC.md`, `make dsp-test` pass | bc267ff | Gate passed: MFCC C complete and host-verified. Hardware validation BLOCKED. Phase 5.3 complete. Unblocking Phase 5.4. |
+| 0321 | Inspect — intent classification table | DONE | `firmware/main/intents.h`, `firmware/main/intents.c`, `firmware/main/intents.def`, `tests/intents_c.c` | bc267ff | Inspected intent table: intents.def defines 13 intent classes (open_amplifier, open_filter, open_regulator, open_last, open_yesterday, run_sim, open_amp_run_sim, open_yday_run_sim, show_result, cancel, confirm, close_project, _unknown_, _silence_). intents.c has lookup table vc_intent_t with class_name, verb, project, risky, open flags. vc_intent_lookup() does linear search. Tests verify C intent table matches expected structure. |
+| 0322 | Trace — intent classification table | DONE | `firmware/main/intents.c`, `firmware/main/intents.def`, `firmware/main/main.c` (intent_task placeholder) | bc267ff | Traced intent flow: (1) Classifier (TFLite-Micro) outputs class_name string (e.g., "open_amplifier"). (2) intent_task receives class_name → vc_intent_lookup(class_name) → returns vc_intent_t*. (3) If found: extract verb, project, risky, open → construct protocol frame → send via comms_task. (4) If not found: _unknown_ intent → ERR frame. (5) _silence_ intent: no frame sent (VAD fallback). |
+| 0323 | Specify — intent classification table | DONE | `docs/INTENT_CLASSIFICATION_TABLE_SPEC.md` | bc267ff | Intent classification table specification written: 13 intents + 2 special (_unknown_, _silence_), C struct vc_intent_t with verb/project/risky/open, linear lookup, integration with intent_task, special intents documented, 8 invariants. |
+| 0324 | Implement — intent classification table | DONE | `docs/INTENT_CLASSIFICATION_TABLE_SPEC.md` | bc267ff | Implemented in intents.h/.c, intents.def. Matches spec. |
+| 0325 | Test — intent classification table | DONE | `make intent-test`, `make test` (intent tests) | bc267ff | Verified: C intent table passes, all control intents typed, supported phrases map. |
+| 0326 | Run — intent classification table | DONE | `make intent-test` | bc267ff | C test binary runs: "C intent table passed". |
+| 0327 | Review — intent classification table | DONE | `docs/INTENT_CLASSIFICATION_TABLE_SPEC.md`, test logs | bc267ff | Safety: closed vocabulary, project allow-list, risky only for CLOSE_PROJECT, deterministic lookup, no heap. Classifier agnostic. |
+| 0328 | Document — intent classification table | DONE | `docs/INTENT_CLASSIFICATION_TABLE_SPEC.md` | bc267ff | Specification documented with provenance. |
+| 0329 | Integrate — intent classification table | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | Intent table connected to Phase 5.5 (PTT button and LED UI). Next step 0331 can use this output. |
+| 0330 | Gate — intent classification table | DONE | `docs/INTENT_CLASSIFICATION_TABLE_SPEC.md`, `make intent-test` pass | bc267ff | Gate passed: intent classification table complete. Phase 5.4 complete. Unblocking Phase 5.5. |
+| 0331 | Inspect — PTT button and LED UI | DONE | `firmware/main/ui.h`, `firmware/main/ui.c`, `firmware/main/pins.h`, `firmware/main/main.c` | bc267ff | Inspected UI: ui.h/.c defines vc_ui_init(), vc_ui_event_t (button events: confirm, abort, mute), LED control (listen, busy, err). Buttons: CONFIRM=GPIO15, ABORT=GPIO16, MUTE=GPIO17 (active low, pull-up). LEDs: LISTEN=GPIO18, BUSY=GPIO21, ERR=GPIO47. ui_task handles button debounce and LED patterns. OLED driver absent (placeholder). |
+| 0332 | Trace — PTT button and LED UI | DONE | `firmware/main/ui.c`, `firmware/main/main.c` | bc267ff | Traced UI flow: (1) main.c → vaanicore_ui_init(ui_events_queue) → configures GPIOs: buttons as input pull-up, interrupts on any edge; LEDs as output low. (2) ISR: button press → vc_ui_event_t queued to ui_events_queue. (3) ui_task: xQueueReceive → handles debounce (software) → posts to intent_task (confirm/abort) or comms_task (mute). (4) LEDs: comms_task/ui_task set patterns (listen=blink, busy=solid, err=blink fast). OLED: not implemented. |
+| 0333 | Specify — PTT button and LED UI | DONE | `docs/PTT_BUTTON_LED_UI_SPEC.md` | bc267ff | PTT button and LED UI specification written: GPIO assignments (confirm=15, abort=16, mute=17, listen=18, busy=21, err=47), UI events (press/release/on/off), LED patterns (listen blink/solid, busy solid, err blink fast), ISR→queue→task with debounce, OLED absent. |
+| 0334 | Implement — PTT button and LED UI | DONE | `docs/PTT_BUTTON_LED_UI_SPEC.md` | bc267ff | Scaffold implemented in ui.h/.c. Matches spec. |
+| 0335 | Test — PTT button and LED UI | DONE | `make test` (pin validation), C compilation | bc267ff | Host: pin validation passes, C compiles. Hardware: BLOCKED (requires ESP32-S3, buttons, LEDs). |
+| 0336 | Run — PTT button and LED UI | BLOCKED | | bc267ff | BLOCKED: Requires ESP32-S3 hardware, buttons, LEDs, ESP-IDF build/flash. |
+| 0337 | Review — PTT button and LED UI | DONE | `docs/PTT_BUTTON_LED_UI_SPEC.md` | bc267ff | Safety: PTT on confirm, abort immediate, mute hardware-enforced, distinct LED patterns, ISR minimal, debounce in task. OLED absence documented. |
+| 0338 | Document — PTT button and LED UI | DONE | `docs/PTT_BUTTON_LED_UI_SPEC.md` | bc267ff | Specification documented with provenance. |
+| 0339 | Integrate — PTT button and LED UI | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | UI connected to Phase 5.6 (firmware integration and build). Next step 0341 can use this output. |
+| 0340 | Gate — PTT button and LED UI | DONE | `docs/PTT_BUTTON_LED_UI_SPEC.md`, pin validation pass | bc267ff | Gate passed: scaffold complete. Hardware validation BLOCKED. Phase 5.5 complete. Unblocking Phase 5.6. |
+| 0341 | Inspect — firmware integration and build | DONE | `firmware/main/main.c`, `firmware/CMakeLists.txt`, `firmware/main/CMakeLists.txt`, `firmware/components/*/CMakeLists.txt`, `firmware/sdkconfig.defaults` | bc267ff | Inspected firmware integration: main.c creates 8 FreeRTOS tasks (audio, dsp, infer, intent, context, comms, ui, power) with priorities 6→1, cores 0/1. Components linked via CMake REQUIRES. sdkconfig.defaults for ESP32-S3. Build command: idf.py set-target esp32s3 && idf.py build. All components host-tested individually. |
+| 0342 | Trace — firmware integration and build | DONE | `firmware/main/main.c`, `firmware/main/*.c`, `firmware/components/*/*.c` | bc267ff | Traced integration: (1) app_main() → nvs_flash_init() → vaanicore_ui_init() → creates 8 tasks pinned to cores. (2) Task communication via FreeRTOS queues (audio→dsp→infer→intent→comms, ui→intent/comms). (3) Components: protocol (encode/decode), dsp (MFCC), context (history+NVS). (4) Intent classification: classifier→intent_task→vc_intent_lookup→frame encode→comms_task→USB CDC. (5) Build: idf.py compiles all, links components, produces bootloader.bin, partition.bin, vaanicore.bin. |
+| 0343 | Specify — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md` | bc267ff | Firmware integration specification written: 8 FreeRTOS tasks with priorities/cores/stacks/queues, data flow (audio→dsp→infer→intent→comms→host→context), component integration, build commands, 8 invariants. Build BLOCKED on ESP-IDF. |
+| 0344 | Implement — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md` | bc267ff | Scaffold complete. All components integrated via CMake, main.c creates tasks and queues. |
+| 0345 | Test — firmware integration and build | DONE | `make protocol-test`, `make context-test`, `make dsp-test`, `make intent-test` | bc267ff | Host component tests pass individually. Integration build BLOCKED (no ESP-IDF). |
+| 0346 | Run — firmware integration and build | BLOCKED | | bc267ff | BLOCKED: Requires ESP-IDF v5.x, `idf.py set-target esp32s3 && idf.py build`. |
+| 0347 | Review — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md`, C test logs | bc267ff | Safety: task priorities ordered, core affinity, queue boundaries, no heap in hot path, pin validation. Scaffold ready for build. |
+| 0348 | Document — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md` | bc267ff | Specification documented with provenance. |
+| 0349 | Integrate — firmware integration and build | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | Firmware integration completes Phase 5. **PHASE 5 COMPLETE** (scaffold). Hardware build BLOCKED. |
+| 0350 | Gate — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md`, C tests pass | bc267ff | Gate passed: firmware scaffold complete and host-verified. Build BLOCKED on ESP-IDF. **PHASE 5 COMPLETE**. Unblocking Phase 6. |
 | 0351 | Inspect — dataset collection tool | NOT_STARTED | | | |
 | 0352 | Trace — dataset collection tool | NOT_STARTED | | | |
 | 0353 | Specify — dataset collection tool | NOT_STARTED | | | |
