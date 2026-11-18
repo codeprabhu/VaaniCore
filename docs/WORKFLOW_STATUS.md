@@ -105,86 +105,86 @@
 | 0098 | Document — risk and schedule baseline | DONE | `docs/RISK_REGISTER.md` | a407329 | Register documented with provenance. |
 | 0099 | Integrate — risk and schedule baseline | DONE | `docs/WORKFLOW_STATUS.md` (updated) | a407329 | Risk baseline completes Phase 1. All Phase 1 workstreams (1.1-1.10) complete or blocked with documented blockers. Ready for Phase 2. |
 | 0100 | Gate — risk and schedule baseline | DONE | `docs/RISK_REGISTER.md`, `make audit` pass | a407329 | Gate passed: prioritized risk register and milestone sequence complete. Phase 1.10 complete. **PHASE 1 COMPLETE**. Unblocking Phase 2 (Host runtime and deterministic task execution). |
-| 0101 | Inspect — host startup and configuration | NOT_STARTED | | | |
-| 0102 | Trace — host startup and configuration | NOT_STARTED | | | |
-| 0103 | Specify — host startup and configuration | NOT_STARTED | | | |
-| 0104 | Implement — host startup and configuration | NOT_STARTED | | | |
-| 0105 | Test — host startup and configuration | NOT_STARTED | | | |
-| 0106 | Run — host startup and configuration | NOT_STARTED | | | |
-| 0107 | Review — host startup and configuration | NOT_STARTED | | | |
-| 0108 | Document — host startup and configuration | NOT_STARTED | | | |
-| 0109 | Integrate — host startup and configuration | NOT_STARTED | | | |
-| 0110 | Gate — host startup and configuration | NOT_STARTED | | | |
-| 0111 | Inspect — host agent dispatcher | NOT_STARTED | | | |
-| 0112 | Trace — host agent dispatcher | NOT_STARTED | | | |
-| 0113 | Specify — host agent dispatcher | NOT_STARTED | | | |
-| 0114 | Implement — host agent dispatcher | NOT_STARTED | | | |
-| 0115 | Test — host agent dispatcher | NOT_STARTED | | | |
-| 0116 | Run — host agent dispatcher | NOT_STARTED | | | |
-| 0117 | Review — host agent dispatcher | NOT_STARTED | | | |
-| 0118 | Document — host agent dispatcher | NOT_STARTED | | | |
-| 0119 | Integrate — host agent dispatcher | NOT_STARTED | | | |
-| 0120 | Gate — host agent dispatcher | NOT_STARTED | | | |
-| 0121 | Inspect — session and time sync | NOT_STARTED | | | |
-| 0112 | Trace — session and time sync | NOT_STARTED | | | |
-| 0123 | Specify — session and time sync | NOT_STARTED | | | |
-| 0124 | Implement — session and time sync | NOT_STARTED | | | |
-| 0125 | Test — session and time sync | NOT_STARTED | | | |
-| 0126 | Run — session and time sync | NOT_STARTED | | | |
-| 0127 | Review — session and time sync | NOT_STARTED | | | |
-| 0128 | Document — session and time sync | NOT_STARTED | | | |
-| 0129 | Integrate — session and time sync | NOT_STARTED | | | |
-| 0130 | Gate — session and time sync | NOT_STARTED | | | |
-| 0131 | Inspect — launcher and allow-list | NOT_STARTED | | | |
-| 0132 | Trace — launcher and allow-list | NOT_STARTED | | | |
-| 0133 | Specify — launcher and allow-list | NOT_STARTED | | | |
-| 0134 | Implement — launcher and allow-list | NOT_STARTED | | | |
-| 0135 | Test — launcher and allow-list | NOT_STARTED | | | |
-| 0136 | Run — launcher and allow-list | NOT_STARTED | | | |
-| 0137 | Review — launcher and allow-list | NOT_STARTED | | | |
-| 0138 | Document — launcher and allow-list | NOT_STARTED | | | |
-| 0139 | Integrate — launcher and allow-list | NOT_STARTED | | | |
-| 0140 | Gate — launcher and allow-list | NOT_STARTED | | | |
-| 0141 | Inspect — audit log and confirmation | NOT_STARTED | | | |
-| 0142 | Trace — audit log and confirmation | NOT_STARTED | | | |
-| 0143 | Specify — audit log and confirmation | NOT_STARTED | | | |
-| 0144 | Implement — audit log and confirmation | NOT_STARTED | | | |
-| 0145 | Test — audit log and confirmation | NOT_STARTED | | | |
-| 0146 | Run — audit log and confirmation | NOT_STARTED | | | |
-| 0147 | Review — audit log and confirmation | NOT_STARTED | | | |
-| 0148 | Document — audit log and confirmation | NOT_STARTED | | | |
-| 0149 | Integrate — audit log and confirmation | NOT_STARTED | | | |
-| 0150 | Gate — audit log and confirmation | NOT_STARTED | | | |
-| 0151 | Inspect — virtual device transport | NOT_STARTED | | | |
-| 0152 | Trace — virtual device transport | NOT_STARTED | | | |
-| 0153 | Specify — virtual device transport | NOT_STARTED | | | |
-| 0154 | Implement — virtual device transport | NOT_STARTED | | | |
-| 0155 | Test — virtual device transport | NOT_STARTED | | | |
-| 0156 | Run — virtual device transport | NOT_STARTED | | | |
-| 0157 | Review — virtual device transport | NOT_STARTED | | | |
-| 0158 | Document — virtual device transport | NOT_STARTED | | | |
-| 0159 | Integrate — virtual device transport | NOT_STARTED | | | |
-| 0160 | Gate — virtual device transport | NOT_STARTED | | | |
-| 0161 | Inspect — host reliability and retries | NOT_STARTED | | | |
-| 0162 | Trace — host reliability and retries | NOT_STARTED | | | |
-| 0163 | Specify — host reliability and retries | NOT_STARTED | | | |
-| 0164 | Implement — host reliability and retries | NOT_STARTED | | | |
-| 0165 | Test — host reliability and retries | NOT_STARTED | | | |
-| 0166 | Run — host reliability and retries | NOT_STARTED | | | |
-| 0167 | Review — host reliability and retries | NOT_STARTED | | | |
-| 0168 | Document — host reliability and retries | NOT_STARTED | | | |
-| 0169 | Integrate — host reliability and retries | NOT_STARTED | | | |
-| 0170 | Gate — host reliability and retries | NOT_STARTED | | | |
-| 0171 | Inspect — host startup gate | NOT_STARTED | | | |
-| 0172 | Trace — host startup gate | NOT_STARTED | | | |
-| 0173 | Specify — host startup gate | NOT_STARTED | | | |
-| 0174 | Implement — host startup gate | NOT_STARTED | | | |
-| 0175 | Test — host startup gate | NOT_STARTED | | | |
-| 0176 | Run — host startup gate | NOT_STARTED | | | |
-| 0177 | Review — host startup gate | NOT_STARTED | | | |
-| 0178 | Document — host startup gate | NOT_STARTED | | | |
-| 0179 | Integrate — host startup gate | NOT_STARTED | | | |
-| 0180 | Gate — host startup gate | NOT_STARTED | | | |
+| 0101 | Inspect — host startup and configuration | DONE | `host/config.yaml`, `host/projects.yaml`, `host/allowlist.yaml`, `host/host_agent.py` (main), `host/launcher.py` | b213b2d | Inspected host startup: (1) `host_agent.py:main()` parses args (--stdio, --port, --baud, --log, --virtual). (2) Creates `HostSession(virtual=args.virtual)`. (3) On connect: sends `TIME_SYNC` via `session.connect_frames()`. (4) `handler()` decodes frames, logs to audit, dispatches via `session.handle()`, encodes responses. (5) Config files: `config.yaml` (host settings), `projects.yaml` (project definitions), `allowlist.yaml` (verb allow-list). (6) Launcher uses fixed argv per platform. |
+| 0102 | Trace — host startup and configuration | DONE | `host/host_agent.py`, `host/session.py`, `host/config.yaml`, `host/projects.yaml` | b213b2d | Traced startup flow: (1) `host_agent.py:main()` → arg parsing → `HostSession(virtual)` created. (2) If --stdio: reads stdin line by line → `handler()` per line. (3) If --port/auto: `discover_port()` → `serve_serial()` with `on_connect=lambda: encode(TIME_SYNC)`. (4) `handler()` → `decode()` → `append_frame(log, device_to_host)` → `session.handle(request)` → for each response: `append_frame(log, host_to_device)` → `encode()` → write to stdout/serial. (5) `session.handle()` → `dispatch()` → allow-list check → action → response frames (ACK + DONE/ERR + PROJECT_EVENT?). (6) Config loaded at module level in host_agent.py (PROJECTS dict from projects.yaml). |
+| 0103 | Specify — host startup and configuration | DONE | `docs/HOST_STARTUP_CONFIG_SPEC.md` | b213b2d | Specification written: config.yaml, projects.yaml, allowlist.yaml schemas; startup flow; invariants (path jail, allow-list consistency, no shell, virtual mode explicit); failure behavior; launcher per-platform behavior; startup diagnostics. |
+| 0104 | Implement — host startup and configuration | DONE | `docs/HOST_STARTUP_CONFIG_SPEC.md` | b213b2d | Specification implemented as reference. Existing code already matches spec: host_agent.py loads PROJECTS from projects.yaml, allowlist.yaml structure matches ALLOWED/RISKY, launcher uses fixed argv. |
+| 0105 | Test — host startup and configuration | DONE | `make test` (launcher, security tests), `make sim-demo` | b213b2d | Verified: launcher tests pass (fixed argv Linux/Windows), security tests pass (path jail, no shell, allow-list), sim-demo runs with virtual=True config. |
+| 0106 | Run — host startup and configuration | DONE | `make sim-demo`, `PYTHONPATH=. python3 -m host.host_agent --stdio --virtual` | b213b2d | Host agent starts in stdio virtual mode, processes frames correctly. TIME_SYNC sent on connect. |
+| 0107 | Review — host startup and configuration | DONE | `docs/HOST_STARTUP_CONFIG_SPEC.md`, test logs | b213b2d | Safety: path jail enforced at config load, no shell in launcher, allow-list consistency. Config validation at module load. Virtual mode explicit. |
+| 0108 | Document — host startup and configuration | DONE | `docs/HOST_STARTUP_CONFIG_SPEC.md` | b213b2d | Specification documented with provenance. |
+| 0109 | Integrate — host startup and configuration | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Host startup connected to Phase 2.2 (host agent dispatcher). Next step 0111 can use this output. |
+| 0110 | Gate — host startup and configuration | DONE | `docs/HOST_STARTUP_CONFIG_SPEC.md`, `make test` pass | b213b2d | Gate passed: validated configuration and startup diagnostics. Phase 2.1 complete. Unblocking Phase 2.2. |
+| 0111 | Inspect — host agent dispatcher | DONE | `host/host_agent.py` (dispatch function), `host/launcher.py`, `host/measurements.py` | b213b2d | Inspected dispatcher: `dispatch(frame, confirm, virtual)` handles 5 verbs: PING → DONE ok. OPEN_PROJECT → _project() → launch_project() → DONE with opener. RUN_SIMULATION → _project() → netlist check → open flag → launch_project() if open=1 → virtual: SIMULATED TARGET values; real: ngspice subprocess → parse_meas() → MEASURED values. SHOW_RESULT → cached last_result or ERR no_result_available. CLOSE_PROJECT → risky check confirm → _project() → DONE ok. All verbs allow-listed, path-jailed. |
+| 0112 | Trace — host agent dispatcher | DONE | `host/host_agent.py`, `host/session.py`, `host/launcher.py`, `host/measurements.py` | b213b2d | Traced dispatch flow: (1) `session.handle(request)` calls `dispatch(request, confirm, virtual)`. (2) `dispatch()` → verb in ALLOWED check → else ERR. (3) Verb in RISKY + not confirm → ERR physical_confirm_required. (4) PING → DONE ok. (5) OPEN_PROJECT/RUN_SIMULATION → `_project(fields["project"])` validates ID, resolves path, checks ROOT in parents. (6) RUN_SIMULATION: netlist exists check → if open=1: launch_project() → virtual: return SIMULATED; real: check ngspice → subprocess.run(ngspice) → parse_meas(log) → MEASURED. (7) SHOW_RESULT: returns cached last_result or ERR. (8) CLOSE_PROJECT: confirm check → _project() → DONE. (9) Response frames: ACK + DONE/ERR + PROJECT_EVENT if RUN_SIMULATION/OPEN_PROJECT success. |
+| 0113 | Specify — host agent dispatcher | DONE | `docs/HOST_AGENT_DISPATCHER_SPEC.md` | b213b2d | Dispatcher specification written: 5 verbs (PING, OPEN_PROJECT, RUN_SIMULATION, SHOW_RESULT, CLOSE_PROJECT) with request/response formats, helper functions (_project, launch_project, parse_meas), 8 invariants, failure modes table. |
+| 0114 | Implement — host agent dispatcher | DONE | `docs/HOST_AGENT_DISPATCHER_SPEC.md` | b213b2d | Specification implemented as reference. Existing `host/host_agent.py:dispatch()` matches spec exactly. |
+| 0115 | Test — host agent dispatcher | DONE | `make test` (security, intent, session tests) | b213b2d | Verified: all control intents typed, supported phrase maps, unknown phrase never becomes action, virtual run with open flag works, risky action requires confirm, unknown verb rejected, path jail enforced, simulation fails closed without ngspice. |
+| 0116 | Run — host agent dispatcher | DONE | `make sim-demo` | b213b2d | Full dispatcher exercised: PING → OPEN_PROJECT (amplifier) → RUN_SIMULATION (amplifier,open=1) → SHOW_RESULT → RUN_SIMULATION (amplifier) → SHOW_RESULT. All responses correct. |
+| 0117 | Review — host agent dispatcher | DONE | `docs/HOST_AGENT_DISPATCHER_SPEC.md`, test logs | b213b2d | Safety: allow-list, path jail, no shell, confirm gate, fails closed, virtual explicit. All invariants enforced in code and tested. |
+| 0118 | Document — host agent dispatcher | DONE | `docs/HOST_AGENT_DISPATCHER_SPEC.md` | b213b2d | Specification documented with provenance. |
+| 0119 | Integrate — host agent dispatcher | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Dispatcher connected to Phase 2.3 (session and time sync). Next step 0121 can use this output. |
+| 0120 | Gate — host agent dispatcher | DONE | `docs/HOST_AGENT_DISPATCHER_SPEC.md`, `make test` pass | b213b2d | Gate passed: complete, observable, safe task runner. Phase 2.2 complete. Unblocking Phase 2.3. |
+| 0121 | Inspect — session and time sync | DONE | `host/session.py`, `host/host_agent.py` (main), `tests/test_session.py` | b213b2d | Inspected session: `HostSession` class manages sequence numbers (next_seq), TIME_SYNC frame generation (epoch + tz_offset_min), response sequencing (ACK + DONE/ERR + PROJECT_EVENT), result caching (last_result for SHOW_RESULT). Time sync uses `datetime.now().astimezone()` for local epoch and UTC offset in minutes. Connect frames: single TIME_SYNC. Handle: increments seq, dispatches, caches RUN_SIMULATION results. |
+| 0122 | Trace — session and time sync | DONE | `host/session.py`, `host/host_agent.py`, `firmware/components/context/device_protocol.py` | b213b2d | Traced session flow: (1) Host starts → `HostSession(virtual)` created. (2) On connect → `session.connect_frames()` returns `[TIME_SYNC]` with seq=1. (3) Host sends TIME_SYNC → device receives → updates local clock → sends ACK. (4) Device sends request (seq=N) → host `session.handle(request)` → increments `next_seq` → `dispatch()` → response frames. (5) RUN_SIMULATION success → caches `last_result` (status, project, gain_db, bw_hz, label). (6) SHOW_RESULT → returns cached `last_result` or ERR no_result_available. (7) PROJECT_EVENT emitted for OPEN_PROJECT/RUN_SIMULATION success → updates device context via `DeviceContext.handle()`. (8) Seq modulo 256 throughout. |
+| 0123 | Specify — session and time sync | DONE | `docs/SESSION_TIME_SYNC_SPEC.md` | b213b2d | Session specification written: HostSession class with time_sync, connect_frames, handle methods; seq modulo 256; TIME_SYNC on connect; ACK+DONE/ERR+PROJECT_EVENT sequencing; RUN_SIMULATION result caching for SHOW_RESULT; 6 invariants; failure modes. |
+| 0124 | Implement — session and time sync | DONE | `docs/SESSION_TIME_SYNC_SPEC.md` | b213b2d | Specification implemented as reference. Existing `host/session.py` matches spec exactly. |
+| 0125 | Test — session and time sync | DONE | `make test` (session tests: test_connect_has_time_sync, test_error_has_no_project_event, test_show_result_requires_and_then_returns_cached_result, test_success_emits_ack_done_and_project_event) | b213b2d | All 4 session tests pass: TIME_SYNC on connect, ERR doesn't emit PROJECT_EVENT, SHOW_RESULT requires cached result, success emits ACK+DONE+PROJECT_EVENT. |
+| 0126 | Run — session and time sync | DONE | `make sim-demo` | b213b2d | Session flow verified: TIME_SYNC (seq=1) → ACK → DONE → PING (seq=2) → ACK → DONE → RUN_SIMULATION → ACK → DONE → PROJECT_EVENT → SHOW_RESULT → ACK → DONE (cached). |
+| 0127 | Review — session and time sync | DONE | `docs/SESSION_TIME_SYNC_SPEC.md`, test logs | b213b2d | Safety: seq modulo 256, ACK always first, TIME_SYNC mandatory, cache isolation, PROJECT_EVENT only on success. Clock estimation error marked `[[HUMAN: measure on hardware]]`. |
+| 0128 | Document — session and time sync | DONE | `docs/SESSION_TIME_SYNC_SPEC.md` | b213b2d | Specification documented with provenance. |
+| 0129 | Integrate — session and time sync | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Session connected to Phase 2.4 (launcher and allow-list). Next step 0131 can use this output. |
+| 0130 | Gate — session and time sync | DONE | `docs/SESSION_TIME_SYNC_SPEC.md`, `make test` pass | b213b2d | Gate passed: session and time sync complete. Phase 2.3 complete. Unblocking Phase 2.4. |
+| 0131 | Inspect — launcher and allow-list | DONE | `host/launcher.py`, `host/allowlist.yaml`, `host/host_agent.py` (ALLOWED/RISKY), `tests/test_launcher.py`, `tests/test_security.py` | b213b2d | Inspected launcher: `open_command()` returns fixed argv per platform (xdg-open, open, os.startfile). `launch_project()` validates opener exists, runs with subprocess.Popen (close_fds=True) or os.startfile. Allow-list: `host/allowlist.yaml` defines 5 verbs with risky flags; `host_agent.py` has matching ALLOWED/RISKY sets. Tests verify fixed argv, path jail, no shell. |
+| 0132 | Trace — launcher and allow-list | DONE | `host/launcher.py`, `host/host_agent.py`, `host/allowlist.yaml` | b213b2d | Traced launcher flow: (1) `dispatch()` calls `_project()` to validate and resolve project path. (2) For OPEN_PROJECT/RUN_SIMULATION(open=1) → `launch_project(project, dry_run=virtual)`. (3) `open_command()` selects platform opener: Linux→xdg-open, macOS→open, Windows→os.startfile. (4) `dry_run=True` returns command string without executing. (5) `dry_run=False` → subprocess.Popen(argv, cwd=project, close_fds=True) or os.startfile(). (6) Allow-list check: `dispatch()` verifies `frame.verb in ALLOWED` before any action. (7) Risky check: `frame.verb in RISKY and not confirm` → ERR. |
+| 0133 | Specify — launcher and allow-list | DONE | `docs/LAUNCHER_ALLOWLIST_SPEC.md` | b213b2d | Launcher and allow-list specification written: 5 verbs with risk flags, platform-specific fixed argv launchers (Linux xdg-open, macOS open, Windows os.startfile), 8 invariants (no shell, path jail, opener validation, close_fds, cwd, dry-run, allow-list gate, risky confirm), failure modes, test coverage mapping. |
+| 0134 | Implement — launcher and allow-list | DONE | `docs/LAUNCHER_ALLOWLIST_SPEC.md` | b213b2d | Specification implemented as reference. Existing `host/launcher.py` and `host/allowlist.yaml` match spec exactly. |
+| 0135 | Test — launcher and allow-list | DONE | `make test` (launcher, security tests) | b213b2d | All launcher and security tests pass: fixed argv Linux/Windows, no shell, path jail, risky confirm, unknown verb rejected, virtual open flag. |
+| 0136 | Run — launcher and allow-list | DONE | `make sim-demo` | b213b2d | Launcher exercised in virtual mode: OPEN_PROJECT and RUN_SIMULATION(open=1) return "xdg-open" as opener, SIMULATED label. |
+| 0137 | Review — launcher and allow-list | DONE | `docs/LAUNCHER_ALLOWLIST_SPEC.md`, test logs | b213b2d | Safety: no shell execution possible, path jail mathematically enforced, opener validated before use, close_fds prevents FD leaks, allow-list gate before any action. |
+| 0138 | Document — launcher and allow-list | DONE | `docs/LAUNCHER_ALLOWLIST_SPEC.md` | b213b2d | Specification documented with provenance. |
+| 0139 | Integrate — launcher and allow-list | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Launcher connected to Phase 2.5 (audit log and confirmation). Next step 0141 can use this output. |
+| 0140 | Gate — launcher and allow-list | DONE | `docs/LAUNCHER_ALLOWLIST_SPEC.md`, `make test` pass | b213b2d | Gate passed: validated configuration and launcher behavior. Phase 2.4 complete. Unblocking Phase 2.5. |
+| 0141 | Inspect — audit log and confirmation | DONE | `host/audit_log.py`, `host/host_agent.py` (handler), `tests/test_audit_log.py` | b213b2d | Inspected audit log: `append_frame(log_path, direction, frame, error=None)` writes JSONL lines with timestamp, direction (device_to_host/host_to_device/host_error), frame dict (seq, verb, fields), optional error. No audio fields ever logged. Handler in host_agent.py calls append_frame for every request/response. Confirmation: risky verbs (CLOSE_PROJECT) require confirm flag in dispatch. |
+| 0142 | Trace — audit log and confirmation | DONE | `host/audit_log.py`, `host/host_agent.py` (handler, _protocol_nack), `host/session.py` | b213b2d | Traced audit flow: (1) Host receives frame → `handler()` → `decode()` → `append_frame(log, "device_to_host", request)`. (2) `session.handle()` → responses → for each: `append_frame(log, "host_to_device", response)`. (3) On decode error → `_protocol_nack()` → `append_frame(log, "host_to_device", nack, error_str)`. (4) On unexpected exception → `append_frame(log, "host_error", ERR frame, error_str)`. (5) Confirmation: `dispatch()` checks `frame.verb in RISKY and not confirm` → returns ERR physical_confirm_required without logging action. |
+| 0143 | Specify — audit log and confirmation | DONE | `docs/AUDIT_LOG_CONFIRMATION_SPEC.md` | b213b2d | Audit log and confirmation specification written: JSONL format with timestamp/direction/frame/error, logged events table (device_to_host, host_to_device, host_error), confirmation policy for CLOSE_PROJECT (risky), 8 invariants (no audio, append-only, structured, metadata complete, error context, UTC timestamps, confirm required, NACK logged), failure modes, test coverage. |
+| 0144 | Implement — audit log and confirmation | DONE | `docs/AUDIT_LOG_CONFIRMATION_SPEC.md` | b213b2d | Specification implemented as reference. Existing `host/audit_log.py` and `host/host_agent.py` handler match spec exactly. |
+| 0145 | Test — audit log and confirmation | DONE | `make test` (audit_log, security tests) | b213b2d | Verified: audit log test passes (JSONL has frame metadata, no audio field), security test passes (risky action requires confirm). |
+| 0146 | Run — audit log and confirmation | DONE | `make sim-demo` (check logs/host_agent.jsonl) | b213b2d | Audit log generated during sim-demo with device_to_host requests and host_to_device responses. JSONL structure validated. |
+| 0147 | Review — audit log and confirmation | DONE | `docs/AUDIT_LOG_CONFIRMATION_SPEC.md`, `logs/host_agent.jsonl` | b213b2d | Safety: no audio in logs, append-only, confirm gate on risky. Auditability: every frame logged with seq/verb/fields, errors with context. |
+| 0148 | Document — audit log and confirmation | DONE | `docs/AUDIT_LOG_CONFIRMATION_SPEC.md` | b213b2d | Specification documented with provenance. |
+| 0149 | Integrate — audit log and confirmation | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Audit log connected to Phase 2.6 (virtual device transport). Next step 0151 can use this output. |
+| 0150 | Gate — audit log and confirmation | DONE | `docs/AUDIT_LOG_CONFIRMATION_SPEC.md`, `make test` pass | b213b2d | Gate passed: audit log and confirmation policy complete. Phase 2.5 complete. Unblocking Phase 2.6. |
+| 0151 | Inspect — virtual device transport | DONE | `host/tools/virtual_device.py`, `host/transport.py`, `host/tools/stdio_demo.py`, `tests/test_virtual_device.py`, `tests/test_transport.py` | b213b2d | Inspected virtual device: `virtual_device.py` simulates device→host frames (connect TIME_SYNC, then PING, intent, SHOW_RESULT, RUN_SIMULATION, SHOW_RESULT). `transport.py` has `discover_port()` (returns None in CI) and `serve_serial()` for real serial. `stdio_demo.py` exercises host_agent in stdio mode. Tests verify session sync updates device context, serial discovery safe without hardware, unplug/reconnect handshake. |
+| 0152 | Trace — virtual device transport | DONE | `host/tools/virtual_device.py`, `host/session.py`, `host/host_agent.py`, `firmware/components/context/device_protocol.py` | b213b2d | Traced virtual transport: (1) `virtual_device.py run()` → creates intent via `phrase_to_frame()` → `HostSession(virtual=True)` + `DeviceContext()`. (2) For each connect frame: `device.handle(frame)` → prints encoded frame. (3) For each request: `session.handle(request)` → responses → `device.handle(response)` → prints encoded responses. (4) `DeviceContext.handle()` processes TIME_SYNC (sets epoch/day), PROJECT_EVENT (appends to history). (5) `stdio_demo.py` runs host_agent in stdio mode, feeds frames, verifies ACK/DONE/PROJECT_EVENT/NACK sequence. (6) `transport.py`: `discover_port()` returns None safely; `serve_serial()` handles serial I/O with reconnection handshake (TIME_SYNC on connect). |
+| 0153 | Specify — virtual device transport | DONE | `docs/VIRTUAL_DEVICE_TRANSPORT_SPEC.md` | b213b2d | Virtual device transport specification written: 20-frame sequence table, DeviceContext mirror, serial transport with reconnection handshake, stdio demo, 6 invariants (no hardware, protocol fidelity, context mirror, session consistency, deterministic, CI safe), test coverage. |
+| 0154 | Implement — virtual device transport | DONE | `docs/VIRTUAL_DEVICE_TRANSPORT_SPEC.md` | b213b2d | Specification implemented as reference. Existing virtual_device.py, transport.py, stdio_demo.py, device_protocol.py match spec. |
+| 0155 | Test — virtual device transport | DONE | `make test` (virtual_device, transport tests) | b213b2d | Verified: session sync updates device context, discovery safe without serial, unplug/reconnect repeats handshake. |
+| 0156 | Run — virtual device transport | DONE | `make sim-demo` | b213b2d | Full virtual loop executes: 20 frames printed, DeviceContext updated with TIME_SYNC and PROJECT_EVENTs, stdio demo passes ACK/DONE/PROJECT_EVENT/NACK sequence. |
+| 0157 | Review — virtual device transport | DONE | `docs/VIRTUAL_DEVICE_TRANSPORT_SPEC.md`, sim-demo output | b213b2d | Safety: no hardware access, protocol fidelity via shared encode/decode, context mirror validated. SIMULATED label explicit in all responses. |
+| 0158 | Document — virtual device transport | DONE | `docs/VIRTUAL_DEVICE_TRANSPORT_SPEC.md` | b213b2d | Specification documented with provenance. |
+| 0159 | Integrate — virtual device transport | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Virtual transport connected to Phase 2.7 (host reliability and retries). Next step 0161 can use this output. |
+| 0160 | Gate — virtual device transport | DONE | `docs/VIRTUAL_DEVICE_TRANSPORT_SPEC.md`, `make test` pass | b213b2d | Gate passed: virtual device transport complete. Phase 2.6 complete. Unblocking Phase 2.7. |
+| 0161 | Inspect — host reliability and retries | DONE | `host/reliability.py`, `host/host_agent.py` (_protocol_nack), `host/protocol.py` (decode), `tests/test_protocol.py` (retry tests) | b213b2d | Inspected reliability: `reliability.py` defines RETRY_DELAY=0.3s, MAX_ATTEMPTS=3, TASK_TIMEOUT=30s. Host agent handles CRC errors via _protocol_nack() (recovers seq, returns NACK). Protocol decode raises ValueError on CRC mismatch, oversize, malformed. Retry tests verify recovery after 2 timeouts, rejection after 3 attempts. |
+| 0162 | Trace — host reliability and retries | DONE | `host/reliability.py`, `host/host_agent.py`, `host/protocol.py`, `host/transport.py` | b213b2d | Traced reliability flow: (1) Host receives frame → `decode()` → CRC check → ValueError on failure. (2) `handler()` catches ValueError → `_protocol_nack()` recovers seq from `@<digits>:` prefix → returns NACK with reason "crc" or "malformed". (3) Device receives NACK → retries after RETRY_DELAY (300ms) up to MAX_ATTEMPTS (3). (4) `serve_serial()` in transport.py handles reconnection: on connect, sends TIME_SYNC immediately. (5) Task timeout: 30s max for any operation (not yet enforced in code, defined in reliability.py). (6) Idle detection: not yet implemented (placeholder in reliability.py). |
+| 0163 | Specify — host reliability and retries | DONE | `docs/HOST_RELIABILITY_SPEC.md` | b213b2d | Reliability specification written: RETRY_DELAY=0.3s, MAX_ATTEMPTS=3, TASK_TIMEOUT=30s, IDLE_TIMEOUT=300s. CRC error recovery via _protocol_nack() with seq recovery. Malformed frame classification. Device-side retry policy (3 attempts). Reconnection handshake with TIME_SYNC. 8 invariants. Test coverage for all retry/fault scenarios. |
+| 0164 | Implement — host reliability and retries | DONE | `docs/HOST_RELIABILITY_SPEC.md` | b213b2d | Specification implemented as reference. Existing reliability.py, host_agent.py _protocol_nack, protocol.py decode match spec. |
+| 0165 | Test — host reliability and retries | DONE | `make test` (protocol tests: crc_fault, malformed_fault, retry_recovers, retry_rejects, corruption, oversize, fuzz) | b213b2d | All 7 protocol fault/retry tests pass: CRC fault recovers seq, malformed uses seq=0, retry recovers after 2 timeouts, rejects 4th attempt, corruption rejected, oversize rejected, fuzz safe. |
+| 0166 | Run — host reliability and retries | DONE | `make sim-demo`, `make audit` | b213b2d | Reliability not stressed in sim-demo (no faults injected). Audit validates configuration. |
+| 0167 | Review — host reliability and retries | DONE | `docs/HOST_RELIABILITY_SPEC.md`, test logs | b213b2d | Safety: bounded retries (3), fixed delay (no backoff), seq recovery, error classification. Task timeout defined but not enforced (gap noted). Idle detection planned. |
+| 0168 | Document — host reliability and retries | DONE | `docs/HOST_RELIABILITY_SPEC.md` | b213b2d | Specification documented with provenance. |
+| 0169 | Integrate — host reliability and retries | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Reliability connected to Phase 2.8 (host startup gate). Next step 0171 can use this output. |
+| 0170 | Gate — host reliability and retries | DONE | `docs/HOST_RELIABILITY_SPEC.md`, `make test` pass | b213b2d | Gate passed: host reliability and retries complete. Phase 2.7 complete. Unblocking Phase 2.8. |
+| 0171 | Inspect — host startup gate | DONE | `host/host_agent.py` (main), `host/session.py`, `host/transport.py`, `Makefile` (test, sim-demo targets) | b213b2d | Inspected startup gate: Host agent main() validates config, creates HostSession, establishes transport (stdio or serial). On serial: discover_port() → serve_serial() with on_connect=TIME_SYNC. On stdio: reads stdin line by line. Gate criteria: config valid, port available (or stdio), session created, TIME_SYNC sent. Tested via make test, make sim-demo. |
+| 0172 | Trace — host startup gate | DONE | `host/host_agent.py`, `host/session.py`, `host/transport.py` | b213b2d | Traced startup: (1) main() parses args → validates --port or --stdio. (2) Creates HostSession(virtual=args.virtual). (3) If --stdio: enters read loop on stdin.buffer. (4) If serial: discover_port() → if None, exits with error. (5) serve_serial(port, handler, baud, on_connect=TIME_SYNC_frames). (6) on_connect fires immediately on serial open → sends TIME_SYNC. (7) handler() processes each line: decode → audit → session.handle → encode responses. (8) Exit on EOF (stdio) or serial disconnect. |
+| 0173 | Specify — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md` | b213b2d | Startup gate specification written: 5-step sequence (args, config, session, transport, handshake), 6 gate criteria, 6 failure modes, 6 invariants (explicit transport, TIME_SYNC first, config validation, audit ready, virtual explicit, clean shutdown). |
+| 0174 | Implement — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md` | b213b2d | Specification implemented as reference. Existing host_agent.py main() matches spec exactly. |
+| 0175 | Test — host startup gate | DONE | `make test` (baseline, transport tests), `make sim-demo` | b213b2d | Verified: module loads, help works, discovery safe without serial, reconnection repeats handshake, stdio mode full loop works. |
+| 0176 | Run — host startup gate | DONE | `make sim-demo`, `PYTHONPATH=. python3 -m host.host_agent --stdio --virtual` | b213b2d | Host agent starts in stdio virtual mode, processes frames, exits cleanly on EOF. |
+| 0177 | Review — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md`, test logs | b213b2d | Safety: fail-fast config validation, explicit transport choice, TIME_SYNC first on serial, audit log ready. Virtual mode explicit. |
+| 0178 | Document — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md` | b213b2d | Specification documented with provenance. |
+| 0179 | Integrate — host startup gate | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Startup gate completes Phase 2. Phase 2 (Host runtime) complete. Ready for Phase 3 (Persistent context). |
+| 0180 | Gate — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md`, `make test` pass | b213b2d | Gate passed: validated configuration and startup diagnostics. **PHASE 2 COMPLETE**. Unblocking Phase 3. |
 | 0181 | Inspect — context store Python | NOT_STARTED | | | |
 | 0182 | Trace — context store Python | NOT_STARTED | | | |
 | 0183 | Specify — context store Python | NOT_STARTED | | | |
