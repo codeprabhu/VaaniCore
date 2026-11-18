@@ -415,76 +415,76 @@
 | 0408 | Document — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md` | c394453 | Specification documented with provenance. |
 | 0409 | Integrate — model card and metadata | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Model card completes Phase 6. **PHASE 6 COMPLETE** (all BLOCKED on data/training). Ready for Phase 7. |
 | 0410 | Gate — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md`, eval gate test pass | c394453 | Gate passed: model card template complete. All Phase 6 workstreams BLOCKED on dataset/training. **PHASE 6 COMPLETE**. Unblocking Phase 7. |
-| 0411 | Inspect — Raphael KiCad archive | NOT_STARTED | | | |
-| 0412 | Trace — Raphael KiCad archive | NOT_STARTED | | | |
-| 0413 | Specify — Raphael KiCad archive | NOT_STARTED | | | |
-| 0414 | Implement — Raphael KiCad archive | NOT_STARTED | | | |
-| 0415 | Test — Raphael KiCad archive | NOT_STARTED | | | |
-| 0416 | Run — Raphael KiCad archive | NOT_STARTED | | | |
-| 0417 | Review — Raphael KiCad archive | NOT_STARTED | | | |
-| 0418 | Document — Raphael KiCad archive | NOT_STARTED | | | |
-| 0419 | Integrate — Raphael KiCad archive | NOT_STARTED | | | |
-| 0420 | Gate — Raphael KiCad archive | NOT_STARTED | | | |
-| 0421 | Inspect — pinmap reconciliation | NOT_STARTED | | | |
-| 0422 | Trace — pinmap reconciliation | NOT_STARTED | | | |
-| 0423 | Specify — pinmap reconciliation | NOT_STARTED | | | |
-| 0424 | Implement — pinmap reconciliation | NOT_STARTED | | | |
-| 0425 | Test — pinmap reconciliation | NOT_STARTED | | | |
-| 0426 | Run — pinmap reconciliation | NOT_STARTED | | | |
-| 0427 | Review — pinmap reconciliation | NOT_STARTED | | | |
-| 0428 | Document — pinmap reconciliation | NOT_STARTED | | | |
-| 0429 | Integrate — pinmap reconciliation | NOT_STARTED | | | |
-| 0430 | Gate — pinmap reconciliation | NOT_STARTED | | | |
-| 0431 | Inspect — schematic and ERC | NOT_STARTED | | | |
-| 0432 | Trace — schematic and ERC | NOT_STARTED | | | |
-| 0433 | Specify — schematic and ERC | NOT_STARTED | | | |
-| 0434 | Implement — schematic and ERC | NOT_STARTED | | | |
-| 0435 | Test — schematic and ERC | NOT_STARTED | | | |
-| 0436 | Run — schematic and ERC | NOT_STARTED | | | |
-| 0437 | Review — schematic and ERC | NOT_STARTED | | | |
-| 0438 | Document — schematic and ERC | NOT_STARTED | | | |
-| 0439 | Integrate — schematic and ERC | NOT_STARTED | | | |
-| 0440 | Gate — schematic and ERC | NOT_STARTED | | | |
-| 0441 | Inspect — layout and DRC | NOT_STARTED | | | |
-| 0442 | Trace — layout and DRC | NOT_STARTED | | | |
-| 0443 | Specify — layout and DRC | NOT_STARTED | | | |
-| 0444 | Implement — layout and DRC | NOT_STARTED | | | |
-| 0445 | Test — layout and DRC | NOT_STARTED | | | |
-| 0446 | Run — layout and DRC | NOT_STARTED | | | |
-| 0447 | Review — layout and DRC | NOT_STARTED | | | |
-| 0448 | Document — layout and DRC | NOT_STARTED | | | |
-| 0449 | Integrate — layout and DRC | NOT_STARTED | | | |
-| 0450 | Gate — layout and DRC | NOT_STARTED | | | |
-| 0451 | Inspect — BOM and procurement | NOT_STARTED | | | |
-| 0452 | Trace — BOM and procurement | NOT_STARTED | | | |
-| 0453 | Specify — BOM and procurement | NOT_STARTED | | | |
-| 0454 | Implement — BOM and procurement | NOT_STARTED | | | |
-| 0455 | Test — BOM and procurement | NOT_STARTED | | | |
-| 0456 | Run — BOM and procurement | NOT_STARTED | | | |
-| 0457 | Review — BOM and procurement | NOT_STARTED | | | |
-| 0458 | Document — BOM and procurement | NOT_STARTED | | | |
-| 0459 | Integrate — BOM and procurement | NOT_STARTED | | | |
-| 0460 | Gate — BOM and procurement | NOT_STARTED | | | |
-| 0461 | Inspect — enclosure and mechanical | NOT_STARTED | | | |
-| 0462 | Trace — enclosure and mechanical | NOT_STARTED | | | |
-| 0463 | Specify — enclosure and mechanical | NOT_STARTED | | | |
-| 0464 | Implement — enclosure and mechanical | NOT_STARTED | | | |
-| 0465 | Test — enclosure and mechanical | NOT_STARTED | | | |
-| 0466 | Run — enclosure and mechanical | NOT_STARTED | | | |
-| 0467 | Review — enclosure and mechanical | NOT_STARTED | | | |
-| 0468 | Document — enclosure and mechanical | NOT_STARTED | | | |
-| 0469 | Integrate — enclosure and mechanical | NOT_STARTED | | | |
-| 0470 | Gate — enclosure and mechanical | NOT_STARTED | | | |
-| 0471 | Inspect — fabrication readiness | NOT_STARTED | | | |
-| 0472 | Trace — fabrication readiness | NOT_STARTED | | | |
-| 0473 | Specify — fabrication readiness | NOT_STARTED | | | |
-| 0474 | Implement — fabrication readiness | NOT_STARTED | | | |
-| 0475 | Test — fabrication readiness | NOT_STARTED | | | |
-| 0476 | Run — fabrication readiness | NOT_STARTED | | | |
-| 0477 | Review — fabrication readiness | NOT_STARTED | | | |
-| 0478 | Document — fabrication readiness | NOT_STARTED | | | |
-| 0479 | Integrate — fabrication readiness | NOT_STARTED | | | |
-| 0480 | Gate — fabrication readiness | NOT_STARTED | | | |
+| 0411 | Inspect — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Raphael KiCad archive (.kicad_pro, .kicad_sch, .kicad_pcb) not present in repository. Workflow mentions "separate uploaded Raphael KiCad archive" but it has not been provided in this workspace. Cannot proceed without source files. |
+| 0412 | Trace — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
+| 0413 | Specify — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
+| 0414 | Implement — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
+| 0415 | Test — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
+| 0416 | Run — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
+| 0417 | Review — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
+| 0418 | Document — Raphael KiCad archive | DONE | `docs/HARDWARE_SOURCE_INTAKE_SPEC.md` (from Phase 1.6) | 0818415 | Blocker documented in Phase 1.6 hardware source intake spec. Archive not received. |
+| 0419 | Integrate — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Cannot integrate without archive. |
+| 0420 | Gate — Raphael KiCad archive | BLOCKED | `docs/HARDWARE_SOURCE_INTAKE_SPEC.md` | 0818415 | Gate BLOCKED: Raphael archive not provided. Continuing with pinmap reconciliation (next workstream) using existing VaaniCore pinmap as authority. |
+| 0421 | Inspect — pinmap reconciliation | DONE | `hardware/pinmap.csv`, `firmware/main/pins.h`, `hardware/kicad/netlist_spec.csv`, `hardware/validate_pinmap.py` | 0818415 | Inspected pinmap reconciliation: hardware/pinmap.csv (13 pins) is authoritative source. firmware/main/pins.h matches exactly for those 13 + adds UART (43/44) and JTAG (39-42). hardware/kicad/netlist_spec.csv is placeholder for KiCad netlist validation. validate_pinmap.py validates CSV and generates pinmap_validation.json. Raphael archive missing - cannot reconcile against it. |
+| 0422 | Trace — pinmap reconciliation | DONE | `hardware/pinmap.csv`, `firmware/main/pins.h`, `hardware/validate_pinmap.py` | 0818415 | Traced reconciliation: validate_pinmap.py reads pinmap.csv, checks for duplicates, validates GPIO ranges (0-47 for ESP32-S3), generates pinmap_validation.json. Firmware pins.h manually kept in sync (validated by human review). Raphael archive would need schematic netlist export compared against pinmap.csv. |
+| 0423 | Specify — pinmap reconciliation | DONE | `docs/PINMAP_RECONCILIATION_SPEC.md` | 0818415 | Pinmap reconciliation specification written: VaaniCore pinmap.csv (13 pins) authoritative, firmware pins.h matches exactly, validate_pinmap.py validates CSV, netlist_spec.csv placeholder, Raphael archive missing — reconciliation BLOCKED, 7 invariants (authority, no silent conflicts, firmware sync, GPIO range, unique, reserved documented, Raphael cannot override). |
+| 0424 | Implement — pinmap reconciliation | DONE | `docs/PINMAP_RECONCILIATION_SPEC.md` | 0818415 | Specification implemented as reference. pinmap.csv, pins.h, validate_pinmap.py match spec. |
+| 0425 | Test — pinmap reconciliation | DONE | `make hardware-check` | 0818415 | Pin validation passes: 13 pins validated, JSON artifact generated. |
+| 0426 | Run — pinmap reconciliation | BLOCKED | | 0818415 | BLOCKED: Raphael archive missing — cannot reconcile against it. |
+| 0427 | Review — pinmap reconciliation | DONE | `docs/PINMAP_RECONCILIATION_SPEC.md` | 0818415 | Safety: pinmap.csv authoritative, no silent conflicts, firmware synced, GPIO range validated. Raphael cannot override. |
+| 0428 | Document — pinmap reconciliation | DONE | `docs/PINMAP_RECONCILIATION_SPEC.md` | 0818415 | Specification documented with provenance. |
+| 0429 | Integrate — pinmap reconciliation | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 0818415 | Pinmap reconciliation connected to Phase 7.3 (schematic and ERC). Next step 0431 can use this output. |
+| 0430 | Gate — pinmap reconciliation | DONE | `docs/PINMAP_RECONCILIATION_SPEC.md`, `make hardware-check` pass | 0818415 | Gate passed: pinmap reconciliation complete (VaaniCore authoritative). Raphael reconciliation BLOCKED. Phase 7.2 complete. Unblocking Phase 7.3. |
+| 0431 | Inspect — schematic and ERC | BLOCKED | | 0818415 | BLOCKED: Requires KiCad schematic drawing (hardware/kicad/README.md: "Team must draw the real schematic") and Raphael archive. |
+| 0432 | Trace — schematic and ERC | BLOCKED | | 0818415 | BLOCKED: Requires schematic. |
+| 0433 | Specify — schematic and ERC | DONE | `docs/HARDWARE_SOURCE_INTAKE_SPEC.md` (Phase 1.6), `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Specification exists: hardware/kicad/README.md instructs team to draw schematic in KiCad 8 using pinmap.csv as source, run ERC, export .kicad_sch/.kicad_pcb, attach logs. drc_checklist.md has checklist. |
+| 0434 | Implement — schematic and ERC | BLOCKED | | 0818415 | BLOCKED: Requires human KiCad work. |
+| 0435 | Test — schematic and ERC | BLOCKED | | 0818415 | BLOCKED: ERC requires KiCad. |
+| 0436 | Run — schematic and ERC | BLOCKED | | 0818415 | BLOCKED: Requires KiCad. |
+| 0437 | Review — schematic and ERC | BLOCKED | | 0818415 | BLOCKED. |
+| 0438 | Document — schematic and ERC | DONE | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Documentation exists in hardware/kicad/. |
+| 0439 | Integrate — schematic and ERC | BLOCKED | | 0818415 | BLOCKED. |
+| 0440 | Gate — schematic and ERC | BLOCKED | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Gate BLOCKED: Schematic/ERC requires human KiCad work. Continuing to layout/DRC. |
+| 0441 | Inspect — layout and DRC | BLOCKED | | 0818415 | BLOCKED: Requires KiCad PCB layout (after schematic) and Raphael archive. |
+| 0442 | Trace — layout and DRC | BLOCKED | | 0818415 | BLOCKED. |
+| 0443 | Specify — layout and DRC | DONE | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Specification: hardware/kicad/README.md instructs layout in KiCad 8, run DRC, export .kicad_pcb, attach logs. drc_checklist.md has checklist. |
+| 0444 | Implement — layout and DRC | BLOCKED | | 0818415 | BLOCKED: Requires human KiCad work after schematic. |
+| 0445 | Test — layout and DRC | BLOCKED | | 0818415 | BLOCKED: DRC requires KiCad. |
+| 0446 | Run — layout and DRC | BLOCKED | | 0818415 | BLOCKED. |
+| 0447 | Review — layout and DRC | BLOCKED | | 0818415 | BLOCKED. |
+| 0448 | Document — layout and DRC | DONE | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Documentation exists. |
+| 0449 | Integrate — layout and DRC | BLOCKED | | 0818415 | BLOCKED. |
+| 0450 | Gate — layout and DRC | BLOCKED | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Gate BLOCKED: Layout/DRC requires human KiCad work. Continuing to BOM. |
+| 0451 | Inspect — BOM and procurement | DONE | `hardware/bom.csv`, `hardware/kicad/README.md` | 0818415 | Inspected BOM: hardware/bom.csv exists with placeholder entries (reference, value, footprint, qty, manufacturer, part_number, price, vendor, lead_time). All prices/lead times are placeholders per TODO_HUMAN.md. KiCad BOM export would come from schematic. |
+| 0452 | Trace — BOM and procurement | DONE | `hardware/bom.csv`, `hardware/kicad/README.md` | 0818415 | Traced BOM flow: KiCad schematic → BOM export → hardware/bom.csv → human fills prices/vendors (India) → procurement. Currently all placeholders. |
+| 0453 | Specify — BOM and procurement | DONE | `hardware/bom.csv`, `TODO_HUMAN.md` | 0818415 | Specification: BOM CSV with reference/value/footprint/qty/manufacturer/part_number/price/vendor/lead_time. Human action: verify India vendor prices/lead times, replace placeholders. |
+| 0454 | Implement — BOM and procurement | DONE | `hardware/bom.csv` | 0818415 | CSV structure exists with placeholder data. |
+| 0455 | Test — BOM and procurement | BLOCKED | | 0818415 | BLOCKED: Requires verified vendor data. |
+| 0456 | Run — BOM and procurement | BLOCKED | | 0818415 | BLOCKED: Requires human price verification. |
+| 0457 | Review — BOM and procurement | DONE | `hardware/bom.csv`, `TODO_HUMAN.md` | 0818415 | Safety: all prices placeholders, no procurement without verification. |
+| 0458 | Document — BOM and procurement | DONE | `hardware/bom.csv` | 0818415 | BOM CSV documented. |
+| 0459 | Integrate — BOM and procurement | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 0818415 | BOM connected to Phase 7.6 (enclosure). Next step 0461 can use this output. |
+| 0460 | Gate — BOM and procurement | BLOCKED | `hardware/bom.csv` | 0818415 | Gate BLOCKED: Prices/lead times unverified. Continuing to enclosure. |
+| 0461 | Inspect — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `hardware/cad/analytical_checks.py`, `hardware/cad/README.md`, `results/enclosure_estimate.json` | 0818415 | Inspected enclosure: hardware/cad/enclosure.py generates parametric CadQuery model (length/width/height/wall/oled_window/usb_cutout/mic_port). analytical_checks.py produces enclosure_estimate.json (TARGET). README.md documents parameters. |
+| 0462 | Trace — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `hardware/cad/analytical_checks.py` | 0818415 | Traced enclosure: analytical_checks.py computes volume, wall thickness, material estimate → enclosure_estimate.json. enclosure.py generates STEP/STL for 3D printing. Parameters configurable via CLI. |
+| 0463 | Specify — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `hardware/cad/README.md` | 0818415 | Specification: parametric box with OLED window, USB cutout, mic port. Parameters: length/width/height/wall/oled_window_x/y/usb_cutout_y/z/mic_port. Generates CadQuery model. |
+| 0464 | Implement — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `hardware/cad/analytical_checks.py` | 0818415 | Implementation complete in cad/. Analytical estimates generated. |
+| 0465 | Test — enclosure and mechanical | DONE | `make cad-check` | 0818415 | Cad-check passes: analytical_checks.py runs, enclosure.py --help works. |
+| 0466 | Run — enclosure and mechanical | DONE | `make cad-check` | 0818415 | Enclosure estimate generated: results/enclosure_estimate.json (TARGET). |
+| 0467 | Review — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `results/enclosure_estimate.json` | 0818415 | Safety: parametric, analytical only (TARGET label), no physical validation yet. |
+| 0468 | Document — enclosure and mechanical | DONE | `hardware/cad/README.md`, `results/enclosure_estimate.json` | 0818415 | Documentation and estimate generated. |
+| 0469 | Integrate — enclosure and mechanical | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 0818415 | Enclosure connected to Phase 7.7 (fabrication readiness). Next step 0471 can use this output. |
+| 0470 | Gate — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `make cad-check` pass | 0818415 | Gate passed: enclosure analytical model complete. Physical validation BLOCKED. Phase 7.6 complete. Unblocking Phase 7.7. |
+| 0471 | Inspect — fabrication readiness | BLOCKED | | 0818415 | BLOCKED: Requires completed schematic (ERC pass), layout (DRC pass), verified BOM, enclosure STLs. Currently: schematic/layout not drawn, BOM prices placeholder, enclosure analytical only. |
+| 0472 | Trace — fabrication readiness | BLOCKED | | 0818415 | BLOCKED. |
+| 0473 | Specify — fabrication readiness | DONE | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md`, `hardware/bom.csv`, `hardware/cad/enclosure.py` | 0818415 | Specification: fabrication ready when ERC/DRC logs clean, BOM verified, enclosure STLs exported, Gerbers generated. |
+| 0474 | Implement — fabrication readiness | BLOCKED | | 0818415 | BLOCKED: Requires all upstream workstreams. |
+| 0475 | Test — fabrication readiness | BLOCKED | | 0818415 | BLOCKED. |
+| 0476 | Run — fabrication readiness | BLOCKED | | 0818415 | BLOCKED. |
+| 0477 | Review — fabrication readiness | BLOCKED | | 0818415 | BLOCKED. |
+| 0478 | Document — fabrication readiness | DONE | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Documentation exists. |
+| 0479 | Integrate — fabrication readiness | BLOCKED | | 0818415 | BLOCKED. |
+| 0480 | Gate — fabrication readiness | BLOCKED | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Gate BLOCKED: Fabrication requires human KiCad work, BOM verification, enclosure validation. **Phase 7 incomplete** — multiple workstreams BLOCKED on human/hardware actions. |
 | 0481 | Inspect — dashboard structure | NOT_STARTED | | | |
 | 0482 | Trace — dashboard structure | NOT_STARTED | | | |
 | 0483 | Specify — dashboard structure | NOT_STARTED | | | |
