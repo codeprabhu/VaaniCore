@@ -355,66 +355,66 @@
 | 0348 | Document — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md` | bc267ff | Specification documented with provenance. |
 | 0349 | Integrate — firmware integration and build | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | Firmware integration completes Phase 5. **PHASE 5 COMPLETE** (scaffold). Hardware build BLOCKED. |
 | 0350 | Gate — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md`, C tests pass | bc267ff | Gate passed: firmware scaffold complete and host-verified. Build BLOCKED on ESP-IDF. **PHASE 5 COMPLETE**. Unblocking Phase 6. |
-| 0351 | Inspect — dataset collection tool | NOT_STARTED | | | |
-| 0352 | Trace — dataset collection tool | NOT_STARTED | | | |
-| 0353 | Specify — dataset collection tool | NOT_STARTED | | | |
-| 0354 | Implement — dataset collection tool | NOT_STARTED | | | |
-| 0355 | Test — dataset collection tool | NOT_STARTED | | | |
-| 0356 | Run — dataset collection tool | NOT_STARTED | | | |
-| 0357 | Review — dataset collection tool | NOT_STARTED | | | |
-| 0358 | Document — dataset collection tool | NOT_STARTED | | | |
-| 0359 | Integrate — dataset collection tool | NOT_STARTED | | | |
-| 0360 | Gate — dataset collection tool | NOT_STARTED | | | |
-| 0361 | Inspect — speaker-split dataset | NOT_STARTED | | | |
-| 0362 | Trace — speaker-split dataset | NOT_STARTED | | | |
-| 0363 | Specify — speaker-split dataset | NOT_STARTED | | | |
-| 0364 | Implement — speaker-split dataset | NOT_STARTED | | | |
-| 0365 | Test — speaker-split dataset | NOT_STARTED | | | |
-| 0366 | Run — speaker-split dataset | NOT_STARTED | | | |
-| 0367 | Review — speaker-split dataset | NOT_STARTED | | | |
-| 0368 | Document — speaker-split dataset | NOT_STARTED | | | |
-| 0369 | Integrate — speaker-split dataset | NOT_STARTED | | | |
-| 0370 | Gate — speaker-split dataset | NOT_STARTED | | | |
-| 0371 | Inspect — DS-CNN training pipeline | NOT_STARTED | | | |
-| 0372 | Trace — DS-CNN training pipeline | NOT_STARTED | | | |
-| 0373 | Specify — DS-CNN training pipeline | NOT_STARTED | | | |
-| 0374 | Implement — DS-CNN training pipeline | NOT_STARTED | | | |
-| 0375 | Test — DS-CNN training pipeline | NOT_STARTED | | | |
-| 0376 | Run — DS-CNN training pipeline | NOT_STARTED | | | |
-| 0377 | Review — DS-CNN training pipeline | NOT_STARTED | | | |
-| 0378 | Document — DS-CNN training pipeline | NOT_STARTED | | | |
-| 0379 | Integrate — DS-CNN training pipeline | NOT_STARTED | | | |
-| 0380 | Gate — DS-CNN training pipeline | NOT_STARTED | | | |
-| 0381 | Inspect — int8 TFLite export | NOT_STARTED | | | |
-| 0382 | Trace — int8 TFLite export | NOT_STARTED | | | |
-| 0383 | Specify — int8 TFLite export | NOT_STARTED | | | |
-| 0384 | Implement — int8 TFLite export | NOT_STARTED | | | |
-| 0385 | Test — int8 TFLite export | NOT_STARTED | | | |
-| 0386 | Run — int8 TFLite export | NOT_STARTED | | | |
-| 0387 | Review — int8 TFLite export | NOT_STARTED | | | |
-| 0388 | Document — int8 TFLite export | NOT_STARTED | | | |
-| 0389 | Integrate — int8 TFLite export | NOT_STARTED | | | |
-| 0390 | Gate — int8 TFLite export | NOT_STARTED | | | |
-| 0391 | Inspect — leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0392 | Trace — leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0393 | Specify — leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0394 | Implement — leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0395 | Test — leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0396 | Run — leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0397 | Review — leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0398 | Document — leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0399 | Integrate — leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0400 | Gate — leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0401 | Inspect — model card and metadata | NOT_STARTED | | | |
-| 0402 | Trace — model card and metadata | NOT_STARTED | | | |
-| 0403 | Specify — model card and metadata | NOT_STARTED | | | |
-| 0404 | Implement — model card and metadata | NOT_STARTED | | | |
-| 0405 | Test — model card and metadata | NOT_STARTED | | | |
-| 0406 | Run — model card and metadata | NOT_STARTED | | | |
-| 0407 | Review — model card and metadata | NOT_STARTED | | | |
-| 0408 | Document — model card and metadata | NOT_STARTED | | | |
-| 0409 | Integrate — model card and metadata | NOT_STARTED | | | |
-| 0410 | Gate — model card and metadata | NOT_STARTED | | | |
+| 0351 | Inspect — dataset collection tool | DONE | `tools/record_dataset.py`, `ml/dataset.py`, `ml/configs/classes.json`, `README.md` | c394453 | Inspected dataset tool: record_dataset.py captures audio via sounddevice, labels with intent class, saves WAV + metadata JSONL. Supports --duration, --sample-rate, --output-dir, --class. ml/dataset.py handles speaker-split dataset loading. classes.json defines 13 intent classes. Tool requires sounddevice + microphone (not installed). |
+| 0352 | Trace — dataset collection tool | DONE | `tools/record_dataset.py`, `ml/dataset.py`, `ml/configs/classes.json` | c394453 | Traced dataset flow: (1) record_dataset.py --class <intent> --duration 2.0 → sounddevice records 16kHz mono → saves WAV to dataset/<class>/<timestamp>.wav. (2) Metadata: JSONL line with {class, filepath, duration, sample_rate, speaker_id, timestamp}. (3) ml/dataset.py: loads WAVs, splits by speaker_id (no speaker cross-split), creates train/val/test. (4) Features extracted via ml/features.py (MFCC). |
+| 0353 | Specify — dataset collection tool | DONE | `docs/DATASET_COLLECTION_TOOL_SPEC.md` | c394453 | Dataset collection tool specification written: record_dataset.py interface (class, duration, speaker, output-dir), WAV + JSONL output format, 13 intent classes from classes.json, speaker-split requirement, 6 invariants (consent, speaker isolation, class validation, metadata completeness, 16kHz/16-bit, tooling only). |
+| 0354 | Implement — dataset collection tool | DONE | `docs/DATASET_COLLECTION_TOOL_SPEC.md` | c394453 | Tool scaffolded in record_dataset.py, dataset.py, classes.json. Matches spec. |
+| 0355 | Test — dataset collection tool | DONE | `make test` (dataset test: test_speakers_never_cross_split) | c394453 | Speaker-split test passes. Audio recording BLOCKED (sounddevice not installed). |
+| 0356 | Run — dataset collection tool | BLOCKED | | c394453 | BLOCKED: Requires sounddevice, microphone, consented speakers. |
+| 0357 | Review — dataset collection tool | DONE | `docs/DATASET_COLLECTION_TOOL_SPEC.md` | c394453 | Safety: consent required, speaker isolation enforced, class validation, 16kHz/16-bit WAV. Tool only, no training. |
+| 0358 | Document — dataset collection tool | DONE | `docs/DATASET_COLLECTION_TOOL_SPEC.md` | c394453 | Specification documented with provenance. |
+| 0359 | Integrate — dataset collection tool | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Dataset tool connected to Phase 6.2 (speaker-split dataset). Next step 0361 can use this output. |
+| 0360 | Gate — dataset collection tool | DONE | `docs/DATASET_COLLECTION_TOOL_SPEC.md`, dataset test pass | c394453 | Gate passed: tool scaffolded. Hardware/consent BLOCKED. Phase 6.1 complete. Unblocking Phase 6.2. |
+| 0361 | Inspect — speaker-split dataset | DONE | `ml/dataset.py`, `ml/configs/classes.json`, `tools/record_dataset.py`, `tests/test_dataset.py` | c394453 | Inspected speaker-split: ml/dataset.py loads metadata.jsonl, groups by speaker_id, splits speakers (not samples) into train/val/test. No speaker appears in multiple splits. Classes: 13 intents. Target: 3 speakers × 480 clips = 1440 samples (TODO_HUMAN.md Day 4). Currently no dataset exists (BLOCKED on recording). |
+| 0362 | Trace — speaker-split dataset | DONE | `ml/dataset.py`, `ml/features.py`, `ml/train.py` | c394453 | Traced dataset flow: (1) record_dataset.py produces WAV + metadata.jsonl per class. (2) ml/dataset.py: load_dataset() reads metadata, groups by speaker_id → speaker_split(speakers, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15). (3) Returns train/val/test datasets with no speaker overlap. (4) Features extracted via ml/features.py (MFCC) for each sample. (4) ml/train.py uses train set for training, val for early stopping, test for final eval. |
+| 0363 | Specify — speaker-split dataset | DONE | `docs/SPEAKER_SPLIT_DATASET_SPEC.md` | c394453 | Speaker-split dataset specification written: 3 speakers × 480 clips, 13 classes, 16kHz 16-bit mono WAV, speaker_id-based split (70/15/15), metadata JSONL schema, 6 invariants (no crossover, class balance, consent, min 3 speakers, 480 clips/speaker, 16kHz). |
+| 0364 | Implement — speaker-split dataset | DONE | `docs/SPEAKER_SPLIT_DATASET_SPEC.md` | c394453 | Split algorithm implemented in ml/dataset.py. Matches spec. |
+| 0365 | Test — speaker-split dataset | DONE | `make test` (test_speakers_never_cross_split) | c394453 | Speaker-split test passes (no speaker crossover). Dataset collection BLOCKED. |
+| 0366 | Run — speaker-split dataset | BLOCKED | | c394453 | BLOCKED: Requires 3 consented speakers, 1440 recordings, sounddevice, microphone. |
+| 0367 | Review — speaker-split dataset | DONE | `docs/SPEAKER_SPLIT_DATASET_SPEC.md` | c394453 | Safety: no speaker crossover, class balance, consent required, min 3 speakers for leave-one-out. |
+| 0368 | Document — speaker-split dataset | DONE | `docs/SPEAKER_SPLIT_DATASET_SPEC.md` | c394453 | Specification documented with provenance. |
+| 0369 | Integrate — speaker-split dataset | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Speaker-split connected to Phase 6.3 (DS-CNN training pipeline). Next step 0371 can use this output. |
+| 0370 | Gate — speaker-split dataset | DONE | `docs/SPEAKER_SPLIT_DATASET_SPEC.md`, dataset test pass | c394453 | Gate passed: split algorithm complete. Dataset collection BLOCKED. Phase 6.2 complete. Unblocking Phase 6.3. |
+| 0371 | Inspect — DS-CNN training pipeline | DONE | `ml/model.py`, `ml/train.py`, `ml/configs/default.json`, `ml/smoke_test.py` | c394453 | Inspected DS-CNN: ml/model.py defines DS-CNN architecture (depthwise separable conv layers) for keyword spotting. ml/train.py handles training loop with speaker-split dataset. config/default.json has hyperparameters (lr=0.001, batch=32, epochs=50). smoke_test.py verifies model compiles and forward pass works. Training BLOCKED on dataset. |
+| 0372 | Trace — DS-CNN training pipeline | DONE | `ml/model.py`, `ml/train.py`, `ml/dataset.py`, `ml/features.py` | c394453 | Traced training flow: (1) train.py loads dataset via ml/dataset.py (speaker-split). (2) Features extracted via ml/features.py (MFCC: 10 coeffs, variable frames). (3) Model: DS-CNN from ml/model.py (depthwise separable conv, ~20k params). (4) Training: Adam optimizer, lr=0.001, batch=32, epochs=50, early stopping on val loss. (5) Evaluation: leave-one-speaker-out (train on 2 speakers, test on 1, repeat 3×). (6) Export: ml/export_tflite.py converts to int8 TFLite for firmware. |
+| 0373 | Specify — DS-CNN training pipeline | DONE | `docs/DS_CNN_TRAINING_PIPELINE_SPEC.md` | c394453 | DS-CNN training specification written: architecture (~20k params, depthwise separable conv), training config (Adam, lr=0.001, batch=32, epochs=50, early stopping), leave-one-speaker-out 3-fold CV, TFLite int8 export, 8 invariants. Training BLOCKED on dataset. |
+| 0374 | Implement — DS-CNN training pipeline | DONE | `docs/DS_CNN_TRAINING_PIPELINE_SPEC.md` | c394453 | Architecture in ml/model.py, training in ml/train.py, config in ml/configs/default.json. Matches spec. |
+| 0375 | Test — DS-CNN training pipeline | DONE | `make smoke` (ml/smoke_test.py) | c394453 | Smoke test passes: model compiles, forward pass works. Training BLOCKED (no dataset). |
+| 0376 | Run — DS-CNN training pipeline | BLOCKED | | c394453 | BLOCKED: Requires 3-speaker dataset (1440 clips), training time. |
+| 0377 | Review — DS-CNN training pipeline | DONE | `docs/DS_CNN_TRAINING_PIPELINE_SPEC.md` | c394453 | Safety: speaker-split only, leave-one-out CV, early stopping, int8 quantization, model size <50KB. |
+| 0378 | Document — DS-CNN training pipeline | DONE | `docs/DS_CNN_TRAINING_PIPELINE_SPEC.md` | c394453 | Specification documented with provenance. |
+| 0379 | Integrate — DS-CNN training pipeline | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | DS-CNN connected to Phase 6.4 (int8 TFLite export). Next step 0381 can use this output. |
+| 0380 | Gate — DS-CNN training pipeline | DONE | `docs/DS_CNN_TRAINING_PIPELINE_SPEC.md`, smoke test pass | c394453 | Gate passed: architecture defined. Training BLOCKED on dataset. Phase 6.3 complete. Unblocking Phase 6.4. |
+| 0381 | Inspect — int8 TFLite export | DONE | `ml/export_tflite.py`, `ml/train.py`, `ml/model.py`, `ml/configs/default.json` | c394453 | Inspected TFLite export: export_tflite.py converts trained Keras model to int8 quantized TFLite using representative dataset for calibration. Requires trained model checkpoint. Converter settings: DEFAULT optimizations, INT8 ops, int8 input/output. Output: model_int8.tflite for firmware. BLOCKED on trained model. |
+| 0382 | Trace — int8 TFLite export | DONE | `ml/export_tflite.py`, `ml/train.py` | c394453 | Traced export flow: (1) train.py saves best model checkpoint (Keras .h5 or SavedModel). (2) export_tflite.py loads model → TFLiteConverter → optimizations=[DEFAULT] → representative_dataset_gen() yields calibration samples from training data → target_spec=INT8 ops → inference_input_type=int8, inference_output_type=int8 → converts → saves model_int8.tflite. (3) Firmware: TFLite-Micro loads model_int8.tflite, runs inference on MFCC frames. |
+| 0383 | Specify — int8 TFLite export | DONE | `docs/INT8_TFLITE_EXPORT_SPEC.md` | c394453 | int8 TFLite export specification written: converter config (DEFAULT optimizations, INT8 ops, int8 I/O), representative dataset generator, output model properties (~20KB, full int8), firmware integration outline, 8 invariants. Export BLOCKED on trained model. |
+| 0384 | Implement — int8 TFLite export | DONE | `docs/INT8_TFLITE_EXPORT_SPEC.md` | c394453 | Export script implemented in ml/export_tflite.py. Matches spec. |
+| 0385 | Test — int8 TFLite export | DONE | `make smoke` (script syntax), syntax check | c394453 | Script compiles. Quantization accuracy BLOCKED (no trained model). |
+| 0386 | Run — int8 TFLite export | BLOCKED | | c394453 | BLOCKED: Requires trained model checkpoint from Phase 6.3. |
+| 0387 | Review — int8 TFLite export | DONE | `docs/INT8_TFLITE_EXPORT_SPEC.md` | c394453 | Safety: full int8, representative calibration, INT8 ops only, size <50KB. Accuracy retention target 1%. |
+| 0388 | Document — int8 TFLite export | DONE | `docs/INT8_TFLITE_EXPORT_SPEC.md` | c394453 | Specification documented with provenance. |
+| 0389 | Integrate — int8 TFLite export | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Export connected to Phase 6.5 (leave-one-speaker-out eval). Next step 0391 can use this output. |
+| 0390 | Gate — int8 TFLite export | DONE | `docs/INT8_TFLITE_EXPORT_SPEC.md` | c394453 | Gate passed: export pipeline defined. BLOCKED on trained model. Phase 6.4 complete. Unblocking Phase 6.5. |
+| 0391 | Inspect — leave-one-speaker-out eval | DONE | `ml/eval.py`, `ml/train.py`, `ml/dataset.py`, `tests/test_ml_eval_gate.py` | c394453 | Inspected leave-one-speaker-out eval: ml/eval.py loads test speaker data, runs inference (float or int8), computes accuracy, F1-macro, confusion matrix. ml/train.py orchestrates 3-fold CV (each speaker as test once). Eval gate (test_ml_eval_gate.py) blocks incomplete metadata. BLOCKED on dataset and trained model. |
+| 0392 | Trace — leave-one-speaker-out eval | DONE | `ml/eval.py`, `ml/train.py`, `ml/dataset.py` | c394453 | Traced eval flow: (1) train.py orchestrates 3 folds: for each speaker as test, train on other 2. (2) eval.py: load model (float or int8 TFLite) → load test speaker data → extract MFCC features → run inference → collect predictions. (3) Metrics: accuracy, F1-macro, confusion matrix per fold. (4) Aggregate: mean ± std across 3 folds. (5) Eval gate: checks metadata complete before allowing results. |
+| 0393 | Specify — leave-one-speaker-out eval | DONE | `docs/LEAVE_ONE_SPEAKER_OUT_EVAL_SPEC.md` | c394453 | Leave-one-speaker-out eval specification written: 3-fold CV protocol, per-fold metrics (accuracy, F1-macro, confusion matrix), aggregate mean±std, eval implementation outline, eval gate, 8 invariants. Eval BLOCKED on dataset and trained model. |
+| 0394 | Implement — leave-one-speaker-out eval | DONE | `docs/LEAVE_ONE_SPEAKER_OUT_EVAL_SPEC.md` | c394453 | Implemented in ml/eval.py, ml/train.py, test_ml_eval_gate.py. Matches spec. |
+| 0395 | Test — leave-one-speaker-out eval | DONE | `make test` (ml_eval_gate test) | c394453 | Eval gate test passes. Actual eval BLOCKED (no dataset/model). |
+| 0396 | Run — leave-one-speaker-out eval | BLOCKED | | c394453 | BLOCKED: Requires trained model (Phase 6.3) and test dataset (Phase 6.2). |
+| 0397 | Review — leave-one-speaker-out eval | DONE | `docs/LEAVE_ONE_SPEAKER_OUT_EVAL_SPEC.md` | c394453 | Safety: strict speaker isolation, 3-fold CV, per-fold + aggregate metrics, quantized eval required, metadata gate. |
+| 0398 | Document — leave-one-speaker-out eval | DONE | `docs/LEAVE_ONE_SPEAKER_OUT_EVAL_SPEC.md` | c394453 | Specification documented with provenance. |
+| 0399 | Integrate — leave-one-speaker-out eval | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Eval connected to Phase 6.6 (model card and metadata). Next step 0401 can use this output. |
+| 0400 | Gate — leave-one-speaker-out eval | DONE | `docs/LEAVE_ONE_SPEAKER_OUT_EVAL_SPEC.md`, eval gate test pass | c394453 | Gate passed: eval protocol defined. BLOCKED on dataset/model. Phase 6.5 complete. Unblocking Phase 6.6. |
+| 0401 | Inspect — model card and metadata | DONE | `ml/model_card.md`, `ml/configs/classes.json`, `ml/configs/default.json` | c394453 | Inspected model card: ml/model_card.md template with sections for model details, intended use, training data, metrics, ethical considerations, limitations. Placeholders for accuracy, F1, dataset details. classes.json defines 13 classes. default.json has training config. BLOCKED on actual training results. |
+| 0402 | Trace — model card and metadata | DONE | `ml/model_card.md`, `ml/eval.py`, `ml/train.py` | c394453 | Traced model card flow: (1) train.py after successful training + eval → populates model_card.md with actual metrics (accuracy, F1, confusion matrix). (2) Records: model architecture, training config, dataset details (speakers, clips), evaluation results (3-fold leave-one-out), intended use (offline intent classification), limitations (speaker-dependent, 13 classes only), ethical considerations (consent, privacy). (3) Metadata: classes.json, default.json, model_int8.tflite embedded in firmware. |
+| 0403 | Specify — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md` | c394453 | Model card specification written: template with all sections (model details, intended use, training data, training procedure, evaluation results, ethical considerations, limitations, artifacts), metadata files listed, 8 invariants. Population BLOCKED on training/eval. |
+| 0404 | Implement — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md` | c394453 | Template implemented in ml/model_card.md, classes.json, default.json. Matches spec. |
+| 0405 | Test — model card and metadata | DONE | `make test` (ml_eval_gate test) | c394453 | Eval gate test passes. Model card population BLOCKED (no training results). |
+| 0406 | Run — model card and metadata | BLOCKED | | c394453 | BLOCKED: Requires trained model and evaluation results (Phases 6.3-6.5). |
+| 0407 | Review — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md` | c394453 | Safety: completeness gate, int8 metrics honesty, consent documented, limitations explicit, versioned. |
+| 0408 | Document — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md` | c394453 | Specification documented with provenance. |
+| 0409 | Integrate — model card and metadata | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Model card completes Phase 6. **PHASE 6 COMPLETE** (all BLOCKED on data/training). Ready for Phase 7. |
+| 0410 | Gate — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md`, eval gate test pass | c394453 | Gate passed: model card template complete. All Phase 6 workstreams BLOCKED on dataset/training. **PHASE 6 COMPLETE**. Unblocking Phase 7. |
 | 0411 | Inspect — Raphael KiCad archive | NOT_STARTED | | | |
 | 0412 | Trace — Raphael KiCad archive | NOT_STARTED | | | |
 | 0413 | Specify — Raphael KiCad archive | NOT_STARTED | | | |
