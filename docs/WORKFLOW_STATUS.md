@@ -185,56 +185,56 @@
 | 0178 | Document — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md` | b213b2d | Specification documented with provenance. |
 | 0179 | Integrate — host startup gate | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Startup gate completes Phase 2. Phase 2 (Host runtime) complete. Ready for Phase 3 (Persistent context). |
 | 0180 | Gate — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md`, `make test` pass | b213b2d | Gate passed: validated configuration and startup diagnostics. **PHASE 2 COMPLETE**. Unblocking Phase 3. |
-| 0181 | Inspect — context store Python | NOT_STARTED | | | |
-| 0182 | Trace — context store Python | NOT_STARTED | | | |
-| 0183 | Specify — context store Python | NOT_STARTED | | | |
-| 0184 | Implement — context store Python | NOT_STARTED | | | |
-| 0185 | Test — context store Python | NOT_STARTED | | | |
-| 0186 | Run — context store Python | NOT_STARTED | | | |
-| 0187 | Review — context store Python | NOT_STARTED | | | |
-| 0188 | Document — context store Python | NOT_STARTED | | | |
-| 0189 | Integrate — context store Python | NOT_STARTED | | | |
-| 0190 | Gate — context store Python | NOT_STARTED | | | |
-| 0191 | Inspect — context store C firmware | NOT_STARTED | | | |
-| 0192 | Trace — context store C firmware | NOT_STARTED | | | |
-| 0193 | Specify — context store C firmware | NOT_STARTED | | | |
-| 0194 | Implement — context store C firmware | NOT_STARTED | | | |
-| 0195 | Test — context store C firmware | NOT_STARTED | | | |
-| 0196 | Run — context store C firmware | NOT_STARTED | | | |
-| 0197 | Review — context store C firmware | NOT_STARTED | | | |
-| 0198 | Document — context store C firmware | NOT_STARTED | | | |
-| 0199 | Integrate — context store C firmware | NOT_STARTED | | | |
-| 0200 | Gate — context store C firmware | NOT_STARTED | | | |
-| 0201 | Inspect — device protocol context | NOT_STARTED | | | |
-| 0202 | Trace — device protocol context | NOT_STARTED | | | |
-| 0203 | Specify — device protocol context | NOT_STARTED | | | |
-| 0204 | Implement — device protocol context | NOT_STARTED | | | |
-| 0205 | Test — device protocol context | NOT_STARTED | | | |
-| 0206 | Run — device protocol context | NOT_STARTED | | | |
-| 0207 | Review — device protocol context | NOT_STARTED | | | |
-| 0208 | Document — device protocol context | NOT_STARTED | | | |
-| 0209 | Integrate — device protocol context | NOT_STARTED | | | |
-| 0210 | Gate — device protocol context | NOT_STARTED | | | |
-| 0211 | Inspect — LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0212 | Trace — LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0213 | Specify — LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0214 | Implement — LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0215 | Test — LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0216 | Run — LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0217 | Review — LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0218 | Document — LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0219 | Integrate — LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0220 | Gate — LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0221 | Inspect — context recovery and bounds | NOT_STARTED | | | |
-| 0222 | Trace — context recovery and bounds | NOT_STARTED | | | |
-| 0223 | Specify — context recovery and bounds | NOT_STARTED | | | |
-| 0224 | Implement — context recovery and bounds | NOT_STARTED | | | |
-| 0225 | Test — context recovery and bounds | NOT_STARTED | | | |
-| 0226 | Run — context recovery and bounds | NOT_STARTED | | | |
-| 0227 | Review — context recovery and bounds | NOT_STARTED | | | |
-| 0228 | Document — context recovery and bounds | NOT_STARTED | | | |
-| 0229 | Integrate — context recovery and bounds | NOT_STARTED | | | |
-| 0230 | Gate — context recovery and bounds | NOT_STARTED | | | |
+| 0181 | Inspect — context store Python | DONE | `firmware/components/context/context_store.py`, `firmware/components/context/__init__.py`, `tests/test_context.py`, `tests/test_device_context.py` | ae1c35e | Inspected Python context store: `ContextStore` class in context_store.py manages JSON file at `~/.vaanicore/context.json` with 16-event history. Methods: `append(project_id, action)`, `get_last()`, `get_yesterday()`, `resolve(selector, today, confirmed_fallback)`. DeviceContext in device_protocol.py mirrors this for virtual device. Tests verify LAST/YESTERDAY resolution, bounded history, missing yesterday requires confirmation. |
+| 0182 | Trace — context store Python | DONE | `firmware/components/context/context_store.py`, `host/session.py`, `firmware/components/context/device_protocol.py` | ae1c35e | Traced Python context flow: (1) Host `session.handle()` on RUN_SIMULATION success → emits PROJECT_EVENT. (2) Virtual device `DeviceContext.handle(PROJECT_EVENT)` → appends to history with local_day from TIME_SYNC. (3) Intent with LAST/YESTERDAY → `ContextStore.resolve()` or `DeviceContext.get_last()/get_yesterday()`. (4) `resolve(selector, today, confirmed_fallback)`: LAST → most recent; YESTERDAY → event with local_day == today-1 (unique, else fallback if confirmed). (5) History bounded to 16 events (FIFO). (6) Persisted to JSON file on each append. |
+| 0183 | Specify — context store Python | DONE | `docs/CONTEXT_STORE_PYTHON_SPEC.md` | ae1c35e | Python context store specification written: ContextStore class with JSON persistence (~/.vaanicore/context.json), 16-event bounded history, LAST/YESTERDAY resolution with confirmed_fallback, DeviceContext mirror for virtual device, local_day computation from TIME_SYNC, 8 invariants. |
+| 0184 | Implement — context store Python | DONE | `docs/CONTEXT_STORE_PYTHON_SPEC.md` | ae1c35e | Specification implemented as reference. Existing context_store.py and device_protocol.py match spec. |
+| 0185 | Test — context store Python | DONE | `make test` (context, device_context tests) | ae1c35e | All context tests pass: LAST, YESTERDAY, missing yesterday requires confirmation, history bounded (16), sync and PROJECT_EVENT resolve local_day. |
+| 0186 | Run — context store Python | DONE | `make sim-demo` | ae1c35e | Virtual device context updated: TIME_SYNC sets epoch/day, PROJECT_EVENTs append to history, LAST/YESTERDAY resolution works in subsequent intents. |
+| 0187 | Review — context store Python | DONE | `docs/CONTEXT_STORE_PYTHON_SPEC.md`, test logs | ae1c35e | Safety: bounded history (16), durable JSON, confirmed fallback explicit. Atomic writes noted as future improvement. Schema versioning for migration. |
+| 0188 | Document — context store Python | DONE | `docs/CONTEXT_STORE_PYTHON_SPEC.md` | ae1c35e | Specification documented with provenance. |
+| 0189 | Integrate — context store Python | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae1c35e | Python context store connected to Phase 3.2 (context store C firmware). Next step 0191 can use this output. |
+| 0190 | Gate — context store Python | DONE | `docs/CONTEXT_STORE_PYTHON_SPEC.md`, `make test` pass | ae1c35e | Gate passed: Python context store complete. Phase 3.1 complete. Unblocking Phase 3.2. |
+| 0191 | Inspect — context store C firmware | DONE | `firmware/components/context/context.h`, `firmware/components/context/context.c`, `firmware/components/context/nvs_store.h`, `firmware/components/context/nvs_store.c`, `tests/context_c.c` | ae1c35e | Inspected C context: `vc_history_t` struct with 16-event circular buffer (`vc_event_t[16]`). `vc_history_init()`, `vc_history_append()`, `vc_history_resolve()`, `vc_history_resolve_confirmed()`. NVS store: `vc_nvs_init()`, `vc_nvs_save()`, `vc_nvs_load()` for ESP32 non-volatile storage. Tests verify C vectors match Python behavior. |
+| 0192 | Trace — context store C firmware | DONE | `firmware/components/context/context.c`, `firmware/components/context/nvs_store.c`, `firmware/main/main.c` | ae1c35e | Traced C context flow: (1) Firmware boot → `vc_nvs_init()` → loads history from NVS if exists. (2) On PROJECT_EVENT received → `vc_history_append(project_id, action, local_day)` → circular buffer update. (3) On intent with LAST/YESTERDAY → `vc_history_resolve[_confirmed](selector, today, &event)` → returns resolved event. (4) On shutdown or periodic → `vc_nvs_save()` persists history to NVS. (5) Circular buffer: `next` index wraps at 16, `count` tracks fill. Resolution: LAST → `events[(next-1+16)%16]`; YESTERDAY → scans for `local_day == today-1` (unique). |
+| 0193 | Specify — context store C firmware | DONE | `docs/CONTEXT_STORE_C_SPEC.md` | ae1c35e | C context store specification written: vc_event_t/vc_history_t structs (16-event circular buffer), API (init, append, resolve, resolve_confirmed), NVS store (init, save, load), firmware integration, 8 invariants (bounded, NVS persistence, Python parity, no heap, strncpy bounds, atomic NVS, schema compat, test vectors). |
+| 0194 | Implement — context store C firmware | DONE | `docs/CONTEXT_STORE_C_SPEC.md` | ae1c35e | Specification implemented as reference. Existing context.c, context.h, nvs_store.c, nvs_store.h match spec. |
+| 0195 | Test — context store C firmware | DONE | `make context-test` | ae1c35e | C context vectors pass: `vc_history_t` resolution matches Python behavior for LAST, YESTERDAY, confirmed fallback, bounded history. |
+| 0196 | Run — context store C firmware | BLOCKED | | ae1c35e | BLOCKED: Requires ESP-IDF build and hardware flash. C code compiled and tested in host context-test only. |
+| 0197 | Review — context store C firmware | DONE | `docs/CONTEXT_STORE_C_SPEC.md`, context-test log | ae1c35e | Safety: no heap allocation, bounded buffers, NVS persistence, Python parity verified. NVS error handling returns esp_err_t. |
+| 0198 | Document — context store C firmware | DONE | `docs/CONTEXT_STORE_C_SPEC.md` | ae1c35e | Specification documented with provenance. |
+| 0199 | Integrate — context store C firmware | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae1c35e | C context store connected to Phase 3.3 (device protocol context). Next step 0201 can use this output. |
+| 0200 | Gate — context store C firmware | DONE | `docs/CONTEXT_STORE_C_SPEC.md`, `make context-test` pass | ae1c35e | Gate passed: C context store complete (host-tested). Hardware validation blocked on ESP-IDF. Phase 3.2 complete. Unblocking Phase 3.3. |
+| 0201 | Inspect — device protocol context | DONE | `firmware/components/context/device_protocol.py`, `host/tools/virtual_device.py`, `tests/test_device_context.py` | ae1c35e | Inspected device protocol context: `DeviceContext` class mirrors firmware context for virtual testing. Handles TIME_SYNC (sets epoch, tz_offset_min, local_day), PROJECT_EVENT (appends to history with local_day). Methods: `get_last()`, `get_yesterday()`. Used by virtual_device.py to simulate device-side context updates. |
+| 0202 | Trace — device protocol context | DONE | `firmware/components/context/device_protocol.py`, `host/tools/virtual_device.py`, `host/session.py` | ae1c35e | Traced device protocol context: (1) virtual_device.py creates DeviceContext(). (2) For each connect frame (TIME_SYNC): device.handle(frame) → sets epoch, tz_offset_min, computes local_day. (3) For each response from host: device.handle(response) → if PROJECT_EVENT, appends to history with local_day. (4) Intent resolution: virtual device doesn't resolve LAST/YESTERDAY (host does), but DeviceContext provides get_last()/get_yesterday() for parity testing. (5) History bounded to 16 events (FIFO). |
+| 0203 | Specify — device protocol context | DONE | `docs/DEVICE_PROTOCOL_CONTEXT_SPEC.md` | ae1c35e | Device protocol context specification written: DeviceContext class with TIME_SYNC/PROJECT_EVENT handling, local_day computation, 16-event bounded history, get_last/get_yesterday, 5 invariants (mirrors firmware, bounded, time sync required, no persistence, deterministic). |
+| 0204 | Implement — device protocol context | DONE | `docs/DEVICE_PROTOCOL_CONTEXT_SPEC.md` | ae1c35e | Specification implemented as reference. Existing device_protocol.py matches spec. |
+| 0205 | Test — device protocol context | DONE | `make test` (device_context tests) | ae1c35e | Verified: history bounded (16), TIME_SYNC sets local_day, PROJECT_EVENT appends with correct day. |
+| 0206 | Run — device protocol context | DONE | `make sim-demo` | ae1c35e | Virtual device context updated through full loop: TIME_SYNC → local_day set → PROJECT_EVENTs appended with correct day. |
+| 0207 | Review — device protocol context | DONE | `docs/DEVICE_PROTOCOL_CONTEXT_SPEC.md`, test logs | ae1c35e | Safety: mirrors firmware exactly, bounded history, no persistence (virtual only). Deterministic behavior. |
+| 0208 | Document — device protocol context | DONE | `docs/DEVICE_PROTOCOL_CONTEXT_SPEC.md` | ae1c35e | Specification documented with provenance. |
+| 0209 | Integrate — device protocol context | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae1c35e | Device protocol context connected to Phase 3.4 (LAST and YESTERDAY intents). Next step 0211 can use this output. |
+| 0210 | Gate — device protocol context | DONE | `docs/DEVICE_PROTOCOL_CONTEXT_SPEC.md`, `make test` pass | ae1c35e | Gate passed: device protocol context complete. Phase 3.3 complete. Unblocking Phase 3.4. |
+| 0211 | Inspect — LAST and YESTERDAY intents | DONE | `host/intent_nlu.py`, `firmware/main/intents.c`, `firmware/main/intents.h`, `host/session.py`, `tests/test_intent.py`, `tests/test_context.py` | ae1c35e | Inspected LAST/YESTERDAY: Python intent_nlu.py maps phrases with "last"/"yesterday" to RUN_SIMULATION/OPEN_PROJECT with project=LAST/YESTERDAY and context=LAST/YESTERDAY. Firmware intents.c has lookup table entries: open_last, open_yesterday, run_sim, close_project (all project=LAST/YESTERDAY). Host session resolves via ContextStore/DeviceContext before dispatch. |
+| 0212 | Trace — LAST and YESTERDAY intents | DONE | `host/intent_nlu.py`, `host/session.py` (dispatch), `firmware/main/intents.c`, `firmware/components/context/context.c` | ae1c35e | Traced LAST/YESTERDAY flow: (1) Phrase "run simulation last" → intent_nlu.py → Frame(RUN_SIMULATION, {project: LAST, context: LAST}). (2) Host session.handle() → dispatch() → _project("LAST") → ContextStore.resolve("LAST", today) → returns last event's project_id. (3) Resolved project used for action. (4) "yesterday" phrase → project=YESTERDAY, context=YESTERDAY → resolve("YESTERDAY", today) → unique previous day event or None (fallback if confirmed). (5) Firmware: classifier outputs class_name "run_sim" → intents.c lookup → vc_intent_t with project="LAST" → device resolves via vc_history_resolve_confirmed(). |
+| 0213 | Specify — LAST and YESTERDAY intents | DONE | `docs/LAST_YESTERDAY_INTENTS_SPEC.md` | ae1c35e | LAST/YESTERDAY specification written: Python phrase patterns (5 mappings), firmware intent table (13 entries with LAST/YESTERDAY), host resolution via ContextStore, firmware resolution via vc_history_resolve_confirmed, confirmation fallback, 6 invariants (host resolves before dispatch, firmware resolves on device, YESTERDAY uniqueness, confirmed fallback, consistent project IDs, context freshness). |
+| 0214 | Implement — LAST and YESTERDAY intents | DONE | `docs/LAST_YESTERDAY_INTENTS_SPEC.md` | ae1c35e | Specification implemented as reference. Existing intent_nlu.py, intents.c, session.py, context.c match spec. |
+| 0215 | Test — LAST and YESTERDAY intents | DONE | `make test` (intent, context tests), `make context-test` | ae1c35e | Verified: LAST resolves, YESTERDAY resolves, missing yesterday requires confirmation, C/Python parity, all control intents typed, supported phrases map. |
+| 0216 | Run — LAST and YESTERDAY intents | DONE | `make sim-demo` (with LAST/YESTERDAY phrases) | ae1c35e | Virtual device exercises context resolution. Host correctly resolves LAST/YESTERDAY from history. |
+| 0217 | Review — LAST and YESTERDAY intents | DONE | `docs/LAST_YESTERDAY_INTENTS_SPEC.md`, test logs | ae1c35e | Safety: host resolves before dispatch (no LAST/YESTERDAY on wire), firmware resolves on device, YESTERDAY uniqueness enforced, confirmed fallback requires physical button. Consistency: C/Python parity verified. |
+| 0218 | Document — LAST and YESTERDAY intents | DONE | `docs/LAST_YESTERDAY_INTENTS_SPEC.md` | ae1c35e | Specification documented with provenance. |
+| 0219 | Integrate — LAST and YESTERDAY intents | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae1c35e | LAST/YESTERDAY connected to Phase 3.5 (context recovery and bounds). Next step 0221 can use this output. |
+| 0220 | Gate — LAST and YESTERDAY intents | DONE | `docs/LAST_YESTERDAY_INTENTS_SPEC.md`, `make test` pass | ae1c35e | Gate passed: LAST and YESTERDAY intents complete. Phase 3.4 complete. Unblocking Phase 3.5. |
+| 0221 | Inspect — context recovery and bounds | DONE | `firmware/components/context/context.c`, `firmware/components/context/nvs_store.c`, `firmware/components/context/context_store.py`, `tests/test_context.py`, `tests/test_device_context.py` | ae1c35e | Inspected context recovery: Python ContextStore loads JSON from ~/.vaanicore/context.json on init (recovers after restart). Firmware NVS store loads from ESP32 NVS partition on boot (vc_nvs_init). Both enforce 16-event bounded history (FIFO). Tests verify history bounded, sync and PROJECT_EVENT resolve local_day. |
+| 0222 | Trace — context recovery and bounds | DONE | `firmware/components/context/context_store.py`, `firmware/components/context/nvs_store.c`, `firmware/main/main.c` | ae1c35e | Traced recovery: (1) Python: ContextStore.__init__() → loads ~/.vaanicore/context.json if exists → reconstructs events list. On append → saves JSON (atomic write not yet implemented). (2) Firmware: main.c app_main() → vc_nvs_init() → opens NVS namespace "vaanicore" → loads "history" key into vc_history_t. On PROJECT_EVENT → vc_history_append() → vc_nvs_save() persists. (3) Bounds: both enforce 16-event capacity via FIFO (Python pop(0), C circular buffer next/count). |
+| 0223 | Specify — context recovery and bounds | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | ae1c35e | Context recovery and bounds specification written: Python JSON file persistence (~/.vaanicore/context.json) with schema versioning, Firmware NVS persistence (namespace vaanicore, key history) with atomic commit, both enforce 16-event FIFO bounds, 8 invariants (bounded, FIFO, durable, recovery, atomic NVS, schema version, fail-fast, parity). Failure modes compared. |
+| 0224 | Implement — context recovery and bounds | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | ae1c35e | Specification implemented as reference. Existing context_store.py, nvs_store.c match spec. Atomic write in Python noted as TODO. |
+| 0225 | Test — context recovery and bounds | DONE | `make test` (context, device_context tests), `make context-test` | ae1c35e | Verified: Python history bounded (16), C circular buffer bounds, sync and PROJECT_EVENT resolve local_day. Recovery tested via test re-runs (JSON persists). |
+| 0226 | Run — context recovery and bounds | DONE | `make sim-demo` (persists across runs) | ae1c35e | Virtual device context persists across sim-demo runs via ~/.vaanicore/context.json. |
+| 0227 | Review — context recovery and bounds | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md`, test logs | ae1c35e | Safety: bounded history (16), durable persistence, fail-fast on corrupt data, NVS atomic. Gap: Python atomic write not implemented (TODO). |
+| 0228 | Document — context recovery and bounds | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | ae1c35e | Specification documented with provenance. |
+| 0229 | Integrate — context recovery and bounds | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae1c35e | Context recovery completes Phase 3. **PHASE 3 COMPLETE**. Ready for Phase 4. |
+| 0230 | Gate — context recovery and bounds | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md`, `make test` pass | ae1c35e | Gate passed: context recovery and bounds complete. **PHASE 3 COMPLETE**. Unblocking Phase 4. |
 | 0231 | Inspect — protocol encode/decode C | NOT_STARTED | | | |
 | 0232 | Trace — protocol encode/decode C | NOT_STARTED | | | |
 | 0233 | Specify — protocol encode/decode C | NOT_STARTED | | | |
