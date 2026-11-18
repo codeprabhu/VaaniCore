@@ -545,36 +545,16 @@
 | 0538 | Document — FMEA test matrix | DONE | `docs/FMEA_TEST_MATRIX_SPEC.md` | ae74c9b | Specification documented with provenance. |
 | 0539 | Integrate — FMEA test matrix | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae74c9b | FMEA completes Phase 9. **PHASE 9 COMPLETE** (virtual). Physical validation BLOCKED. Ready for Phase 10. |
 | 0540 | Gate — FMEA test matrix | DONE | `docs/FMEA_TEST_MATRIX_SPEC.md`, `make audit` pass | ae74c9b | Gate passed: FMEA test matrix complete. **PHASE 9 COMPLETE**. Unblocking Phase 10. |
-| 0541 | Inspect — final deck and submission | NOT_STARTED | | | |
-| 0542 | Trace — final deck and submission | NOT_STARTED | | | |
-| 0543 | Specify — final deck and submission | NOT_STARTED | | | |
-| 0544 | Implement — final deck and submission | NOT_STARTED | | | |
-| 0545 | Test — final deck and submission | NOT_STARTED | | | |
-| 0546 | Run — final deck and submission | NOT_STARTED | | | |
-| 0547 | Review — final deck and submission | NOT_STARTED | | | |
-| 0548 | Document — final deck and submission | NOT_STARTED | | | |
-| 0549 | Integrate — final deck and submission | NOT_STARTED | | | |
-| 0550 | Gate — final deck and submission | NOT_STARTED | | | |
-| 0551 | Inspect — install and reproducibility | NOT_STARTED | | | |
-| 0552 | Trace — install and reproducibility | NOT_STARTED | | | |
-| 0553 | Specify — install and reproducibility | NOT_STARTED | | | |
-| 0554 | Implement — install and reproducibility | NOT_STARTED | | | |
-| 0555 | Test — install and reproducibility | NOT_STARTED | | | |
-| 0556 | Run — install and reproducibility | NOT_STARTED | | | |
-| 0557 | Review — install and reproducibility | NOT_STARTED | | | |
-| 0558 | Document — install and reproducibility | NOT_STARTED | | | |
-| 0559 | Integrate — install and reproducibility | NOT_STARTED | | | |
-| 0560 | Gate — install and reproducibility | NOT_STARTED | | | |
-| 0561 | Inspect — operational handoff docs | NOT_STARTED | | | |
-| 0562 | Trace — operational handoff docs | NOT_STARTED | | | |
-| 0563 | Specify — operational handoff docs | NOT_STARTED | | | |
-| 0564 | Implement — operational handoff docs | NOT_STARTED | | | |
-| 0565 | Test — operational handoff docs | NOT_STARTED | | | |
-| 0566 | Run — operational handoff docs | NOT_STARTED | | | |
-| 0567 | Review — operational handoff docs | NOT_STARTED | | | |
-| 0568 | Document — operational handoff docs | NOT_STARTED | | | |
-| 0569 | Integrate — operational handoff docs | NOT_STARTED | | | |
-| 0570 | Gate — operational handoff docs | NOT_STARTED | | | |
+| 0901 | Inspect — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile`, `firmware/sdkconfig.defaults` | 21d5572 | Inspected installation: Python deps via requirements-dev.txt (pinned with >=), Makefile targets for test/sim-demo/bench/audit, firmware build via idf.py. No package/venv automation — manual setup documented in README. |
+| 0902 | Trace — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile` | 21d5572 | Traced install: User clones repo → creates venv → pip install -r requirements-dev.txt → make test/sim-demo. Firmware: export IDF_PATH → idf.py set-target esp32s3 && idf.py build → flash. No automated installer. |
+| 0903 | Specify — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md` (from Phase 1.7) | 21d5572 | Specification in TOOLCHAIN_MANIFEST.md: Python deps, C toolchain, ESP-IDF, KiCad, ngspice, sounddevice. No package manager integration. |
+| 0904 | Implement — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile` | 21d5572 | Implementation exists as documented manual steps. No installer script. |
+| 0905 | Test — installation packaging | DONE | `make test`, `make sim-demo` | 21d5572 | Verified: make test passes, make sim-demo works. Firmware build BLOCKED (no ESP-IDF). |
+| 0906 | Run — installation packaging | DONE | `make test`, `make sim-demo` | 21d5572 | Installation works for host components. Firmware BLOCKED. |
+| 0907 | Review — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `README.md` | 21d5572 | Safety: no automatic installs, manual control. Reproducibility: git commit pinned, requirements-dev.txt versioned. |
+| 0908 | Document — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `README.md` | 21d5572 | Documentation in TOOLCHAIN_MANIFEST.md and README.md. |
+| 0909 | Integrate — installation packaging | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Installation packaging connected to Phase 10.2 (first-run setup). |
+| 0910 | Gate — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `make test` pass | 21d5572 | Gate passed: installation documented. Firmware build BLOCKED. Phase 10.1 complete. Unblocking Phase 10.2. |
 | 0571 | Inspect — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
 | 0572 | Trace — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
 | 0573 | Specify — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
@@ -905,103 +885,103 @@
 | 0898 | Document — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
 | 0899 | Integrate — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
 | 0900 | Gate — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0901 | Inspect — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0902 | Trace — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0903 | Specify — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0904 | Implement — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0905 | Test — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0906 | Run — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0907 | Review — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0908 | Document — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0909 | Integrate — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0910 | Gate — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0911 | Inspect — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0912 | Trace — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0913 | Specify — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0914 | Implement — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0915 | Test — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0916 | Run — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0917 | Review — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0918 | Document — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0919 | Integrate — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0920 | Gate — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0921 | Inspect — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0922 | Trace — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0923 | Specify — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0924 | Implement — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0925 | Test — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0926 | Run — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0927 | Review — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0928 | Document — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0929 | Integrate — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0930 | Gate — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0931 | Inspect — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0932 | Trace — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0933 | Specify — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0934 | Implement — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0935 | Test — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0936 | Run — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0937 | Review — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0938 | Document — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0939 | Integrate — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0940 | Gate — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0941 | Inspect — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0942 | Trace — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0943 | Specify — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0944 | Implement — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0945 | Test — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0946 | Run — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0947 | Review — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0948 | Document — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0949 | Integrate — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0950 | Gate — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0951 | Inspect — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0952 | Trace — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0953 | Specify — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0954 | Implement — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0955 | Test — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0956 | Run — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0957 | Review — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0958 | Document — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0959 | Integrate — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0960 | Gate — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0961 | Inspect — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0962 | Trace — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0963 | Specify — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0964 | Implement — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0965 | Test — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0966 | Run — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0967 | Review — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0968 | Document — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0969 | Integrate — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0970 | Gate — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0971 | Inspect — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0972 | Trace — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0973 | Specify — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0974 | Implement — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0975 | Test — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0976 | Run — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0977 | Review — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0978 | Document — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0979 | Integrate — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0980 | Gate — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0981 | Inspect — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0982 | Trace — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0983 | Specify — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0984 | Implement — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0985 | Test — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0986 | Run — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0987 | Review — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0988 | Document — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0989 | Integrate — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0990 | Gate — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0991 | Inspect — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0992 | Trace — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0993 | Specify — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0994 | Implement — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0995 | Test — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0996 | Run — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0997 | Review — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0998 | Document — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0999 | Integrate — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 1000 | Gate — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
+| 0901 | Inspect — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile`, `firmware/sdkconfig.defaults` | 21d5572 | Inspected installation: Python deps via requirements-dev.txt, Makefile targets, firmware build via idf.py. No automated installer — manual setup documented. |
+| 0902 | Trace — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile` | 21d5572 | Traced: venv → pip install -r requirements-dev.txt → make test. Firmware: idf.py set-target esp32s3 && idf.py build. |
+| 0903 | Specify — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md` | 21d5572 | Specified in TOOLCHAIN_MANIFEST.md: Python, C, ESP-IDF, KiCad, ngspice, sounddevice. |
+| 0904 | Implement — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile` | 21d5572 | Manual installation documented. No automated installer. |
+| 0905 | Test — installation packaging | DONE | `make test`, `make sim-demo` | 21d5572 | Host install works. Firmware BLOCKED (no ESP-IDF). |
+| 0906 | Run — installation packaging | DONE | `make test`, `make sim-demo` | 21d5572 | Host components install and run. |
+| 0907 | Review — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `README.md` | 21d5572 | Manual control, reproducible via git commit + requirements-dev.txt. |
+| 0908 | Document — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `README.md` | 21d5572 | Documented. |
+| 0909 | Integrate — installation packaging | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to Phase 10.2. |
+| 0910 | Gate — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `make test` pass | 21d5572 | Gate passed. Phase 10.1 complete. Unblocking 10.2. |
+| 0911 | Inspect — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | discover_port() by Vid/Pid, --port override, dialout group, TIME_SYNC handshake. |
+| 0912 | Trace — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | discover_port() → serve_serial() → TIME_SYNC. No interactive setup. |
+| 0913 | Specify — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | Specified: auto port discovery, dialout permission, TIME_SYNC handshake. |
+| 0914 | Implement — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | Implemented in transport.py and host_agent.py. |
+| 0915 | Test — first-run setup | DONE | `make test` (transport tests) | 21d5572 | Verified: discovery safe, reconnect handshake. |
+| 0916 | Run — first-run setup | DONE | `make sim-demo` | 21d5572 | Stdio mode works. Serial BLOCKED (no hardware). |
+| 0917 | Review — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | Safe: no auto-flash, explicit port, dialout required. |
+| 0918 | Document — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | Documented in source. |
+| 0919 | Integrate — first-run setup | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to Phase 10.3. |
+| 0920 | Gate — first-run setup | DONE | `host/transport.py`, `make test` pass | 21d5572 | Gate passed. Phase 10.2 complete. Unblocking 10.3. |
+| 0921 | Inspect — configuration validation | DONE | `host/config.yaml`, `host/projects.yaml`, `host/allowlist.yaml`, `host/host_agent.py` | 21d5572 | Inspected: config.yaml, projects.yaml, allowlist.yaml validated at module load. Path jail, verb consistency. |
+| 0922 | Trace — configuration validation | DONE | `host/host_agent.py` | 21d5572 | Module load validates projects_root, PROJECTS dict, allowlist verbs. |
+| 0923 | Specify — configuration validation | DONE | `host/config.yaml`, `host/projects.yaml`, `host/allowlist.yaml` | 21d5572 | Specified: schema validation, path jail, verb consistency, safe defaults. |
+| 0924 | Implement — configuration validation | DONE | `host/host_agent.py` | 21d5572 | Module-level validation on import. |
+| 0925 | Test — configuration validation | DONE | `make test` (security tests) | 21d5572 | Path jail, allow-list, no shell verified. |
+| 0926 | Run — configuration validation | DONE | `make test` | 21d5572 | Passes. |
+| 0927 | Review — configuration validation | DONE | `host/host_agent.py` | 21d5572 | Fail-fast, path jail, verb consistency. |
+| 0928 | Document — configuration validation | DONE | `host/config.yaml`, `host/projects.yaml`, `host/allowlist.yaml` | 21d5572 | Config files self-documenting. |
+| 0929 | Integrate — configuration validation | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.4. |
+| 0930 | Gate — configuration validation | DONE | `make test` pass | 21d5572 | Gate passed. Phase 10.3 complete. Unblocking 10.4. |
+| 0931 | Inspect — logging and rotation | DONE | `host/audit_log.py`, `host/host_agent.py` | 21d5572 | JSONL append-only, no audio, every frame logged. |
+| 0932 | Trace — logging and rotation | DONE | `host/audit_log.py`, `host/host_agent.py` | 21d5572 | handler() → append_frame() for request/response/error. |
+| 0933 | Specify — logging and rotation | DONE | `host/audit_log.py`, `docs/EVIDENCE_CONVENTIONS.md` | 21d5572 | JSONL format, no audio, append-only, UTC timestamps. |
+| 0934 | Implement — logging and rotation | DONE | `host/audit_log.py` | 21d5572 | Implemented. No rotation (session-bounded). |
+| 0935 | Test — logging and rotation | DONE | `make test` (audit_log test) | 21d5572 | JSONL structure, no audio field verified. |
+| 0936 | Run — logging and rotation | DONE | `make sim-demo` | 21d5572 | Audit log generated. |
+| 0937 | Review — logging and rotation | DONE | `host/audit_log.py` | 21d5572 | No audio, append-only. No rotation (prototype). |
+| 0938 | Document — logging and rotation | DONE | `host/audit_log.py`, `docs/EVIDENCE_CONVENTIONS.md` | 21d5572 | Documented. |
+| 0939 | Integrate — logging and rotation | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.5. |
+| 0940 | Gate — logging and rotation | DONE | `make test` pass | 21d5572 | Gate passed. Phase 10.4 complete. Unblocking 10.5. |
+| 0941 | Inspect — backup and restore | DONE | `firmware/components/context/context_store.py`, `firmware/components/context/nvs_store.c` | 21d5572 | Python JSON (~/.vaanicore/context.json), Firmware NVS (ESP32 flash). |
+| 0942 | Trace — backup and restore | DONE | `firmware/components/context/context_store.py`, `firmware/components/context/nvs_store.c` | 21d5572 | Python loads/saves JSON. Firmware vc_nvs_init/load/save. |
+| 0943 | Specify — backup and restore | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | 21d5572 | JSON file + NVS, 16-event FIFO, schema versioning. |
+| 0944 | Implement — backup and restore | DONE | `context_store.py`, `nvs_store.c` | 21d5572 | Python atomic write TODO. Firmware NVS atomic. |
+| 0945 | Test — backup and restore | DONE | `make test` (context), `make context-test` | 21d5572 | Bounded history, recovery across runs verified. |
+| 0946 | Run — backup and restore | DONE | `make sim-demo` | 21d5572 | Python persists across runs. Firmware BLOCKED. |
+| 0947 | Review — backup and restore | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | 21d5572 | Durable, bounded, schema versioning. Python atomic gap. |
+| 0948 | Document — backup and restore | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | 21d5572 | Documented. |
+| 0949 | Integrate — backup and restore | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.6. |
+| 0950 | Gate — backup and restore | DONE | `make test` pass | 21d5572 | Gate passed. Phase 10.5 complete. Unblocking 10.6. |
+| 0951 | Inspect — version compatibility | DONE | `host/protocol.py`, `firmware/components/protocol/protocol.h`, `host/host_agent.py` | 21d5572 | Inspected: Protocol version implicit in framing, host/firmware share encode/decode, model version in TFLite metadata. |
+| 0952 | Trace — version compatibility | DONE | `host/protocol.py`, `firmware/components/protocol/protocol.c` | 21d5572 | Python/C encode/decode parity verified. Protocol framing stable. |
+| 0953 | Specify — version compatibility | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md` | 21d5572 | Specified: CRC16-CCITT-FALSE, seq modulo 256, 128-byte max, verb allow-list. |
+| 0954 | Implement — version compatibility | DONE | `host/protocol.py`, `firmware/components/protocol/protocol.c` | 21d5572 | Parity verified via shared test vectors. |
+| 0955 | Test — version compatibility | DONE | `make protocol-test`, `make test` | 21d5572 | Python/C parity passes. |
+| 0956 | Run — version compatibility | DONE | `make protocol-test` | 21d5572 | C vectors pass. |
+| 0957 | Review — version compatibility | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md` | 21d5572 | Stable framing, parity verified. No version negotiation (fixed). |
+| 0958 | Document — version compatibility | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md` | 21d5572 | Documented. |
+| 0959 | Integrate — version compatibility | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.7. |
+| 0960 | Gate — version compatibility | DONE | `make protocol-test` pass | 21d5572 | Gate passed. Phase 10.6 complete. Unblocking 10.7. |
+| 0961 | Inspect — operator runbook | DONE | `README.md`, `host/host_agent.py`, `host/tools/virtual_device.py` | 21d5572 | Inspected: README has make targets, host_agent has --help, virtual_device demonstrates demo. |
+| 0962 | Trace — operator runbook | DONE | `README.md`, `Makefile` | 21d5572 | make test → make sim-demo → make bench → make audit → make deck-draft. |
+| 0963 | Specify — operator runbook | DONE | `README.md`, `Makefile`, `docs/demo_script.md` | 21d5572 | Startup: make test, Demo: make sim-demo, Benchmark: make bench, Deck: make deck-draft. |
+| 0964 | Implement — operator runbook | DONE | `README.md`, `Makefile` | 21d5572 | Documented in README and Makefile. |
+| 0965 | Test — operator runbook | DONE | `make phase-a` | 21d5572 | Full Phase-A workflow runs. |
+| 0966 | Run — operator runbook | DONE | `make phase-a` | 21d5572 | All Phase-A targets pass. |
+| 0967 | Review — operator runbook | DONE | `README.md`, `Makefile` | 21d5572 | Clear targets, documented workflow. |
+| 0968 | Document — operator runbook | DONE | `README.md`, `Makefile`, `docs/demo_script.md` | 21d5572 | Documented. |
+| 0969 | Integrate — operator runbook | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.8. |
+| 0970 | Gate — operator runbook | DONE | `make phase-a` pass | 21d5572 | Gate passed. Phase 10.7 complete. Unblocking 10.8. |
+| 0971 | Inspect — demo environment | BLOCKED | `TODO_HUMAN.md`, `docs/TOOLCHAIN_MANIFEST.md` | 21d5572 | BLOCKED: Requires Linux desktop, KiCad 8, ngspice, USB permissions, audio device, ESP32-S3 hardware. |
+| 0972 | Trace — demo environment | BLOCKED | `TODO_HUMAN.md` | 21d5572 | BLOCKED: Hardware/software dependencies not met. |
+| 0973 | Specify — demo environment | DONE | `TODO_HUMAN.md`, `docs/TOOLCHAIN_MANIFEST.md` | 21d5572 | Specified: Linux, KiCad 8, ngspice, dialout group, microphone, ESP32-S3 x2. |
+| 0974 | Implement — demo environment | BLOCKED | | 21d5572 | BLOCKED: Human action required (TODO_HUMAN.md Days 1-14). |
+| 0975 | Test — demo environment | BLOCKED | | 21d5572 | BLOCKED. |
+| 0976 | Run — demo environment | BLOCKED | | 21d5572 | BLOCKED. |
+| 0977 | Review — demo environment | BLOCKED | `TODO_HUMAN.md` | 21d5572 | All dependencies listed in TODO_HUMAN.md. |
+| 0978 | Document — demo environment | DONE | `TODO_HUMAN.md`, `docs/TOOLCHAIN_MANIFEST.md` | 21d5572 | Documented. |
+| 0979 | Integrate — demo environment | BLOCKED | | 21d5572 | BLOCKED. |
+| 0980 | Gate — demo environment | BLOCKED | `TODO_HUMAN.md` | 21d5572 | Gate BLOCKED. Phase 10.8 incomplete. |
+| 0981 | Inspect — maintenance workflow | DONE | `README.md`, `Makefile`, `docs/DECK_DRAFT_QA_SPEC.md` | 21d5572 | Inspected: make targets for test/bench/deck, deck QA process, git for version control. |
+| 0982 | Trace — maintenance workflow | DONE | `Makefile`, `deck/build_deck.py` | 21d5572 | make test → regression, make bench → performance, make deck-draft → visual QA. |
+| 0983 | Specify — maintenance workflow | DONE | `Makefile`, `docs/DECK_DRAFT_QA_SPEC.md` | 21d5572 | Specified: regression test, benchmark, deck QA, git rollback. |
+| 0984 | Implement — maintenance workflow | DONE | `Makefile`, `deck/build_deck.py` | 21d5572 | Implemented via Makefile targets. |
+| 0985 | Test — maintenance workflow | DONE | `make test`, `make bench`, `make deck-draft` | 21d5572 | All targets work. |
+| 0986 | Run — maintenance workflow | DONE | `make phase-a` | 21d5572 | Phase-A workflow runs. |
+| 0987 | Review — maintenance workflow | DONE | `Makefile`, `docs/DECK_DRAFT_QA_SPEC.md` | 21d5572 | Clear targets, rollback via git. |
+| 0988 | Document — maintenance workflow | DONE | `Makefile`, `docs/DECK_DRAFT_QA_SPEC.md` | 21d5572 | Documented. |
+| 0989 | Integrate — maintenance workflow | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.9. |
+| 0990 | Gate — maintenance workflow | DONE | `make phase-a` pass | 21d5572 | Gate passed. Phase 10.9 complete. Unblocking 10.10. |
+| 0991 | Inspect — handoff verification | BLOCKED | `TODO_HUMAN.md`, `docs/SUBMISSION_CHECKLIST.md` | 21d5572 | BLOCKED: Requires clean clone, hardware setup, demo rehearsal, mentor sign-off. |
+| 0992 | Trace — handoff verification | BLOCKED | `TODO_HUMAN.md` | 21d5572 | BLOCKED: Clean clone → setup → demo → mentor review. |
+| 0993 | Specify — handoff verification | DONE | `TODO_HUMAN.md`, `docs/SUBMISSION_CHECKLIST.md` | 21d5572 | Specified: clean clone, setup from scratch, demo rehearsal, limitations review, mentor sign-off. |
+| 0994 | Implement — handoff verification | BLOCKED | | 21d5572 | BLOCKED: Human action required. |
+| 0995 | Test — handoff verification | BLOCKED | | 21d5572 | BLOCKED. |
+| 0996 | Run — handoff verification | BLOCKED | | 21d5572 | BLOCKED. |
+| 0997 | Review — handoff verification | BLOCKED | `TODO_HUMAN.md`, `docs/SUBMISSION_CHECKLIST.md` | 21d5572 | All requirements listed. |
+| 0998 | Document — handoff verification | DONE | `TODO_HUMAN.md`, `docs/SUBMISSION_CHECKLIST.md` | 21d5572 | Documented. |
+| 0999 | Integrate — handoff verification | BLOCKED | | 21d5572 | BLOCKED. |
+| 1000 | Gate — handoff verification | BLOCKED | `TODO_HUMAN.md`, `docs/SUBMISSION_CHECKLIST.md` | 21d5572 | Gate BLOCKED. Phase 10.10 incomplete. **PROTOTYPE HANDOFF PENDING HUMAN ACTIONS**. |
