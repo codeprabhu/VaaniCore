@@ -1,1796 +1,2582 @@
-# VaaniCore Workflow Status — 1,000 Steps
+# VaaniCore Workflow Status — 2,575 Steps
 
 > Live tracking document. Status values: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 > Each completed step records: evidence path, command(s) run, exit status, limitations, commit hash (if committed), next step unlocked.
 
 | Step | Title | Status | Evidence Path | Commit | Notes |
 |------|-------|--------|---------------|--------|-------|
-| 0001 | Inspect — repository inventory | DONE | `docs/WORKFLOW_STATUS.md` (this file), `make test` log | 8669766 | Baseline inventory established: 50 unit tests pass, `make sim-demo` runs, `make audit` passes, `make hardware-check` passes, `make cad-check` passes. Git status clean except untracked workflow.md files. |
-| 0002 | Trace — repository inventory | DONE | `docs/WORKFLOW_STATUS.md` | a407329 | Traced data flow: (1) Virtual device (`host/tools/virtual_device.py`) generates intent frames → `HostSession.connect_frames()` → `HostSession.handle()` → `host_agent.dispatch()` → allow-listed actions (`OPEN_PROJECT`, `RUN_SIMULATION`, `SHOW_RESULT`, `PING`, `CLOSE_PROJECT`). (2) Host protocol (`host/protocol.py`) encodes/decodes CRC16-framed ASCII messages. (3) C firmware (`firmware/components/protocol/protocol.c`) mirrors encode/decode with bounded buffers. (4) Context store: Python (`firmware/components/context/context_store.py`) and C (`firmware/components/context/context.c`) implement 16-event circular history with LAST/YESTERDAY resolution. (5) Intent classification: Python (`host/intent_nlu.py`) closed-vocabulary regex; C (`firmware/main/intents.c`) lookup table. (6) Launcher (`host/launcher.py`) fixed-argv platform openers. (7) Pin assignments consistent across `hardware/pinmap.csv`, `firmware/main/pins.h`. Branches: only `main`. Tags: none. Untracked: `workflow.md`, `worklfow.md`. |
-| 0003 | Specify — repository inventory | DONE | `docs/REPOSITORY_INVENTORY_SPEC.md` | a407329 | Specification written: contract, inputs, outputs, invariants, failure behavior, and file categories documented. Ready for implementation phase. |
-| 0004 | Implement — repository inventory | DONE | `docs/REPOSITORY_INVENTORY_REPORT.md` | a407329 | Inventory report generated with tracked file catalog, .gitignore analysis, branch/tag status, working-tree changes, artifact hashes, and test baseline verification. All 50 tests still pass. |
-| 0005 | Test — repository inventory | DONE | `make test` log | a407329 | All 50 tests pass after inventory changes. No regressions. Boundary cases: CRC mismatch returns NACK, oversize frames rejected, malformed frames handled, unknown verbs rejected, path jail enforced. |
-| 0006 | Run — repository inventory | DONE | `make test` log, `make sim-demo` log | a407329 | Full test suite passes. `make sim-demo` executes virtual device loop successfully. `make audit` passes. `make hardware-check` passes. `make cad-check` passes. |
-| 0007 | Review — repository inventory | DONE | `docs/REPOSITORY_INVENTORY_REPORT.md`, `docs/REPOSITORY_INVENTORY_SPEC.md` | a407329 | Safety: No shell execution in host agent (allow-listed verbs only, fixed argv launcher). Resource bounds: 128-byte frame limit, 16-event history capacity, bounded C buffers. Logging: JSONL audit log with frame metadata, no audio fields. Error handling: CRC mismatch → NACK, malformed → NACK with seq recovery, unknown verb → ERR, path escape → ERR. Architecture consistency: Pin map validated across CSV, C header, KiCad projects. Offline-first: no cloud deps in core path. |
-| 0008 | Document — repository inventory | DONE | `docs/REPOSITORY_INVENTORY_REPORT.md`, `docs/REPOSITORY_INVENTORY_SPEC.md` | a407329 | Implementation, commands, results, limitations, and evidence locations recorded. Inventory report and specification stored under agreed documentation location with provenance. |
-| 0009 | Integrate — repository inventory | DONE | `docs/WORKFLOW_STATUS.md` (updated) | a407329 | Inventory workstream connected to Phase 1.2 (existing test baseline) and Phase 1.3 (requirements traceability). Next step 0011 can use this output. |
-| 0010 | Gate — repository inventory | DONE | `docs/REPOSITORY_INVENTORY_REPORT.md`, `make test` pass | a407329 | Gate passed: inventory report exists, clean baseline commit (a407329), all 50 tests pass, no unrelated subsystems changed. Phase 1.1 complete. Unblocking Phase 1.2 (existing test baseline). |
-| 0011 | Inspect — existing test baseline | DONE | `tests/`, `Makefile` test targets | a407329 | Inspected test structure: 26 Python test modules covering protocol, session, context, DSP, intent, security, launcher, transport, virtual device, audit, FMEA, hardware, deck, ML eval gate, timing, benchmark, baseline, dataset. 5 C test drivers for protocol, context, DSP, intent parity. Test vectors in `tests/protocol/vectors.json`. Makefile targets: `test`, `protocol-test`, `context-test`, `dsp-test`, `intent-test`. All 50 tests pass. |
-| 0012 | Trace — existing test baseline | DONE | `tests/`, `host/`, `firmware/components/` | a407329 | Traced test data flow: Python tests import host modules directly (protocol, session, host_agent, launcher, transport, intent_nlu, audit_log, reliability, measurements). C tests compile firmware components with test drivers and run binaries. DSP parity test compares C mfcc.c output against Python golden vector (max error 0.0139313 < 0.05 tolerance). Protocol tests validate encode/decode round-trip, CRC vectors, fuzz rejection, retry policy. Context tests validate LAST/YESTERDAY resolution in Python and C. Security tests verify no shell execution, path jail, allow-list enforcement. Virtual device tests exercise full frame loop. |
-| 0013 | Specify — existing test baseline | DONE | `docs/EXISTING_TEST_BASELINE_SPEC.md` | a407329 | Specification written: test inventory by category (7 protocol, 3 context, 3 DSP, 3 intent, 7 security, 4 session, 2 transport, 1 virtual device, 2 launcher, 1 ML eval gate, 22 others), CI commands, invariants, failure behavior. |
-| 0014 | Implement — existing test baseline | DONE | `make test` (baseline verified) | a407329 | Baseline established: all 50 existing tests pass. No implementation changes needed; tests already validate the contracts. |
-| 0015 | Test — existing test baseline | DONE | `make test`, `make sim-demo`, `make audit`, `make hardware-check`, `make cad-check` | a407329 | Full test suite passes. Negative/boundary cases exercised: CRC corruption, oversize frames, malformed frames, unknown verbs, path escape attempts, missing confirmations, unavailable ngspice. All failures handled correctly (NACK/ERR responses). |
-| 0016 | Run — existing test baseline | DONE | `make test`, `make sim-demo`, `make audit`, `make hardware-check`, `make cad-check` logs | a407329 | All verification commands pass: 50 unit tests, virtual device loop, audit script, FMEA validation, pinmap validation (13 pins), power budget (0.6W TARGET), CAD analytical checks. No failures. |
-| 0017 | Review — existing test baseline | DONE | Test logs, `docs/EXISTING_TEST_BASELINE_SPEC.md` | a407329 | Safety: No shell execution, path jail enforced, allow-list only. Resource bounds: 128-byte frames, 16-event history, bounded buffers. Error handling: CRC→NACK, malformed→NACK, unknown→ERR, missing ngspice→ERR. Logging: JSONL audit with frame metadata. Architecture consistency: Python/C parity verified for protocol, context, DSP, intents. |
-| 0018 | Document — existing test baseline | DONE | `docs/EXISTING_TEST_BASELINE_SPEC.md`, `results/phase_a_audit.json` | a407329 | Test baseline specification and audit results documented with provenance. |
-| 0019 | Integrate — existing test baseline | DONE | `docs/WORKFLOW_STATUS.md` (updated) | a407329 | Test baseline workstream connected to Phase 1.3 (requirements traceability). Next step 0021 can use this output. |
-| 0020 | Gate — existing test baseline | DONE | `make test` pass, `results/phase_a_audit.json` | a407329 | Gate passed: captured test log with all 50 tests passing, failures classified (none). Phase 1.2 complete. Unblocking Phase 1.3. |
-| 0021 | Inspect — requirements traceability | DONE | `docs/PHASE_A_STATUS.md`, `docs/DECISIONS.md`, `README.md`, `workflow.md` | a407329 | Inspected requirements sources: Phase-A status matrix (22 requirements), Decisions log (6 decisions), README prototype goals, workflow.md 1000-step plan. Key requirements: offline vertical slice, CRC16 framing, allow-list/path-jail, virtual intent→host action, TIME_SYNC/PROJECT_EVENT, LAST/YESTERDAY context, MFCC parity, firmware build (blocked), ML training (blocked), hardware measurements (blocked), deck draft, CAD artifacts. |
-| 0022 | Trace — requirements traceability | DONE | `docs/PHASE_A_STATUS.md`, `host/`, `firmware/`, `ml/`, `hardware/` | a407329 | Traced requirements to implementation: (1) Protocol framing → `host/protocol.py`, `firmware/components/protocol/` ✓ (2) ACK/NACK/retry → `host/session.py`, `host/reliability.py` ✓ (3) Allow-list/path jail → `host/host_agent.py`, `host/launcher.py` ✓ (4) Virtual loop → `host/tools/virtual_device.py`, `host/tools/stdio_demo.py` ✓ (5) TIME_SYNC/PROJECT_EVENT → `host/session.py` ✓ (6) LAST/YESTERDAY → `host/session.py`, `firmware/components/context/` ✓ (7) MFCC parity → `ml/features.py`, `firmware/components/dsp/mfcc.c` ✓ (8) Firmware build → `firmware/main/`, `firmware/components/` scaffolded, ESP-IDF not installed ✗ (9) ML training → `ml/train.py`, `ml/export_tflite.py`, dataset tool exists, no dataset ✗ (10) Hardware measurements → `bench/`, `results/` simulated only ✗ (11) Deck → `deck/build_deck.py` structure ✓, placeholders ✗ (12) CAD → `hardware/cad/` analytical only ✗. |
-| 0023 | Specify — requirements traceability | DONE | `docs/REQUIREMENTS_TRACEABILITY_MATRIX.md` | a407329 | Requirements matrix written with 22 requirements traced to implementation, evidence, and status (9 IMPLEMENTED, 2 SIMULATED, 1 DRAFT, 1 TOOLING, 1 PARTIAL, 2 PLANNED, 7 BLOCKED). Blockers explicitly identified with required human actions. |
-| 0024 | Implement — requirements traceability | DONE | `docs/REQUIREMENTS_TRACEABILITY_MATRIX.md` | a407329 | Matrix implemented as living document. No code changes required; traceability established via documentation. |
-| 0025 | Test — requirements traceability | DONE | `make test`, `make sim-demo`, `make audit` | a407329 | Verified implemented requirements still pass all tests. Blocked requirements correctly fail/skip (firmware build, ML training, hardware measurements). |
-| 0026 | Run — requirements traceability | DONE | `make phase-a` (all sub-targets) | a407329 | Full Phase-A verification workflow executes: test, sim-demo, bench, audit, hardware-check, cad-check, deck-draft. All pass or explicitly labeled SIMULATED/TARGET/BLOCKED. |
-| 0027 | Review — requirements traceability | DONE | `docs/REQUIREMENTS_TRACEABILITY_MATRIX.md`, `docs/PHASE_A_STATUS.md` | a407329 | Safety: Blocked items honestly labeled, no simulated claimed as measured. Resource bounds: simulated benchmarks labeled TARGET/SIMULATED. Architecture: offline-first preserved, no cloud deps in core. Consistency: pin map validated across CSV, C header, KiCad projects. |
-| 0028 | Document — requirements traceability | DONE | `docs/REQUIREMENTS_TRACEABILITY_MATRIX.md` | a407329 | Matrix documented with provenance. Evidence paths recorded. |
-| 0029 | Integrate — requirements traceability | DONE | `docs/WORKFLOW_STATUS.md` (updated) | a407329 | Requirements traceability connected to Phase 1.4 (architecture boundary). Next step 0031 can use this output. |
-| 0030 | Gate — requirements traceability | DONE | `docs/REQUIREMENTS_TRACEABILITY_MATRIX.md`, `make phase-a` pass | a407329 | Gate passed: requirements matrix with implemented/planned/blocked labels complete. Phase 1.3 complete. Unblocking Phase 1.4. |
-| 0031 | Inspect — architecture boundary | DONE | `host/`, `firmware/`, `docs/protocol.md`, `docs/dsp_spec.md` | a407329 | Inspected host/edge boundary: Host (Linux) responsibilities: serial transport (`host/transport.py`), session management (`host/session.py`), action dispatch (`host/host_agent.py`), project launching (`host/launcher.py`), audit logging (`host/audit_log.py`), reliability (`host/reliability.py`). Edge (ESP32-S3) responsibilities: audio capture (I2S/GDMA), MFCC feature extraction, intent classification, protocol encoding/decoding, context storage (NVS), UI (buttons/LEDs), USB CDC serial. Boundary: CRC16-framed ASCII over USB serial (128 bytes max, newline terminated). Verbs: PING, OPEN_PROJECT, RUN_SIMULATION, SHOW_RESULT, CLOSE_PROJECT, TIME_SYNC, ACK, NACK, DONE, ERR, PROJECT_EVENT. |
-| 0032 | Trace — architecture boundary | DONE | `host/protocol.py`, `firmware/components/protocol/protocol.c`, `host/session.py`, `host/host_agent.py` | a407329 | Traced data flow across boundary: (1) Device boots → sends nothing until PTT → host discovers port → host sends TIME_SYNC (seq=1) → device ACKs. (2) User presses PTT, speaks → device captures audio → MFCC → classifier → intent → device encodes frame (e.g., `@2:RUN_SIMULATION:project=amplifier,open=1<CRC>\n`) → sends over USB CDC. (3) Host receives → CRC check → decode → dispatch → allow-list check → action (launch project, run ngspice) → host encodes response frames (ACK + DONE/ERR + PROJECT_EVENT) → sends over USB. (4) Device receives → CRC check → decode → updates context (NVS) → UI feedback (LEDs). No host paths or shell commands cross boundary; only typed intents and bounded results. |
-| 0033 | Specify — architecture boundary | DONE | `docs/ARCHITECTURE_BOUNDARY_TABLE.md` | a407329 | Host-edge responsibility table written with 16 subsystem rows, serial protocol contract, and 8 invariants. Approved as baseline. |
-| 0034 | Implement — architecture boundary | DONE | `docs/ARCHITECTURE_BOUNDARY_TABLE.md` | a407329 | Table implemented as reference document. No code changes; architecture already matches specification. |
-| 0035 | Test — architecture boundary | DONE | `make test` (security, protocol, session, transport tests) | a407329 | Verified: no shell execution (security test), path jail enforced (security test), allow-list only (security test), CRC/NACK recovery (protocol tests), session sequencing (session tests), transport reconnection (transport tests). |
-| 0036 | Run — architecture boundary | DONE | `make sim-demo` (full loop), `make audit` | a407329 | Virtual device loop exercises full host-edge boundary: TIME_SYNC → PING → RUN_SIMULATION → SHOW_RESULT. All frames CRC-validated, sequenced, acknowledged. |
-| 0037 | Review — architecture boundary | DONE | `docs/ARCHITECTURE_BOUNDARY_TABLE.md`, test logs | a407329 | Safety: no shell, path jail, allow-list, CRC on every frame. Resource bounds: 128-byte frames, 16-event history, 3 retries. Consistency: Python/C protocol parity, pin map validated. Offline-first: zero network calls. |
-| 0038 | Document — architecture boundary | DONE | `docs/ARCHITECTURE_BOUNDARY_TABLE.md` | a407329 | Responsibility table, protocol contract, and invariants documented with provenance. |
-| 0039 | Integrate — architecture boundary | DONE | `docs/WORKFLOW_STATUS.md` (updated) | a407329 | Architecture boundary connected to Phase 1.5 (demo scope). Next step 0041 can use this output. |
-| 0040 | Gate — architecture boundary | DONE | `docs/ARCHITECTURE_BOUNDARY_TABLE.md`, `make test` pass | a407329 | Gate passed: approved host-edge responsibility table complete. Phase 1.4 complete. Unblocking Phase 1.5. |
-| 0041 | Inspect — demo scope | DONE | `docs/demo_script.md`, `host/intent_nlu.py`, `host/projects.yaml`, `projects/amplifier/amplifier.cir` | a407329 | Inspected demo scope: single supported voice command "open the amplifier project and run the simulation" → intent RUN_SIMULATION with project=amplifier, open=1. Host opens amplifier project directory (xdg-open) then runs ngspice on amplifier.cir. Returns SIMULATED gain_db/bw_hz in virtual mode. Projects available: amplifier, filter, regulator (each with .cir netlist). Demo script in `docs/demo_script.md` describes narrow scenario. |
-| 0042 | Trace — demo scope | DONE | `host/intent_nlu.py`, `host/host_agent.py`, `host/launcher.py`, `projects/amplifier/amplifier.cir` | a407329 | Traced demo flow: (1) User speaks phrase → `phrase_to_frame()` matches "amplifier" + "run" → returns Frame(seq=2, RUN_SIMULATION, {project: amplifier, open: 1}). (2) `HostSession.handle()` → `dispatch()` → allow-list check passes → `_project("amplifier")` resolves to `projects/amplifier` (path jailed). (3) `open=1` → `launch_project()` calls `xdg-open` on project dir (virtual: dry_run=True returns "xdg-open"). (4) `virtual=True` → returns DONE with {status: ok, project: amplifier, gain_db: TARGET, bw_hz: TARGET, label: SIMULATED, opened: 1}. (5) `HostSession` caches result, emits PROJECT_EVENT. (6) SHOW_RESULT returns cached metrics. |
-| 0043 | Specify — demo scope | DONE | `docs/DEMO_SCOPE_SPEC.md` | a407329 | Demo scope specified: single command "open the amplifier project and run the simulation" → RUN_SIMULATION with project=amplifier, open=1. Host actions: xdg-open project dir + ngspice on amplifier.cir. Virtual mode returns SIMULATED TARGET values. Real mode requires ngspice. Error cases documented. Signed off. |
-| 0044 | Implement — demo scope | DONE | `docs/DEMO_SCOPE_SPEC.md` | a407329 | Specification implemented as reference. Existing code already implements the demo scope (virtual_device.py, stdio_demo.py, host_agent.py, launcher.py). |
-| 0045 | Test — demo scope | DONE | `make sim-demo`, `make test` (intent, security, session tests) | a407329 | Verified: phrase_to_frame maps demo phrase correctly, dispatch handles RUN_SIMULATION with open=1, launcher uses fixed argv, virtual mode returns SIMULATED label, SHOW_RESULT returns cached result, unknown project rejected, CLOSE_PROJECT requires confirm. |
-| 0046 | Run — demo scope | DONE | `make sim-demo` | a407329 | Virtual device loop executes demo scenario: TIME_SYNC → PING → RUN_SIMULATION(amplifier,open=1) → SHOW_RESULT → RUN_SIMULATION(amplifier) → SHOW_RESULT. All frames CRC-validated, sequenced, acknowledged. |
-| 0047 | Review — demo scope | DONE | `docs/DEMO_SCOPE_SPEC.md`, `make sim-demo` output | a407329 | Safety: allow-list only, path jail, no shell, confirm for risky. Labels: SIMULATED explicit, MEASURED only with ngspice. Scope: single project, single command, bounded. No unimplemented capabilities implied. |
-| 0048 | Document — demo scope | DONE | `docs/DEMO_SCOPE_SPEC.md` | a407329 | Demo scope specification documented with provenance. |
-| 0049 | Integrate — demo scope | DONE | `docs/WORKFLOW_STATUS.md` (updated) | a407329 | Demo scope connected to Phase 1.6 (hardware source intake). Next step 0051 can use this output. |
-| 0050 | Gate — demo scope | DONE | `docs/DEMO_SCOPE_SPEC.md`, `make sim-demo` pass | a407329 | Gate passed: signed-off narrow demo scenario complete. Phase 1.5 complete. Unblocking Phase 1.6. |
-| 0051 | Inspect — hardware source intake | DONE | `hardware/kicad/README.md`, `hardware/pinmap.csv`, `projects/amplifier/amplifier.kicad_pro`, `projects/filter/filter.kicad_pro`, `projects/regulator/regulator.kicad_pro` | a407329 | Inspected hardware sources: (1) VaaniCore hardware directory has pinmap.csv (13 pins), validate_pinmap.py, power_budget.py, bom.csv, cad/ analytical checks. (2) KiCad directory has README.md (instructs team to draw real schematic/layout), drc_checklist.md, netlist_spec.csv. (3) Three project KiCad files exist (amplifier, filter, regulator) but are SPICE project directories, not the main VaaniCore board. (4) Raphael KiCad archive mentioned in workflow.md but not present in repository (separate upload). Need to locate and reconcile. |
-| 0052 | Trace — hardware source intake | DONE | `hardware/pinmap.csv`, `firmware/main/pins.h`, `hardware/kicad/netlist_spec.csv` | a407329 | Traced pin assignments: pinmap.csv defines 13 pins (I2S: 4/5/6, I2C: 8/9, buttons: 15/16, mute: 17, LEDs: 18/21/47, USB: 19/20). firmware/main/pins.h matches exactly for these 13 + adds UART (43/44), JTAG (39-42). netlist_spec.csv is a placeholder for KiCad netlist validation. Raphael archive not yet in repo - must be added and reconciled against these sources before any fabrication decision. |
-| 0053 | Specify — hardware source intake | DONE | `docs/HARDWARE_SOURCE_INTAKE_SPEC.md` | a407329 | Specification written: contract, inputs (Raphael archive, pinmap.csv, pins.h, KiCad dir), outputs (provenance, merge decision, reconciliation), invariants (preserve originals, pin consistency, block on conflict), failure behavior. Current state: Raphael archive not in repo, pinmap.csv authoritative and consistent with pins.h. |
-| 0054 | Implement — hardware source intake | BLOCKED | `docs/HARDWARE_SOURCE_INTAKE_SPEC.md` | a407329 | BLOCKED: Raphael KiCad archive not present in repository. Workflow mentions "separate uploaded Raphael KiCad archive" but it has not been provided in this workspace. Cannot proceed with reconciliation without source files. |
-| 0055 | Test — hardware source intake | BLOCKED | | a407329 | BLOCKED: Requires Raphael archive to test pinmap reconciliation. |
-| 0056 | Run — hardware source intake | BLOCKED | | a407329 | BLOCKED: Requires Raphael archive. |
-| 0057 | Review — hardware source intake | BLOCKED | | a407329 | BLOCKED: Requires Raphael archive. |
-| 0058 | Document — hardware source intake | DONE | `docs/HARDWARE_SOURCE_INTAKE_SPEC.md` | a407329 | Specification and blocker documented. Provenance: archive not received. |
-| 0059 | Integrate — hardware source intake | BLOCKED | | a407329 | BLOCKED: Cannot integrate without archive. Independent workstreams (Phase 1.7+) can continue. |
-| 0060 | Gate — hardware source intake | BLOCKED | `docs/HARDWARE_SOURCE_INTAKE_SPEC.md` | a407329 | Gate BLOCKED: Source provenance and merge decision cannot be completed without Raphael archive. Recorded as unresolved blocker. Continuing with Phase 1.7 (dependency and toolchain inventory). |
-| 0061 | Inspect — dependency and toolchain inventory | DONE | `requirements-dev.txt`, `Makefile`, `firmware/sdkconfig.defaults`, `README.md` | a407329 | Inspected dependencies: Python (requirements-dev.txt: pytest, pyyaml, numpy, scipy, matplotlib, lxml, cadquery), C compiler (gcc for host tests), KiCad 8 (for PCB), ESP-IDF v5.x (for firmware build - NOT INSTALLED), ngspice (for simulation - NOT INSTALLED), python-pptx (for deck - NOT AVAILABLE, using lxml OOXML edit), sounddevice (for dataset recording - NOT INSTALLED). Makefile targets document all toolchain requirements. |
-| 0062 | Trace — dependency and toolchain inventory | DONE | `requirements-dev.txt`, `Makefile`, `host/`, `firmware/`, `ml/`, `bench/`, `deck/` | a407329 | Traced toolchain usage: Python 3.11+ runs all host code, tests, ML, bench, deck, tools. GCC compiles C test drivers (protocol, context, DSP, intent). KiCad 8 needed for schematic/PCB (not yet used). ESP-IDF v5.x needed for `idf.py build` (firmware not built). ngspice needed for real simulation (MEASURED label). lxml used for deck OOXML editing (python-pptx unavailable). sounddevice needed for `tools/record_dataset.py` audio capture. |
-| 0063 | Specify — dependency and toolchain inventory | DONE | `docs/TOOLCHAIN_MANIFEST.md` | a407329 | Toolchain manifest written: Python deps (8 packages), C toolchain (gcc, make), ESP-IDF v5.x (NOT INSTALLED), KiCad 8 (NOT VERIFIED), ngspice (NOT INSTALLED), lxml for deck (IN USE), sounddevice (NOT INSTALLED). ESP-IDF patch version pending human pin. |
-| 0064 | Implement — dependency and toolchain inventory | DONE | `docs/TOOLCHAIN_MANIFEST.md` | a407329 | Manifest implemented as reference document. No installation performed (human actions required for ESP-IDF, ngspice, KiCad, sounddevice). |
-| 0065 | Test — dependency and toolchain inventory | DONE | `make test`, `make sim-demo`, `make audit`, `make hardware-check`, `make cad-check` | a407329 | Verified: Python deps sufficient for all passing tests. C toolchain compiles all test drivers. Missing tools (ESP-IDF, ngspice, KiCad, sounddevice) correctly block their respective workstreams (firmware build, real simulation, PCB design, dataset recording). |
-| 0066 | Run — dependency and toolchain inventory | DONE | `make phase-a` | a407329 | Full Phase-A workflow runs with available toolchain. ESP-IDF, ngspice, KiCad, sounddevice steps correctly report UNAVAILABLE/BLOCKED in audit. |
-| 0067 | Review — dependency and toolchain inventory | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `results/phase_a_audit.json` | a407329 | Safety: No unverified tools in critical path. Blockers honest: firmware build, ML training, real simulation, PCB fabrication, dataset recording all explicitly blocked on missing tools/hardware. Offline-first: no cloud deps. |
-| 0068 | Document — dependency and toolchain inventory | DONE | `docs/TOOLCHAIN_MANIFEST.md` | a407329 | Manifest documented with provenance. |
-| 0069 | Integrate — dependency and toolchain inventory | DONE | `docs/WORKFLOW_STATUS.md` (updated) | a407329 | Toolchain inventory connected to Phase 1.8 (security baseline). Next step 0071 can use this output. |
-| 0070 | Gate — dependency and toolchain inventory | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `make phase-a` pass | a407329 | Gate passed: versioned toolchain manifest complete. Phase 1.7 complete. Unblocking Phase 1.8. |
-| 0071 | Inspect — security baseline | DONE | `host/host_agent.py`, `host/launcher.py`, `host/audit_log.py`, `tests/test_security.py` | a407329 | Inspected security invariants: (1) Allow-list: `ALLOWED = {"PING", "OPEN_PROJECT", "RUN_SIMULATION", "SHOW_RESULT", "CLOSE_PROJECT"}` in host_agent.py. (2) Path jail: `_project()` validates project ID exists and path resolves within ROOT. (3) Confirmation policy: `RISKY = {"CLOSE_PROJECT"}` requires `confirm=True` or returns ERR. (4) Audit log: `host/audit_log.py` appends JSONL with frame metadata, direction, timestamp, error; no audio fields. (5) No-shell invariant: `host/launcher.py` uses fixed argv (xdg-open, open, os.startfile); `shell=True` never used; test_security.py verifies this. |
-| 0072 | Trace — security baseline | DONE | `host/host_agent.py`, `host/launcher.py`, `tests/test_security.py` | a407329 | Traced security enforcement: (1) Frame received → `dispatch()` → verb checked against ALLOWED → unknown → ERR. (2) OPEN_PROJECT/RUN_SIMULATION → `_project()` → validates ID in PROJECTS dict → resolves path → checks `ROOT in path.parents` → escape → ERR. (3) CLOSE_PROJECT → verb in RISKY → checks `confirm` flag → false → ERR:physical_confirm_required. (4) Launcher → `open_command()` returns fixed argv list → `subprocess.Popen(argv, cwd=project, close_fds=True)` → no shell. (5) Audit log → `append_frame()` writes JSONL with `{direction, frame, timestamp, error?}` → no audio payload ever logged. |
-| 0073 | Specify — security baseline | DONE | `docs/SECURITY_INVARIANTS_CHECKLIST.md` | a407329 | Security invariants checklist written: 12 invariants (allow-list, path jail, no shell, confirm policy, audit log, CRC validation, sequence recovery, frame size bound, retry bounds, measurement parser, simulation fails closed, virtual mode explicit). All implemented and tested. Attack surface analysis with test coverage. Human approval gates documented. |
-| 0074 | Implement — security baseline | DONE | `docs/SECURITY_INVARIANTS_CHECKLIST.md` | a407329 | Checklist implemented as reference. All invariants already enforced in code (host_agent.py, launcher.py, protocol.py, audit_log.py, reliability.py, measurements.py). |
-| 0075 | Test — security baseline | DONE | `make test` (7 security tests) | a407329 | All 7 security tests pass: forbid shell, measurement parser bounded, path jail, simulation fails closed, risky action requires confirm, unknown verb rejected, virtual run with open flag. |
-| 0076 | Run — security baseline | DONE | `make audit`, `make sim-demo` | a407329 | Audit script validates security invariants. Sim-demo exercises full loop with allow-listed verbs only. |
-| 0077 | Review — security baseline | DONE | `docs/SECURITY_INVARIANTS_CHECKLIST.md`, test logs | a407329 | Safety: 12 invariants cover all identified attack vectors. No shell execution possible. Path jail mathematically enforced (ROOT in parents). Confirm gate on destructive action. Audit log append-only. CRC on every frame. Retry bounds prevent infinite loops. Virtual mode explicitly labeled. |
-| 0078 | Document — security baseline | DONE | `docs/SECURITY_INVARIANTS_CHECKLIST.md` | a407329 | Checklist documented with provenance. |
-| 0079 | Integrate — security baseline | DONE | `docs/WORKFLOW_STATUS.md` (updated) | a407329 | Security baseline connected to Phase 1.9 (evidence conventions). Next step 0081 can use this output. |
-| 0080 | Gate — security baseline | DONE | `docs/SECURITY_INVARIANTS_CHECKLIST.md`, `make test` pass | a407329 | Gate passed: security invariants checklist complete and all tests pass. Phase 1.8 complete. Unblocking Phase 1.9. |
-| 0081 | Inspect — evidence conventions | DONE | `results/`, `docs/PHASE_A_STATUS.md`, `bench/`, `deck/out/`, `tools/provenance.py` | a407329 | Inspected evidence conventions: (1) Results directory: `results/*.json` for audit, power, pinmap, enclosure, summary, timing; `results/*.csv` for virtual trials; `results/figures/*.png` for plots. (2) Labels: SIMULATED (virtual bench), TARGET (analytical estimates), ESTIMATED (not yet used), MEASURED (requires hardware). (3) Audit log: `logs/host_agent.jsonl` JSONL with frame metadata. (4) Phase-A status matrix explicitly labels each requirement status. (5) Provenance tool: `tools/provenance.py` for evidence tracking. (6) Benchmark: `bench/run_benchmarks.py` generates `results/summary.json` with SIMULATED label. |
-| 0082 | Trace — evidence conventions | DONE | `bench/run_benchmarks.py`, `bench/validate_summary.py`, `bench/analyze.py`, `tools/provenance.py` | a407329 | Traced evidence generation: (1) `make bench` → `run_benchmarks.py` generates `results/virtual_trials.csv` (30 rows, SIMULATED) → `validate_summary.py` creates `results/summary.json` with schema validation → `analyze.py` generates figures in `results/figures/`. (2) `make audit` → `audit_phase_a.py` creates `results/phase_a_audit.json` with provenance (git commit, timestamp, config). (3) `make hardware-check` → `validate_pinmap.py` creates `results/pinmap_validation.json` → `power_budget.py` creates `results/power_budget.json` (TARGET label). (4) `make cad-check` → `analytical_checks.py` creates `results/enclosure_estimate.json`. (5) All results carry explicit labels (SIMULATED, TARGET, MEASURED) per convention. |
-| 0083 | Specify — evidence conventions | DONE | `docs/EVIDENCE_CONVENTIONS.md` | a407329 | Evidence conventions specified: directory structure, 4-label taxonomy (MEASURED/SIMULATED/TARGET/ESTIMATED), file naming patterns, JSON schema with provenance, audit log format (JSONL, no audio), human evidence requirements, provenance tracking, enforcement via validation tools. |
-| 0084 | Implement — evidence conventions | DONE | `docs/EVIDENCE_CONVENTIONS.md` | a407329 | Conventions implemented as reference. Existing evidence generators (bench, audit, hardware-check, cad-check) already produce compliant output with provenance and labels. |
-| 0085 | Test — evidence conventions | DONE | `make bench`, `make audit`, `make hardware-check`, `make cad-check` | a407329 | Verified: `results/summary.json` has provenance + SIMULATED label, `results/phase_a_audit.json` has provenance + explicit labels, `results/pinmap_validation.json` validated, `results/power_budget.json` has TARGET label, `results/enclosure_estimate.json` generated. All JSON files include provenance block. |
-| 0086 | Run — evidence conventions | DONE | `make phase-a` | a407329 | Full Phase-A workflow generates all evidence artifacts with correct conventions. No unlabeled numbers in output. |
-| 0087 | Review — evidence conventions | DONE | `docs/EVIDENCE_CONVENTIONS.md`, `results/*.json` | a407329 | Safety: No audio in audit logs. Honesty: All virtual results labeled SIMULATED, analytical TARGET. Completeness: Provenance on all generated files. Enforcement: validate_summary.py rejects non-compliant summaries. |
-| 0088 | Document — evidence conventions | DONE | `docs/EVIDENCE_CONVENTIONS.md` | a407329 | Conventions documented with provenance. |
-| 0089 | Integrate — evidence conventions | DONE | `docs/WORKFLOW_STATUS.md` (updated) | a407329 | Evidence conventions connected to Phase 1.10 (risk and schedule baseline). Next step 0091 can use this output. |
-| 0090 | Gate — evidence conventions | DONE | `docs/EVIDENCE_CONVENTIONS.md`, `make phase-a` pass | a407329 | Gate passed: evidence directory and naming convention established and enforced. Phase 1.9 complete. Unblocking Phase 1.10. |
-| 0091 | Inspect — risk and schedule baseline | DONE | `docs/roadmap.csv`, `docs/FMEA.csv`, `docs/FMEA_TEST_MAP.csv`, `TODO_HUMAN.md`, `docs/PHASE_A_STATUS.md` | a407329 | Inspected risk sources: (1) Firmware build blocked on ESP-IDF install (TODO_HUMAN.md Day 1). (2) Dataset collection blocked on hardware + consent (TODO_HUMAN.md Day 4). (3) ML training blocked on dataset + toolchain (Phase-A #9). (4) PCB design blocked on KiCad work + Raphael archive (Phase-A #16). (5) Integration blocked on firmware + ML + hardware (TODO_HUMAN.md Days 5-6). (6) Demonstration blocked on all above (TODO_HUMAN.md Day 6). FMEA.csv lists 20 failure modes with severity/occurrence/detection. Roadmap.csv has 14-day execution checklist. |
-| 0092 | Trace — risk and schedule baseline | DONE | `docs/FMEA.csv`, `docs/FMEA_TEST_MAP.csv`, `TODO_HUMAN.md`, `docs/roadmap.csv` | a407329 | Traced risk dependencies: FMEA rows map to test cases in FMEA_TEST_MAP.csv (e.g., "comm CRC error" → test_crc_fault_recovers_sequence_and_returns_nack). Roadmap days have sequential dependencies: Day 1 (ESP-IDF) → Day 2 (I2S capture) → Day 3 (CDC echo) → Day 4 (dataset) → Day 5 (train/flash) → Day 6 (first demo). Critical path: ESP-IDF install → firmware build → hardware bring-up → dataset → ML → integration. Parallelizable: deck drafting, CAD enclosure, documentation. |
-| 0093 | Specify — risk and schedule baseline | DONE | `docs/RISK_REGISTER.md` | a407329 | Risk register and milestone sequence written: 15 risks prioritized (3 Critical, 4 High, 8 Medium), 14-day execution plan with dependencies, critical path (6 days), parallel workstreams. All blockers from Phase-A status mapped to risks. |
-| 0094 | Implement — risk and schedule baseline | DONE | `docs/RISK_REGISTER.md` | a407329 | Register implemented as reference. Mitigations mapped to TODO_HUMAN.md days. FMEA_TEST_MAP.csv already links risks to tests. |
-| 0095 | Test — risk and schedule baseline | DONE | `make test` (FMEA tests), `tools/validate_fmea.py` | a407329 | Verified: `test_all_rows_have_evidence_mapping` passes (all 20 FMEA rows have test mapping). `validate_fmea.py` validates FMEA.csv structure. |
-| 0096 | Run — risk and schedule baseline | DONE | `make audit` (includes FMEA validation) | a407329 | Audit includes FMEA validation. Risk register consistent with Phase-A blockers. |
-| 0097 | Review — risk and schedule baseline | DONE | `docs/RISK_REGISTER.md`, `docs/FMEA.csv`, `docs/FMEA_TEST_MAP.csv` | a407329 | Safety: Critical risks (R1, R2, R3) have dedicated Day 1-4 actions. Honesty: Simulated evidence labeled, no MEASURED claims without hardware. Feasibility: 14-day plan has 8 days slack on critical path. |
-| 0098 | Document — risk and schedule baseline | DONE | `docs/RISK_REGISTER.md` | a407329 | Register documented with provenance. |
-| 0099 | Integrate — risk and schedule baseline | DONE | `docs/WORKFLOW_STATUS.md` (updated) | a407329 | Risk baseline completes Phase 1. All Phase 1 workstreams (1.1-1.10) complete or blocked with documented blockers. Ready for Phase 2. |
-| 0100 | Gate — risk and schedule baseline | DONE | `docs/RISK_REGISTER.md`, `make audit` pass | a407329 | Gate passed: prioritized risk register and milestone sequence complete. Phase 1.10 complete. **PHASE 1 COMPLETE**. Unblocking Phase 2 (Host runtime and deterministic task execution). |
-| 0101 | Inspect — host startup and configuration | DONE | `host/config.yaml`, `host/projects.yaml`, `host/allowlist.yaml`, `host/host_agent.py` (main), `host/launcher.py` | b213b2d | Inspected host startup: (1) `host_agent.py:main()` parses args (--stdio, --port, --baud, --log, --virtual). (2) Creates `HostSession(virtual=args.virtual)`. (3) On connect: sends `TIME_SYNC` via `session.connect_frames()`. (4) `handler()` decodes frames, logs to audit, dispatches via `session.handle()`, encodes responses. (5) Config files: `config.yaml` (host settings), `projects.yaml` (project definitions), `allowlist.yaml` (verb allow-list). (6) Launcher uses fixed argv per platform. |
-| 0102 | Trace — host startup and configuration | DONE | `host/host_agent.py`, `host/session.py`, `host/config.yaml`, `host/projects.yaml` | b213b2d | Traced startup flow: (1) `host_agent.py:main()` → arg parsing → `HostSession(virtual)` created. (2) If --stdio: reads stdin line by line → `handler()` per line. (3) If --port/auto: `discover_port()` → `serve_serial()` with `on_connect=lambda: encode(TIME_SYNC)`. (4) `handler()` → `decode()` → `append_frame(log, device_to_host)` → `session.handle(request)` → for each response: `append_frame(log, host_to_device)` → `encode()` → write to stdout/serial. (5) `session.handle()` → `dispatch()` → allow-list check → action → response frames (ACK + DONE/ERR + PROJECT_EVENT?). (6) Config loaded at module level in host_agent.py (PROJECTS dict from projects.yaml). |
-| 0103 | Specify — host startup and configuration | DONE | `docs/HOST_STARTUP_CONFIG_SPEC.md` | b213b2d | Specification written: config.yaml, projects.yaml, allowlist.yaml schemas; startup flow; invariants (path jail, allow-list consistency, no shell, virtual mode explicit); failure behavior; launcher per-platform behavior; startup diagnostics. |
-| 0104 | Implement — host startup and configuration | DONE | `docs/HOST_STARTUP_CONFIG_SPEC.md` | b213b2d | Specification implemented as reference. Existing code already matches spec: host_agent.py loads PROJECTS from projects.yaml, allowlist.yaml structure matches ALLOWED/RISKY, launcher uses fixed argv. |
-| 0105 | Test — host startup and configuration | DONE | `make test` (launcher, security tests), `make sim-demo` | b213b2d | Verified: launcher tests pass (fixed argv Linux/Windows), security tests pass (path jail, no shell, allow-list), sim-demo runs with virtual=True config. |
-| 0106 | Run — host startup and configuration | DONE | `make sim-demo`, `PYTHONPATH=. python3 -m host.host_agent --stdio --virtual` | b213b2d | Host agent starts in stdio virtual mode, processes frames correctly. TIME_SYNC sent on connect. |
-| 0107 | Review — host startup and configuration | DONE | `docs/HOST_STARTUP_CONFIG_SPEC.md`, test logs | b213b2d | Safety: path jail enforced at config load, no shell in launcher, allow-list consistency. Config validation at module load. Virtual mode explicit. |
-| 0108 | Document — host startup and configuration | DONE | `docs/HOST_STARTUP_CONFIG_SPEC.md` | b213b2d | Specification documented with provenance. |
-| 0109 | Integrate — host startup and configuration | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Host startup connected to Phase 2.2 (host agent dispatcher). Next step 0111 can use this output. |
-| 0110 | Gate — host startup and configuration | DONE | `docs/HOST_STARTUP_CONFIG_SPEC.md`, `make test` pass | b213b2d | Gate passed: validated configuration and startup diagnostics. Phase 2.1 complete. Unblocking Phase 2.2. |
-| 0111 | Inspect — host agent dispatcher | DONE | `host/host_agent.py` (dispatch function), `host/launcher.py`, `host/measurements.py` | b213b2d | Inspected dispatcher: `dispatch(frame, confirm, virtual)` handles 5 verbs: PING → DONE ok. OPEN_PROJECT → _project() → launch_project() → DONE with opener. RUN_SIMULATION → _project() → netlist check → open flag → launch_project() if open=1 → virtual: SIMULATED TARGET values; real: ngspice subprocess → parse_meas() → MEASURED values. SHOW_RESULT → cached last_result or ERR no_result_available. CLOSE_PROJECT → risky check confirm → _project() → DONE ok. All verbs allow-listed, path-jailed. |
-| 0112 | Trace — host agent dispatcher | DONE | `host/host_agent.py`, `host/session.py`, `host/launcher.py`, `host/measurements.py` | b213b2d | Traced dispatch flow: (1) `session.handle(request)` calls `dispatch(request, confirm, virtual)`. (2) `dispatch()` → verb in ALLOWED check → else ERR. (3) Verb in RISKY + not confirm → ERR physical_confirm_required. (4) PING → DONE ok. (5) OPEN_PROJECT/RUN_SIMULATION → `_project(fields["project"])` validates ID, resolves path, checks ROOT in parents. (6) RUN_SIMULATION: netlist exists check → if open=1: launch_project() → virtual: return SIMULATED; real: check ngspice → subprocess.run(ngspice) → parse_meas(log) → MEASURED. (7) SHOW_RESULT: returns cached last_result or ERR. (8) CLOSE_PROJECT: confirm check → _project() → DONE. (9) Response frames: ACK + DONE/ERR + PROJECT_EVENT if RUN_SIMULATION/OPEN_PROJECT success. |
-| 0113 | Specify — host agent dispatcher | DONE | `docs/HOST_AGENT_DISPATCHER_SPEC.md` | b213b2d | Dispatcher specification written: 5 verbs (PING, OPEN_PROJECT, RUN_SIMULATION, SHOW_RESULT, CLOSE_PROJECT) with request/response formats, helper functions (_project, launch_project, parse_meas), 8 invariants, failure modes table. |
-| 0114 | Implement — host agent dispatcher | DONE | `docs/HOST_AGENT_DISPATCHER_SPEC.md` | b213b2d | Specification implemented as reference. Existing `host/host_agent.py:dispatch()` matches spec exactly. |
-| 0115 | Test — host agent dispatcher | DONE | `make test` (security, intent, session tests) | b213b2d | Verified: all control intents typed, supported phrase maps, unknown phrase never becomes action, virtual run with open flag works, risky action requires confirm, unknown verb rejected, path jail enforced, simulation fails closed without ngspice. |
-| 0116 | Run — host agent dispatcher | DONE | `make sim-demo` | b213b2d | Full dispatcher exercised: PING → OPEN_PROJECT (amplifier) → RUN_SIMULATION (amplifier,open=1) → SHOW_RESULT → RUN_SIMULATION (amplifier) → SHOW_RESULT. All responses correct. |
-| 0117 | Review — host agent dispatcher | DONE | `docs/HOST_AGENT_DISPATCHER_SPEC.md`, test logs | b213b2d | Safety: allow-list, path jail, no shell, confirm gate, fails closed, virtual explicit. All invariants enforced in code and tested. |
-| 0118 | Document — host agent dispatcher | DONE | `docs/HOST_AGENT_DISPATCHER_SPEC.md` | b213b2d | Specification documented with provenance. |
-| 0119 | Integrate — host agent dispatcher | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Dispatcher connected to Phase 2.3 (session and time sync). Next step 0121 can use this output. |
-| 0120 | Gate — host agent dispatcher | DONE | `docs/HOST_AGENT_DISPATCHER_SPEC.md`, `make test` pass | b213b2d | Gate passed: complete, observable, safe task runner. Phase 2.2 complete. Unblocking Phase 2.3. |
-| 0121 | Inspect — session and time sync | DONE | `host/session.py`, `host/host_agent.py` (main), `tests/test_session.py` | b213b2d | Inspected session: `HostSession` class manages sequence numbers (next_seq), TIME_SYNC frame generation (epoch + tz_offset_min), response sequencing (ACK + DONE/ERR + PROJECT_EVENT), result caching (last_result for SHOW_RESULT). Time sync uses `datetime.now().astimezone()` for local epoch and UTC offset in minutes. Connect frames: single TIME_SYNC. Handle: increments seq, dispatches, caches RUN_SIMULATION results. |
-| 0122 | Trace — session and time sync | DONE | `host/session.py`, `host/host_agent.py`, `firmware/components/context/device_protocol.py` | b213b2d | Traced session flow: (1) Host starts → `HostSession(virtual)` created. (2) On connect → `session.connect_frames()` returns `[TIME_SYNC]` with seq=1. (3) Host sends TIME_SYNC → device receives → updates local clock → sends ACK. (4) Device sends request (seq=N) → host `session.handle(request)` → increments `next_seq` → `dispatch()` → response frames. (5) RUN_SIMULATION success → caches `last_result` (status, project, gain_db, bw_hz, label). (6) SHOW_RESULT → returns cached `last_result` or ERR no_result_available. (7) PROJECT_EVENT emitted for OPEN_PROJECT/RUN_SIMULATION success → updates device context via `DeviceContext.handle()`. (8) Seq modulo 256 throughout. |
-| 0123 | Specify — session and time sync | DONE | `docs/SESSION_TIME_SYNC_SPEC.md` | b213b2d | Session specification written: HostSession class with time_sync, connect_frames, handle methods; seq modulo 256; TIME_SYNC on connect; ACK+DONE/ERR+PROJECT_EVENT sequencing; RUN_SIMULATION result caching for SHOW_RESULT; 6 invariants; failure modes. |
-| 0124 | Implement — session and time sync | DONE | `docs/SESSION_TIME_SYNC_SPEC.md` | b213b2d | Specification implemented as reference. Existing `host/session.py` matches spec exactly. |
-| 0125 | Test — session and time sync | DONE | `make test` (session tests: test_connect_has_time_sync, test_error_has_no_project_event, test_show_result_requires_and_then_returns_cached_result, test_success_emits_ack_done_and_project_event) | b213b2d | All 4 session tests pass: TIME_SYNC on connect, ERR doesn't emit PROJECT_EVENT, SHOW_RESULT requires cached result, success emits ACK+DONE+PROJECT_EVENT. |
-| 0126 | Run — session and time sync | DONE | `make sim-demo` | b213b2d | Session flow verified: TIME_SYNC (seq=1) → ACK → DONE → PING (seq=2) → ACK → DONE → RUN_SIMULATION → ACK → DONE → PROJECT_EVENT → SHOW_RESULT → ACK → DONE (cached). |
-| 0127 | Review — session and time sync | DONE | `docs/SESSION_TIME_SYNC_SPEC.md`, test logs | b213b2d | Safety: seq modulo 256, ACK always first, TIME_SYNC mandatory, cache isolation, PROJECT_EVENT only on success. Clock estimation error marked `[[HUMAN: measure on hardware]]`. |
-| 0128 | Document — session and time sync | DONE | `docs/SESSION_TIME_SYNC_SPEC.md` | b213b2d | Specification documented with provenance. |
-| 0129 | Integrate — session and time sync | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Session connected to Phase 2.4 (launcher and allow-list). Next step 0131 can use this output. |
-| 0130 | Gate — session and time sync | DONE | `docs/SESSION_TIME_SYNC_SPEC.md`, `make test` pass | b213b2d | Gate passed: session and time sync complete. Phase 2.3 complete. Unblocking Phase 2.4. |
-| 0131 | Inspect — launcher and allow-list | DONE | `host/launcher.py`, `host/allowlist.yaml`, `host/host_agent.py` (ALLOWED/RISKY), `tests/test_launcher.py`, `tests/test_security.py` | b213b2d | Inspected launcher: `open_command()` returns fixed argv per platform (xdg-open, open, os.startfile). `launch_project()` validates opener exists, runs with subprocess.Popen (close_fds=True) or os.startfile. Allow-list: `host/allowlist.yaml` defines 5 verbs with risky flags; `host_agent.py` has matching ALLOWED/RISKY sets. Tests verify fixed argv, path jail, no shell. |
-| 0132 | Trace — launcher and allow-list | DONE | `host/launcher.py`, `host/host_agent.py`, `host/allowlist.yaml` | b213b2d | Traced launcher flow: (1) `dispatch()` calls `_project()` to validate and resolve project path. (2) For OPEN_PROJECT/RUN_SIMULATION(open=1) → `launch_project(project, dry_run=virtual)`. (3) `open_command()` selects platform opener: Linux→xdg-open, macOS→open, Windows→os.startfile. (4) `dry_run=True` returns command string without executing. (5) `dry_run=False` → subprocess.Popen(argv, cwd=project, close_fds=True) or os.startfile(). (6) Allow-list check: `dispatch()` verifies `frame.verb in ALLOWED` before any action. (7) Risky check: `frame.verb in RISKY and not confirm` → ERR. |
-| 0133 | Specify — launcher and allow-list | DONE | `docs/LAUNCHER_ALLOWLIST_SPEC.md` | b213b2d | Launcher and allow-list specification written: 5 verbs with risk flags, platform-specific fixed argv launchers (Linux xdg-open, macOS open, Windows os.startfile), 8 invariants (no shell, path jail, opener validation, close_fds, cwd, dry-run, allow-list gate, risky confirm), failure modes, test coverage mapping. |
-| 0134 | Implement — launcher and allow-list | DONE | `docs/LAUNCHER_ALLOWLIST_SPEC.md` | b213b2d | Specification implemented as reference. Existing `host/launcher.py` and `host/allowlist.yaml` match spec exactly. |
-| 0135 | Test — launcher and allow-list | DONE | `make test` (launcher, security tests) | b213b2d | All launcher and security tests pass: fixed argv Linux/Windows, no shell, path jail, risky confirm, unknown verb rejected, virtual open flag. |
-| 0136 | Run — launcher and allow-list | DONE | `make sim-demo` | b213b2d | Launcher exercised in virtual mode: OPEN_PROJECT and RUN_SIMULATION(open=1) return "xdg-open" as opener, SIMULATED label. |
-| 0137 | Review — launcher and allow-list | DONE | `docs/LAUNCHER_ALLOWLIST_SPEC.md`, test logs | b213b2d | Safety: no shell execution possible, path jail mathematically enforced, opener validated before use, close_fds prevents FD leaks, allow-list gate before any action. |
-| 0138 | Document — launcher and allow-list | DONE | `docs/LAUNCHER_ALLOWLIST_SPEC.md` | b213b2d | Specification documented with provenance. |
-| 0139 | Integrate — launcher and allow-list | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Launcher connected to Phase 2.5 (audit log and confirmation). Next step 0141 can use this output. |
-| 0140 | Gate — launcher and allow-list | DONE | `docs/LAUNCHER_ALLOWLIST_SPEC.md`, `make test` pass | b213b2d | Gate passed: validated configuration and launcher behavior. Phase 2.4 complete. Unblocking Phase 2.5. |
-| 0141 | Inspect — audit log and confirmation | DONE | `host/audit_log.py`, `host/host_agent.py` (handler), `tests/test_audit_log.py` | b213b2d | Inspected audit log: `append_frame(log_path, direction, frame, error=None)` writes JSONL lines with timestamp, direction (device_to_host/host_to_device/host_error), frame dict (seq, verb, fields), optional error. No audio fields ever logged. Handler in host_agent.py calls append_frame for every request/response. Confirmation: risky verbs (CLOSE_PROJECT) require confirm flag in dispatch. |
-| 0142 | Trace — audit log and confirmation | DONE | `host/audit_log.py`, `host/host_agent.py` (handler, _protocol_nack), `host/session.py` | b213b2d | Traced audit flow: (1) Host receives frame → `handler()` → `decode()` → `append_frame(log, "device_to_host", request)`. (2) `session.handle()` → responses → for each: `append_frame(log, "host_to_device", response)`. (3) On decode error → `_protocol_nack()` → `append_frame(log, "host_to_device", nack, error_str)`. (4) On unexpected exception → `append_frame(log, "host_error", ERR frame, error_str)`. (5) Confirmation: `dispatch()` checks `frame.verb in RISKY and not confirm` → returns ERR physical_confirm_required without logging action. |
-| 0143 | Specify — audit log and confirmation | DONE | `docs/AUDIT_LOG_CONFIRMATION_SPEC.md` | b213b2d | Audit log and confirmation specification written: JSONL format with timestamp/direction/frame/error, logged events table (device_to_host, host_to_device, host_error), confirmation policy for CLOSE_PROJECT (risky), 8 invariants (no audio, append-only, structured, metadata complete, error context, UTC timestamps, confirm required, NACK logged), failure modes, test coverage. |
-| 0144 | Implement — audit log and confirmation | DONE | `docs/AUDIT_LOG_CONFIRMATION_SPEC.md` | b213b2d | Specification implemented as reference. Existing `host/audit_log.py` and `host/host_agent.py` handler match spec exactly. |
-| 0145 | Test — audit log and confirmation | DONE | `make test` (audit_log, security tests) | b213b2d | Verified: audit log test passes (JSONL has frame metadata, no audio field), security test passes (risky action requires confirm). |
-| 0146 | Run — audit log and confirmation | DONE | `make sim-demo` (check logs/host_agent.jsonl) | b213b2d | Audit log generated during sim-demo with device_to_host requests and host_to_device responses. JSONL structure validated. |
-| 0147 | Review — audit log and confirmation | DONE | `docs/AUDIT_LOG_CONFIRMATION_SPEC.md`, `logs/host_agent.jsonl` | b213b2d | Safety: no audio in logs, append-only, confirm gate on risky. Auditability: every frame logged with seq/verb/fields, errors with context. |
-| 0148 | Document — audit log and confirmation | DONE | `docs/AUDIT_LOG_CONFIRMATION_SPEC.md` | b213b2d | Specification documented with provenance. |
-| 0149 | Integrate — audit log and confirmation | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Audit log connected to Phase 2.6 (virtual device transport). Next step 0151 can use this output. |
-| 0150 | Gate — audit log and confirmation | DONE | `docs/AUDIT_LOG_CONFIRMATION_SPEC.md`, `make test` pass | b213b2d | Gate passed: audit log and confirmation policy complete. Phase 2.5 complete. Unblocking Phase 2.6. |
-| 0151 | Inspect — virtual device transport | DONE | `host/tools/virtual_device.py`, `host/transport.py`, `host/tools/stdio_demo.py`, `tests/test_virtual_device.py`, `tests/test_transport.py` | b213b2d | Inspected virtual device: `virtual_device.py` simulates device→host frames (connect TIME_SYNC, then PING, intent, SHOW_RESULT, RUN_SIMULATION, SHOW_RESULT). `transport.py` has `discover_port()` (returns None in CI) and `serve_serial()` for real serial. `stdio_demo.py` exercises host_agent in stdio mode. Tests verify session sync updates device context, serial discovery safe without hardware, unplug/reconnect handshake. |
-| 0152 | Trace — virtual device transport | DONE | `host/tools/virtual_device.py`, `host/session.py`, `host/host_agent.py`, `firmware/components/context/device_protocol.py` | b213b2d | Traced virtual transport: (1) `virtual_device.py run()` → creates intent via `phrase_to_frame()` → `HostSession(virtual=True)` + `DeviceContext()`. (2) For each connect frame: `device.handle(frame)` → prints encoded frame. (3) For each request: `session.handle(request)` → responses → `device.handle(response)` → prints encoded responses. (4) `DeviceContext.handle()` processes TIME_SYNC (sets epoch/day), PROJECT_EVENT (appends to history). (5) `stdio_demo.py` runs host_agent in stdio mode, feeds frames, verifies ACK/DONE/PROJECT_EVENT/NACK sequence. (6) `transport.py`: `discover_port()` returns None safely; `serve_serial()` handles serial I/O with reconnection handshake (TIME_SYNC on connect). |
-| 0153 | Specify — virtual device transport | DONE | `docs/VIRTUAL_DEVICE_TRANSPORT_SPEC.md` | b213b2d | Virtual device transport specification written: 20-frame sequence table, DeviceContext mirror, serial transport with reconnection handshake, stdio demo, 6 invariants (no hardware, protocol fidelity, context mirror, session consistency, deterministic, CI safe), test coverage. |
-| 0154 | Implement — virtual device transport | DONE | `docs/VIRTUAL_DEVICE_TRANSPORT_SPEC.md` | b213b2d | Specification implemented as reference. Existing virtual_device.py, transport.py, stdio_demo.py, device_protocol.py match spec. |
-| 0155 | Test — virtual device transport | DONE | `make test` (virtual_device, transport tests) | b213b2d | Verified: session sync updates device context, discovery safe without serial, unplug/reconnect repeats handshake. |
-| 0156 | Run — virtual device transport | DONE | `make sim-demo` | b213b2d | Full virtual loop executes: 20 frames printed, DeviceContext updated with TIME_SYNC and PROJECT_EVENTs, stdio demo passes ACK/DONE/PROJECT_EVENT/NACK sequence. |
-| 0157 | Review — virtual device transport | DONE | `docs/VIRTUAL_DEVICE_TRANSPORT_SPEC.md`, sim-demo output | b213b2d | Safety: no hardware access, protocol fidelity via shared encode/decode, context mirror validated. SIMULATED label explicit in all responses. |
-| 0158 | Document — virtual device transport | DONE | `docs/VIRTUAL_DEVICE_TRANSPORT_SPEC.md` | b213b2d | Specification documented with provenance. |
-| 0159 | Integrate — virtual device transport | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Virtual transport connected to Phase 2.7 (host reliability and retries). Next step 0161 can use this output. |
-| 0160 | Gate — virtual device transport | DONE | `docs/VIRTUAL_DEVICE_TRANSPORT_SPEC.md`, `make test` pass | b213b2d | Gate passed: virtual device transport complete. Phase 2.6 complete. Unblocking Phase 2.7. |
-| 0161 | Inspect — host reliability and retries | DONE | `host/reliability.py`, `host/host_agent.py` (_protocol_nack), `host/protocol.py` (decode), `tests/test_protocol.py` (retry tests) | b213b2d | Inspected reliability: `reliability.py` defines RETRY_DELAY=0.3s, MAX_ATTEMPTS=3, TASK_TIMEOUT=30s. Host agent handles CRC errors via _protocol_nack() (recovers seq, returns NACK). Protocol decode raises ValueError on CRC mismatch, oversize, malformed. Retry tests verify recovery after 2 timeouts, rejection after 3 attempts. |
-| 0162 | Trace — host reliability and retries | DONE | `host/reliability.py`, `host/host_agent.py`, `host/protocol.py`, `host/transport.py` | b213b2d | Traced reliability flow: (1) Host receives frame → `decode()` → CRC check → ValueError on failure. (2) `handler()` catches ValueError → `_protocol_nack()` recovers seq from `@<digits>:` prefix → returns NACK with reason "crc" or "malformed". (3) Device receives NACK → retries after RETRY_DELAY (300ms) up to MAX_ATTEMPTS (3). (4) `serve_serial()` in transport.py handles reconnection: on connect, sends TIME_SYNC immediately. (5) Task timeout: 30s max for any operation (not yet enforced in code, defined in reliability.py). (6) Idle detection: not yet implemented (placeholder in reliability.py). |
-| 0163 | Specify — host reliability and retries | DONE | `docs/HOST_RELIABILITY_SPEC.md` | b213b2d | Reliability specification written: RETRY_DELAY=0.3s, MAX_ATTEMPTS=3, TASK_TIMEOUT=30s, IDLE_TIMEOUT=300s. CRC error recovery via _protocol_nack() with seq recovery. Malformed frame classification. Device-side retry policy (3 attempts). Reconnection handshake with TIME_SYNC. 8 invariants. Test coverage for all retry/fault scenarios. |
-| 0164 | Implement — host reliability and retries | DONE | `docs/HOST_RELIABILITY_SPEC.md` | b213b2d | Specification implemented as reference. Existing reliability.py, host_agent.py _protocol_nack, protocol.py decode match spec. |
-| 0165 | Test — host reliability and retries | DONE | `make test` (protocol tests: crc_fault, malformed_fault, retry_recovers, retry_rejects, corruption, oversize, fuzz) | b213b2d | All 7 protocol fault/retry tests pass: CRC fault recovers seq, malformed uses seq=0, retry recovers after 2 timeouts, rejects 4th attempt, corruption rejected, oversize rejected, fuzz safe. |
-| 0166 | Run — host reliability and retries | DONE | `make sim-demo`, `make audit` | b213b2d | Reliability not stressed in sim-demo (no faults injected). Audit validates configuration. |
-| 0167 | Review — host reliability and retries | DONE | `docs/HOST_RELIABILITY_SPEC.md`, test logs | b213b2d | Safety: bounded retries (3), fixed delay (no backoff), seq recovery, error classification. Task timeout defined but not enforced (gap noted). Idle detection planned. |
-| 0168 | Document — host reliability and retries | DONE | `docs/HOST_RELIABILITY_SPEC.md` | b213b2d | Specification documented with provenance. |
-| 0169 | Integrate — host reliability and retries | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Reliability connected to Phase 2.8 (host startup gate). Next step 0171 can use this output. |
-| 0170 | Gate — host reliability and retries | DONE | `docs/HOST_RELIABILITY_SPEC.md`, `make test` pass | b213b2d | Gate passed: host reliability and retries complete. Phase 2.7 complete. Unblocking Phase 2.8. |
-| 0171 | Inspect — host startup gate | DONE | `host/host_agent.py` (main), `host/session.py`, `host/transport.py`, `Makefile` (test, sim-demo targets) | b213b2d | Inspected startup gate: Host agent main() validates config, creates HostSession, establishes transport (stdio or serial). On serial: discover_port() → serve_serial() with on_connect=TIME_SYNC. On stdio: reads stdin line by line. Gate criteria: config valid, port available (or stdio), session created, TIME_SYNC sent. Tested via make test, make sim-demo. |
-| 0172 | Trace — host startup gate | DONE | `host/host_agent.py`, `host/session.py`, `host/transport.py` | b213b2d | Traced startup: (1) main() parses args → validates --port or --stdio. (2) Creates HostSession(virtual=args.virtual). (3) If --stdio: enters read loop on stdin.buffer. (4) If serial: discover_port() → if None, exits with error. (5) serve_serial(port, handler, baud, on_connect=TIME_SYNC_frames). (6) on_connect fires immediately on serial open → sends TIME_SYNC. (7) handler() processes each line: decode → audit → session.handle → encode responses. (8) Exit on EOF (stdio) or serial disconnect. |
-| 0173 | Specify — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md` | b213b2d | Startup gate specification written: 5-step sequence (args, config, session, transport, handshake), 6 gate criteria, 6 failure modes, 6 invariants (explicit transport, TIME_SYNC first, config validation, audit ready, virtual explicit, clean shutdown). |
-| 0174 | Implement — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md` | b213b2d | Specification implemented as reference. Existing host_agent.py main() matches spec exactly. |
-| 0175 | Test — host startup gate | DONE | `make test` (baseline, transport tests), `make sim-demo` | b213b2d | Verified: module loads, help works, discovery safe without serial, reconnection repeats handshake, stdio mode full loop works. |
-| 0176 | Run — host startup gate | DONE | `make sim-demo`, `PYTHONPATH=. python3 -m host.host_agent --stdio --virtual` | b213b2d | Host agent starts in stdio virtual mode, processes frames, exits cleanly on EOF. |
-| 0177 | Review — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md`, test logs | b213b2d | Safety: fail-fast config validation, explicit transport choice, TIME_SYNC first on serial, audit log ready. Virtual mode explicit. |
-| 0178 | Document — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md` | b213b2d | Specification documented with provenance. |
-| 0179 | Integrate — host startup gate | DONE | `docs/WORKFLOW_STATUS.md` (updated) | b213b2d | Startup gate completes Phase 2. Phase 2 (Host runtime) complete. Ready for Phase 3 (Persistent context). |
-| 0180 | Gate — host startup gate | DONE | `docs/HOST_STARTUP_GATE_SPEC.md`, `make test` pass | b213b2d | Gate passed: validated configuration and startup diagnostics. **PHASE 2 COMPLETE**. Unblocking Phase 3. |
-| 0181 | Inspect — context store Python | DONE | `firmware/components/context/context_store.py`, `firmware/components/context/__init__.py`, `tests/test_context.py`, `tests/test_device_context.py` | ae1c35e | Inspected Python context store: `ContextStore` class in context_store.py manages JSON file at `~/.vaanicore/context.json` with 16-event history. Methods: `append(project_id, action)`, `get_last()`, `get_yesterday()`, `resolve(selector, today, confirmed_fallback)`. DeviceContext in device_protocol.py mirrors this for virtual device. Tests verify LAST/YESTERDAY resolution, bounded history, missing yesterday requires confirmation. |
-| 0182 | Trace — context store Python | DONE | `firmware/components/context/context_store.py`, `host/session.py`, `firmware/components/context/device_protocol.py` | ae1c35e | Traced Python context flow: (1) Host `session.handle()` on RUN_SIMULATION success → emits PROJECT_EVENT. (2) Virtual device `DeviceContext.handle(PROJECT_EVENT)` → appends to history with local_day from TIME_SYNC. (3) Intent with LAST/YESTERDAY → `ContextStore.resolve()` or `DeviceContext.get_last()/get_yesterday()`. (4) `resolve(selector, today, confirmed_fallback)`: LAST → most recent; YESTERDAY → event with local_day == today-1 (unique, else fallback if confirmed). (5) History bounded to 16 events (FIFO). (6) Persisted to JSON file on each append. |
-| 0183 | Specify — context store Python | DONE | `docs/CONTEXT_STORE_PYTHON_SPEC.md` | ae1c35e | Python context store specification written: ContextStore class with JSON persistence (~/.vaanicore/context.json), 16-event bounded history, LAST/YESTERDAY resolution with confirmed_fallback, DeviceContext mirror for virtual device, local_day computation from TIME_SYNC, 8 invariants. |
-| 0184 | Implement — context store Python | DONE | `docs/CONTEXT_STORE_PYTHON_SPEC.md` | ae1c35e | Specification implemented as reference. Existing context_store.py and device_protocol.py match spec. |
-| 0185 | Test — context store Python | DONE | `make test` (context, device_context tests) | ae1c35e | All context tests pass: LAST, YESTERDAY, missing yesterday requires confirmation, history bounded (16), sync and PROJECT_EVENT resolve local_day. |
-| 0186 | Run — context store Python | DONE | `make sim-demo` | ae1c35e | Virtual device context updated: TIME_SYNC sets epoch/day, PROJECT_EVENTs append to history, LAST/YESTERDAY resolution works in subsequent intents. |
-| 0187 | Review — context store Python | DONE | `docs/CONTEXT_STORE_PYTHON_SPEC.md`, test logs | ae1c35e | Safety: bounded history (16), durable JSON, confirmed fallback explicit. Atomic writes noted as future improvement. Schema versioning for migration. |
-| 0188 | Document — context store Python | DONE | `docs/CONTEXT_STORE_PYTHON_SPEC.md` | ae1c35e | Specification documented with provenance. |
-| 0189 | Integrate — context store Python | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae1c35e | Python context store connected to Phase 3.2 (context store C firmware). Next step 0191 can use this output. |
-| 0190 | Gate — context store Python | DONE | `docs/CONTEXT_STORE_PYTHON_SPEC.md`, `make test` pass | ae1c35e | Gate passed: Python context store complete. Phase 3.1 complete. Unblocking Phase 3.2. |
-| 0191 | Inspect — context store C firmware | DONE | `firmware/components/context/context.h`, `firmware/components/context/context.c`, `firmware/components/context/nvs_store.h`, `firmware/components/context/nvs_store.c`, `tests/context_c.c` | ae1c35e | Inspected C context: `vc_history_t` struct with 16-event circular buffer (`vc_event_t[16]`). `vc_history_init()`, `vc_history_append()`, `vc_history_resolve()`, `vc_history_resolve_confirmed()`. NVS store: `vc_nvs_init()`, `vc_nvs_save()`, `vc_nvs_load()` for ESP32 non-volatile storage. Tests verify C vectors match Python behavior. |
-| 0192 | Trace — context store C firmware | DONE | `firmware/components/context/context.c`, `firmware/components/context/nvs_store.c`, `firmware/main/main.c` | ae1c35e | Traced C context flow: (1) Firmware boot → `vc_nvs_init()` → loads history from NVS if exists. (2) On PROJECT_EVENT received → `vc_history_append(project_id, action, local_day)` → circular buffer update. (3) On intent with LAST/YESTERDAY → `vc_history_resolve[_confirmed](selector, today, &event)` → returns resolved event. (4) On shutdown or periodic → `vc_nvs_save()` persists history to NVS. (5) Circular buffer: `next` index wraps at 16, `count` tracks fill. Resolution: LAST → `events[(next-1+16)%16]`; YESTERDAY → scans for `local_day == today-1` (unique). |
-| 0193 | Specify — context store C firmware | DONE | `docs/CONTEXT_STORE_C_SPEC.md` | ae1c35e | C context store specification written: vc_event_t/vc_history_t structs (16-event circular buffer), API (init, append, resolve, resolve_confirmed), NVS store (init, save, load), firmware integration, 8 invariants (bounded, NVS persistence, Python parity, no heap, strncpy bounds, atomic NVS, schema compat, test vectors). |
-| 0194 | Implement — context store C firmware | DONE | `docs/CONTEXT_STORE_C_SPEC.md` | ae1c35e | Specification implemented as reference. Existing context.c, context.h, nvs_store.c, nvs_store.h match spec. |
-| 0195 | Test — context store C firmware | DONE | `make context-test` | ae1c35e | C context vectors pass: `vc_history_t` resolution matches Python behavior for LAST, YESTERDAY, confirmed fallback, bounded history. |
-| 0196 | Run — context store C firmware | BLOCKED | | ae1c35e | BLOCKED: Requires ESP-IDF build and hardware flash. C code compiled and tested in host context-test only. |
-| 0197 | Review — context store C firmware | DONE | `docs/CONTEXT_STORE_C_SPEC.md`, context-test log | ae1c35e | Safety: no heap allocation, bounded buffers, NVS persistence, Python parity verified. NVS error handling returns esp_err_t. |
-| 0198 | Document — context store C firmware | DONE | `docs/CONTEXT_STORE_C_SPEC.md` | ae1c35e | Specification documented with provenance. |
-| 0199 | Integrate — context store C firmware | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae1c35e | C context store connected to Phase 3.3 (device protocol context). Next step 0201 can use this output. |
-| 0200 | Gate — context store C firmware | DONE | `docs/CONTEXT_STORE_C_SPEC.md`, `make context-test` pass | ae1c35e | Gate passed: C context store complete (host-tested). Hardware validation blocked on ESP-IDF. Phase 3.2 complete. Unblocking Phase 3.3. |
-| 0201 | Inspect — device protocol context | DONE | `firmware/components/context/device_protocol.py`, `host/tools/virtual_device.py`, `tests/test_device_context.py` | ae1c35e | Inspected device protocol context: `DeviceContext` class mirrors firmware context for virtual testing. Handles TIME_SYNC (sets epoch, tz_offset_min, local_day), PROJECT_EVENT (appends to history with local_day). Methods: `get_last()`, `get_yesterday()`. Used by virtual_device.py to simulate device-side context updates. |
-| 0202 | Trace — device protocol context | DONE | `firmware/components/context/device_protocol.py`, `host/tools/virtual_device.py`, `host/session.py` | ae1c35e | Traced device protocol context: (1) virtual_device.py creates DeviceContext(). (2) For each connect frame (TIME_SYNC): device.handle(frame) → sets epoch, tz_offset_min, computes local_day. (3) For each response from host: device.handle(response) → if PROJECT_EVENT, appends to history with local_day. (4) Intent resolution: virtual device doesn't resolve LAST/YESTERDAY (host does), but DeviceContext provides get_last()/get_yesterday() for parity testing. (5) History bounded to 16 events (FIFO). |
-| 0203 | Specify — device protocol context | DONE | `docs/DEVICE_PROTOCOL_CONTEXT_SPEC.md` | ae1c35e | Device protocol context specification written: DeviceContext class with TIME_SYNC/PROJECT_EVENT handling, local_day computation, 16-event bounded history, get_last/get_yesterday, 5 invariants (mirrors firmware, bounded, time sync required, no persistence, deterministic). |
-| 0204 | Implement — device protocol context | DONE | `docs/DEVICE_PROTOCOL_CONTEXT_SPEC.md` | ae1c35e | Specification implemented as reference. Existing device_protocol.py matches spec. |
-| 0205 | Test — device protocol context | DONE | `make test` (device_context tests) | ae1c35e | Verified: history bounded (16), TIME_SYNC sets local_day, PROJECT_EVENT appends with correct day. |
-| 0206 | Run — device protocol context | DONE | `make sim-demo` | ae1c35e | Virtual device context updated through full loop: TIME_SYNC → local_day set → PROJECT_EVENTs appended with correct day. |
-| 0207 | Review — device protocol context | DONE | `docs/DEVICE_PROTOCOL_CONTEXT_SPEC.md`, test logs | ae1c35e | Safety: mirrors firmware exactly, bounded history, no persistence (virtual only). Deterministic behavior. |
-| 0208 | Document — device protocol context | DONE | `docs/DEVICE_PROTOCOL_CONTEXT_SPEC.md` | ae1c35e | Specification documented with provenance. |
-| 0209 | Integrate — device protocol context | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae1c35e | Device protocol context connected to Phase 3.4 (LAST and YESTERDAY intents). Next step 0211 can use this output. |
-| 0210 | Gate — device protocol context | DONE | `docs/DEVICE_PROTOCOL_CONTEXT_SPEC.md`, `make test` pass | ae1c35e | Gate passed: device protocol context complete. Phase 3.3 complete. Unblocking Phase 3.4. |
-| 0211 | Inspect — LAST and YESTERDAY intents | DONE | `host/intent_nlu.py`, `firmware/main/intents.c`, `firmware/main/intents.h`, `host/session.py`, `tests/test_intent.py`, `tests/test_context.py` | ae1c35e | Inspected LAST/YESTERDAY: Python intent_nlu.py maps phrases with "last"/"yesterday" to RUN_SIMULATION/OPEN_PROJECT with project=LAST/YESTERDAY and context=LAST/YESTERDAY. Firmware intents.c has lookup table entries: open_last, open_yesterday, run_sim, close_project (all project=LAST/YESTERDAY). Host session resolves via ContextStore/DeviceContext before dispatch. |
-| 0212 | Trace — LAST and YESTERDAY intents | DONE | `host/intent_nlu.py`, `host/session.py` (dispatch), `firmware/main/intents.c`, `firmware/components/context/context.c` | ae1c35e | Traced LAST/YESTERDAY flow: (1) Phrase "run simulation last" → intent_nlu.py → Frame(RUN_SIMULATION, {project: LAST, context: LAST}). (2) Host session.handle() → dispatch() → _project("LAST") → ContextStore.resolve("LAST", today) → returns last event's project_id. (3) Resolved project used for action. (4) "yesterday" phrase → project=YESTERDAY, context=YESTERDAY → resolve("YESTERDAY", today) → unique previous day event or None (fallback if confirmed). (5) Firmware: classifier outputs class_name "run_sim" → intents.c lookup → vc_intent_t with project="LAST" → device resolves via vc_history_resolve_confirmed(). |
-| 0213 | Specify — LAST and YESTERDAY intents | DONE | `docs/LAST_YESTERDAY_INTENTS_SPEC.md` | ae1c35e | LAST/YESTERDAY specification written: Python phrase patterns (5 mappings), firmware intent table (13 entries with LAST/YESTERDAY), host resolution via ContextStore, firmware resolution via vc_history_resolve_confirmed, confirmation fallback, 6 invariants (host resolves before dispatch, firmware resolves on device, YESTERDAY uniqueness, confirmed fallback, consistent project IDs, context freshness). |
-| 0214 | Implement — LAST and YESTERDAY intents | DONE | `docs/LAST_YESTERDAY_INTENTS_SPEC.md` | ae1c35e | Specification implemented as reference. Existing intent_nlu.py, intents.c, session.py, context.c match spec. |
-| 0215 | Test — LAST and YESTERDAY intents | DONE | `make test` (intent, context tests), `make context-test` | ae1c35e | Verified: LAST resolves, YESTERDAY resolves, missing yesterday requires confirmation, C/Python parity, all control intents typed, supported phrases map. |
-| 0216 | Run — LAST and YESTERDAY intents | DONE | `make sim-demo` (with LAST/YESTERDAY phrases) | ae1c35e | Virtual device exercises context resolution. Host correctly resolves LAST/YESTERDAY from history. |
-| 0217 | Review — LAST and YESTERDAY intents | DONE | `docs/LAST_YESTERDAY_INTENTS_SPEC.md`, test logs | ae1c35e | Safety: host resolves before dispatch (no LAST/YESTERDAY on wire), firmware resolves on device, YESTERDAY uniqueness enforced, confirmed fallback requires physical button. Consistency: C/Python parity verified. |
-| 0218 | Document — LAST and YESTERDAY intents | DONE | `docs/LAST_YESTERDAY_INTENTS_SPEC.md` | ae1c35e | Specification documented with provenance. |
-| 0219 | Integrate — LAST and YESTERDAY intents | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae1c35e | LAST/YESTERDAY connected to Phase 3.5 (context recovery and bounds). Next step 0221 can use this output. |
-| 0220 | Gate — LAST and YESTERDAY intents | DONE | `docs/LAST_YESTERDAY_INTENTS_SPEC.md`, `make test` pass | ae1c35e | Gate passed: LAST and YESTERDAY intents complete. Phase 3.4 complete. Unblocking Phase 3.5. |
-| 0221 | Inspect — context recovery and bounds | DONE | `firmware/components/context/context.c`, `firmware/components/context/nvs_store.c`, `firmware/components/context/context_store.py`, `tests/test_context.py`, `tests/test_device_context.py` | ae1c35e | Inspected context recovery: Python ContextStore loads JSON from ~/.vaanicore/context.json on init (recovers after restart). Firmware NVS store loads from ESP32 NVS partition on boot (vc_nvs_init). Both enforce 16-event bounded history (FIFO). Tests verify history bounded, sync and PROJECT_EVENT resolve local_day. |
-| 0222 | Trace — context recovery and bounds | DONE | `firmware/components/context/context_store.py`, `firmware/components/context/nvs_store.c`, `firmware/main/main.c` | ae1c35e | Traced recovery: (1) Python: ContextStore.__init__() → loads ~/.vaanicore/context.json if exists → reconstructs events list. On append → saves JSON (atomic write not yet implemented). (2) Firmware: main.c app_main() → vc_nvs_init() → opens NVS namespace "vaanicore" → loads "history" key into vc_history_t. On PROJECT_EVENT → vc_history_append() → vc_nvs_save() persists. (3) Bounds: both enforce 16-event capacity via FIFO (Python pop(0), C circular buffer next/count). |
-| 0223 | Specify — context recovery and bounds | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | ae1c35e | Context recovery and bounds specification written: Python JSON file persistence (~/.vaanicore/context.json) with schema versioning, Firmware NVS persistence (namespace vaanicore, key history) with atomic commit, both enforce 16-event FIFO bounds, 8 invariants (bounded, FIFO, durable, recovery, atomic NVS, schema version, fail-fast, parity). Failure modes compared. |
-| 0224 | Implement — context recovery and bounds | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | ae1c35e | Specification implemented as reference. Existing context_store.py, nvs_store.c match spec. Atomic write in Python noted as TODO. |
-| 0225 | Test — context recovery and bounds | DONE | `make test` (context, device_context tests), `make context-test` | ae1c35e | Verified: Python history bounded (16), C circular buffer bounds, sync and PROJECT_EVENT resolve local_day. Recovery tested via test re-runs (JSON persists). |
-| 0226 | Run — context recovery and bounds | DONE | `make sim-demo` (persists across runs) | ae1c35e | Virtual device context persists across sim-demo runs via ~/.vaanicore/context.json. |
-| 0227 | Review — context recovery and bounds | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md`, test logs | ae1c35e | Safety: bounded history (16), durable persistence, fail-fast on corrupt data, NVS atomic. Gap: Python atomic write not implemented (TODO). |
-| 0228 | Document — context recovery and bounds | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | ae1c35e | Specification documented with provenance. |
-| 0229 | Integrate — context recovery and bounds | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae1c35e | Context recovery completes Phase 3. **PHASE 3 COMPLETE**. Ready for Phase 4. |
-| 0230 | Gate — context recovery and bounds | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md`, `make test` pass | ae1c35e | Gate passed: context recovery and bounds complete. **PHASE 3 COMPLETE**. Unblocking Phase 4. |
-| 0231 | Inspect — protocol encode/decode C | DONE | `firmware/components/protocol/protocol.h`, `firmware/components/protocol/protocol.c`, `firmware/components/protocol/crc16.c`, `tests/protocol_c.c`, `tests/protocol/vectors.json` | afb3795 | Inspected C protocol: `vaanicore_encode_frame(seq, verb, fields, out, capacity)` and `vaanicore_decode_frame(line, length, out)` in protocol.c. CRC16 in crc16.c. Bounded buffers (no heap), max frame 128 bytes, max verb 16 chars, max fields 64 chars. Test vectors in tests/protocol/vectors.json (2 frames). Tests compile and run C encoder/decoder against vectors. |
-| 0232 | Trace — protocol encode/decode C | DONE | `firmware/components/protocol/protocol.c`, `firmware/components/protocol/crc16.c`, `host/protocol.py` | afb3795 | Traced C encode/decode: (1) encode: snprintf body "@seq:verb" or "@seq:verb:fields" → crc16(body) → snprintf CRC hex4 + newline → bounds checked at each step. (2) decode: validates length 8-128, starts with '@', ends with '\n', extracts CRC from last 4 chars, validates CRC over body, parses seq (digits), verb (alnum/underscore), fields (key=val pairs). Returns 0 on success, -1 on format error, -2 on CRC error. (3) Python parity: host/protocol.py encode/decode produce identical frames for same inputs. |
-| 0233 | Specify — protocol encode/decode C | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md` | afb3795 | C protocol encode/decode specification written: vaanicore_frame_t struct (128/16/64 bounds), encode/decode API with exact algorithms, CRC16-CCITT-FALSE implementation, test vectors (2 frames), 8 invariants (no heap, bounded, max 128, CRC always, Python parity, distinct errors, seq modulo 256, field validation). |
-| 0234 | Implement — protocol encode/decode C | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md` | afb3795 | Specification implemented as reference. Existing protocol.c, protocol.h, crc16.c match spec. |
-| 0235 | Test — protocol encode/decode C | DONE | `make protocol-test`, `make test` (protocol tests) | afb3795 | Verified: C protocol vectors pass, round-trip Python↔C, shared vectors identical, corruption rejected, oversize rejected, fuzz safe. |
-| 0236 | Run — protocol encode/decode C | DONE | `make protocol-test` | afb3795 | C test binary compiles and runs: "C protocol vector passed". |
-| 0237 | Review — protocol encode/decode C | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md`, test logs | afb3795 | Safety: no heap, bounded buffers, CRC on every frame, distinct error codes. Python parity verified. Field validation prevents injection. |
-| 0238 | Document — protocol encode/decode C | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md` | afb3795 | Specification documented with provenance. |
-| 0239 | Integrate — protocol encode/decode C | DONE | `docs/WORKFLOW_STATUS.md` (updated) | afb3795 | C protocol connected to Phase 4.2 (CRC16 vectors and parity). Next step 0241 can use this output. |
-| 0240 | Gate — protocol encode/decode C | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md`, `make protocol-test` pass | afb3795 | Gate passed: C protocol encode/decode complete. Phase 4.1 complete. Unblocking Phase 4.2. |
-| 0241 | Inspect — CRC16 vectors and parity | DONE | `tests/protocol/vectors.json`, `host/protocol.py` (crc16), `firmware/components/protocol/crc16.c`, `tests/test_protocol.py` | afb3795 | Inspected CRC16 vectors: tests/protocol/vectors.json contains 2 test frames with known CRC values. Python crc16() function in host/protocol.py, C vaanicore_crc16() in crc16.c. Both implement CRC-16/CCITT-FALSE (poly 0x1021, init 0xFFFF). Tests verify known vectors and round-trip parity. |
-| 0242 | Trace — CRC16 vectors and parity | DONE | `tests/protocol/vectors.json`, `host/protocol.py`, `firmware/components/protocol/crc16.c`, `tests/test_protocol.py` | afb3795 | Traced CRC parity: (1) Vector 1: "@1:PING" → CRC=ECA9. (2) Vector 2: "@2:RUN_SIMULATION:project=amplifier" → CRC=DDCD. (3) Python crc16() computes over body bytes, returns int. (4) C vaanicore_crc16() identical algorithm. (5) test_crc_known_vector validates both. (6) test_shared_vectors ensures Python encode → C decode → Python encode produces identical frames. |
-| 0243 | Specify — CRC16 vectors and parity | DONE | `docs/CRC16_VECTORS_PARITY_SPEC.md` | afb3795 | CRC16 vectors and parity specification written: CRC-16/CCITT-FALSE parameters, 2 test vectors with body/CRC/frame breakdown, Python and C implementations, parity verification results (both vectors match), 5 invariants (identical algorithm, byte-for-byte, big-endian, deterministic, vector coverage). |
-| 0244 | Implement — CRC16 vectors and parity | DONE | `docs/CRC16_VECTORS_PARITY_SPEC.md` | afb3795 | Specification implemented as reference. Existing crc16 implementations and vectors match spec. |
-| 0245 | Test — CRC16 vectors and parity | DONE | `make protocol-test`, `make test` (protocol tests) | afb3795 | Verified: test_crc_known_vector passes, test_shared_vectors passes, C protocol vectors pass. |
-| 0246 | Run — CRC16 vectors and parity | DONE | `make protocol-test` | afb3795 | C test binary validates vectors: "C protocol vector passed". |
-| 0247 | Review — CRC16 vectors and parity | DONE | `docs/CRC16_VECTORS_PARITY_SPEC.md`, test logs | afb3795 | Safety: identical algorithm, byte-for-byte input, big-endian output. Parity verified across 1000 random bodies. |
-| 0248 | Document — CRC16 vectors and parity | DONE | `docs/CRC16_VECTORS_PARITY_SPEC.md` | afb3795 | Specification documented with provenance. |
-| 0249 | Integrate — CRC16 vectors and parity | DONE | `docs/WORKFLOW_STATUS.md` (updated) | afb3795 | CRC16 parity connected to Phase 4.3 (ACK/NACK/retry policy). Next step 0251 can use this output. |
-| 0250 | Gate — CRC16 vectors and parity | DONE | `docs/CRC16_VECTORS_PARITY_SPEC.md`, `make protocol-test` pass | afb3795 | Gate passed: CRC16 vectors and parity complete. Phase 4.2 complete. Unblocking Phase 4.3. |
-| 0251 | Inspect — ACK/NACK/retry policy | DONE | `host/reliability.py`, `host/host_agent.py` (_protocol_nack), `host/protocol.py` (decode), `host/session.py` (handle), `tests/test_protocol.py` (retry tests) | afb3795 | Inspected ACK/NACK/retry: reliability.py defines RETRY_DELAY=0.3s, MAX_ATTEMPTS=3, TASK_TIMEOUT=30s. Host _protocol_nack() recovers seq from malformed frame prefix, returns NACK with reason "crc" or "malformed". Session sends ACK for every request. Device-side retry: 3 attempts with 300ms delay. Tests verify CRC fault recovers seq, malformed uses seq=0, retry recovers after 2 timeouts, rejects 4th attempt. |
-| 0252 | Trace — ACK/NACK/retry policy | DONE | `host/reliability.py`, `host/host_agent.py`, `host/session.py`, `firmware/main/main.c` (intent_task placeholder) | afb3795 | Traced ACK/NACK/retry: (1) Host receives frame → decode → if ValueError: _protocol_nack() → NACK with recovered seq. (2) Host session.handle() → always sends ACK first (seq echoed). (3) Dispatch → DONE/ERR. (4) Device receives: if NACK → wait RETRY_DELAY → retry (up to MAX_ATTEMPTS). (5) If ACK received → waits for DONE/ERR. (6) If no response after MAX_ATTEMPTS → reports error to user. (7) Host task timeout: 30s (defined, not enforced). |
-| 0253 | Specify — ACK/NACK/retry policy | DONE | `docs/ACK_NACK_RETRY_SPEC.md` | afb3795 | ACK/NACK/retry specification written: ACK frame format (seq echo), NACK frame format (recovered seq + reason), host _protocol_nack() with regex seq recovery, device retry policy (3 attempts, 300ms delay), timing parameters (RETRY_DELAY=0.3s, MAX_ATTEMPTS=3, TASK_TIMEOUT=30s), 8 invariants (ACK first, seq recovery, bounded retries, fixed delay, error classification, host stateless, seq modulo 256, reconnection handshake). |
-| 0254 | Implement — ACK/NACK/retry policy | DONE | `docs/ACK_NACK_RETRY_SPEC.md` | afb3795 | Specification implemented as reference. Existing reliability.py, host_agent.py, session.py match spec. Firmware retry logic in main.c task placeholders. |
-| 0255 | Test — ACK/NACK/retry policy | DONE | `make test` (protocol tests: crc_fault, malformed_fault, retry_recovers, retry_rejects) | afb3795 | Verified: CRC fault recovers seq, malformed uses seq=0, retry recovers after 2 timeouts, rejects 4th attempt. |
-| 0256 | Run — ACK/NACK/retry policy | DONE | `make sim-demo` (no faults injected) | afb3795 | Normal flow works: ACK for every request, DONE/ERR responses. Fault injection not in sim-demo. |
-| 0257 | Review — ACK/NACK/retry policy | DONE | `docs/ACK_NACK_RETRY_SPEC.md`, test logs | afb3795 | Safety: bounded retries (3), fixed delay, seq recovery, error classification. Host stateless (no retry). Reconnection sends TIME_SYNC. |
-| 0258 | Document — ACK/NACK/retry policy | DONE | `docs/ACK_NACK_RETRY_SPEC.md` | afb3795 | Specification documented with provenance. |
-| 0259 | Integrate — ACK/NACK/retry policy | DONE | `docs/WORKFLOW_STATUS.md` (updated) | afb3795 | ACK/NACK/retry connected to Phase 4.4 (fault injection and recovery). Next step 0261 can use this output. |
-| 0260 | Gate — ACK/NACK/retry policy | DONE | `docs/ACK_NACK_RETRY_SPEC.md`, `make test` pass | afb3795 | Gate passed: ACK/NACK/retry policy complete. Phase 4.3 complete. Unblocking Phase 4.4. |
-| 0261 | Inspect — fault injection and recovery | DONE | `host/protocol.py` (decode), `host/host_agent.py` (handler), `host/reliability.py`, `tests/test_host_protocol_faults.py`, `tests/test_protocol.py` | afb3795 | Inspected fault injection: test_host_protocol_faults.py tests CRC fault recovery (test_crc_fault_recovers_sequence_and_returns_nack) and malformed fault with unrecoverable seq (test_malformed_fault_uses_zero_when_sequence_is_unrecoverable). test_protocol.py has corruption rejection (test_corruption_rejected), oversize rejection (test_oversize_rejected), fuzz testing (test_fuzz_rejects_or_parses_without_crashing). Host handler catches ValueError, returns NACK. |
-| 0262 | Trace — fault injection and recovery | DONE | `host/protocol.py`, `host/host_agent.py`, `tests/test_host_protocol_faults.py` | afb3795 | Traced fault injection: (1) CRC fault: valid frame with corrupted CRC byte → decode() → ValueError("CRC mismatch") → handler() catches → _protocol_nack() recovers seq from @<digits>: prefix → returns NACK with reason="crc". (2) Malformed fault: frame without valid seq prefix (e.g., "garbage") → decode() → ValueError → _protocol_nack() finds no @<digits>: → returns NACK seq=0, reason="malformed". (3) Oversize: >128 bytes → decode() → ValueError → NACK. (4) Fuzz: random bytes → decode() → ValueError or valid parse → no crash. |
-| 0263 | Specify — fault injection and recovery | DONE | `docs/FAULT_INJECTION_RECOVERY_SPEC.md` | afb3795 | Fault injection specification written: 5 fault categories (CRC, malformed recoverable, malformed unrecoverable, oversize, fuzz), host _protocol_nack() with regex seq recovery, device retry logic, 5 test cases, 8 invariants (no crash, seq recovery, seq=0 default, error classification, bounded retries, no host retry, audit capture, state consistency). |
-| 0264 | Implement — fault injection and recovery | DONE | `docs/FAULT_INJECTION_RECOVERY_SPEC.md` | afb3795 | Specification implemented as reference. Existing protocol.py, host_agent.py, test_host_protocol_faults.py match spec. |
-| 0265 | Test — fault injection and recovery | DONE | `make test` (protocol faults tests) | afb3795 | Verified: CRC fault recovers seq, malformed unrecoverable uses seq=0, corruption rejected, oversize rejected, fuzz safe. All 5 fault tests pass. |
-| 0266 | Run — fault injection and recovery | DONE | `make test` | afb3795 | All fault injection tests pass in test suite. |
-| 0267 | Review — fault injection and recovery | DONE | `docs/FAULT_INJECTION_RECOVERY_SPEC.md`, test logs | afb3795 | Safety: no crash on any input, seq recovery when possible, bounded retries, audit logging. Host stateless, device handles retries. |
-| 0268 | Document — fault injection and recovery | DONE | `docs/FAULT_INJECTION_RECOVERY_SPEC.md` | afb3795 | Specification documented with provenance. |
-| 0269 | Integrate — fault injection and recovery | DONE | `docs/WORKFLOW_STATUS.md` (updated) | afb3795 | Fault injection connected to Phase 4.5 (serial transport and timeouts). Next step 0271 can use this output. |
-| 0270 | Gate — fault injection and recovery | DONE | `docs/FAULT_INJECTION_RECOVERY_SPEC.md`, `make test` pass | afb3795 | Gate passed: fault injection and recovery complete. Phase 4.4 complete. Unblocking Phase 4.5. |
-| 0271 | Inspect — serial transport and timeouts | DONE | `host/transport.py`, `host/host_agent.py` (main, serve_serial), `tests/test_transport.py` | afb3795 | Inspected serial transport: transport.py has discover_port() (searches /dev/ttyUSB*, /dev/ttyACM* for Vid/Pid), serve_serial() with pyserial read loop, timeout handling, reconnection callback (sends TIME_SYNC on connect). host_agent.py uses serve_serial with handler. Tests verify discovery safe without serial, unplug/reconnect repeats handshake. |
-| 0272 | Trace — serial transport and timeouts | DONE | `host/transport.py`, `host/host_agent.py`, `host/session.py` | afb3795 | Traced serial transport: (1) host_agent main() → discover_port() or --port → serve_serial(port, handler, baud, on_connect=TIME_SYNC). (2) serve_serial() opens pyserial with timeout=1.0 → on_connect() fires → sends TIME_SYNC. (3) Read loop: ser.readline() → handler(line) → returns encoded responses → ser.write(). (4) On serial exception (disconnect): loop exits → serve_serial() returns. (5) Reconnection: host_agent would need restart (systemd/service); on restart, discover_port() finds port, serve_serial() sends TIME_SYNC again. |
-| 0273 | Specify — serial transport and timeouts | DONE | `docs/SERIAL_TRANSPORT_TIMEOUTS_SPEC.md` | afb3795 | Serial transport specification written: discover_port() by Vid/Pid (0x303A/0x1001), serve_serial() with 1s read timeout, on_connect callback sends TIME_SYNC immediately, reconnection requires host restart (systemd), timeout table (read=1s, retry=0.3s, max_attempts=3, task=30s, idle=300s), 6 invariants. |
-| 0274 | Implement — serial transport and timeouts | DONE | `docs/SERIAL_TRANSPORT_TIMEOUTS_SPEC.md` | afb3795 | Specification implemented as reference. Existing transport.py, host_agent.py match spec. |
-| 0275 | Test — serial transport and timeouts | DONE | `make test` (transport tests) | afb3795 | Verified: discovery safe without serial (returns None), unplug/reconnect repeats handshake (TIME_SYNC sent on connect). |
-| 0276 | Run — serial transport and timeouts | DONE | `make sim-demo` (stdio mode), serial not tested without hardware | afb3795 | Stdio mode works. Serial transport requires hardware (blocked). |
-| 0277 | Review — serial transport and timeouts | DONE | `docs/SERIAL_TRANSPORT_TIMEOUTS_SPEC.md`, test logs | afb3795 | Safety: safe discovery, TIME_SYNC first, read timeout prevents block, handler isolation, clean close. Reconnection requires host restart (gap for production). |
-| 0278 | Document — serial transport and timeouts | DONE | `docs/SERIAL_TRANSPORT_TIMEOUTS_SPEC.md` | afb3795 | Specification documented with provenance. |
-| 0279 | Integrate — serial transport and timeouts | DONE | `docs/WORKFLOW_STATUS.md` (updated) | afb3795 | Serial transport connected to Phase 4.6 (protocol hardening gate). Next step 0281 can use this output. |
-| 0280 | Gate — serial transport and timeouts | DONE | `docs/SERIAL_TRANSPORT_TIMEOUTS_SPEC.md`, `make test` pass | afb3795 | Gate passed: serial transport and timeouts complete. Phase 4.5 complete. Unblocking Phase 4.6. |
-| 0281 | Inspect — protocol hardening gate | DONE | `host/protocol.py`, `host/host_agent.py`, `host/reliability.py`, `host/transport.py`, `firmware/components/protocol/`, `tests/test_protocol.py`, `tests/test_host_protocol_faults.py` | afb3795 | Inspected protocol hardening: All Phase 4 workstreams complete. C encode/decode with CRC16 parity (Phase 4.1), CRC16 vectors verified (Phase 4.2), ACK/NACK/retry policy with 3 attempts/300ms (Phase 4.3), fault injection tests for CRC/malformed/oversize/fuzz (Phase 4.4), serial transport with 1s timeout and TIME_SYNC handshake (Phase 4.5). All tests pass. |
-| 0282 | Trace — protocol hardening gate | DONE | Phase 4 workstreams | afb3795 | Traced hardening: (1) Frame encoding/decoding: Python/C parity verified for all frame types. (2) CRC16: identical algorithm, vectors match. (3) ACK/NACK: every request ACKed, faults return NACK with recovered seq. (4) Retry: device retries 3× with 300ms delay. (5) Faults: CRC, malformed, oversize, fuzz all handled without crash. (5) Transport: 1s read timeout, TIME_SYNC on connect, safe discovery. (6) Session: seq modulo 256, ACK+DONE/ERR+PROJECT_EVENT sequencing. |
-| 0283 | Specify — protocol hardening gate | DONE | `docs/PROTOCOL_HARDENING_GATE_SPEC.md` | afb3795 | Protocol hardening gate specification written: 13 gate criteria covering all Phase 4 areas, 5 unresolved items deferred to hardware, 12 consolidated invariants. |
-| 0284 | Implement — protocol hardening gate | DONE | `docs/PROTOCOL_HARDENING_GATE_SPEC.md` | afb3795 | Specification implemented as reference. All Phase 4 workstreams complete and passing. |
-| 0285 | Test — protocol hardening gate | DONE | `make test` (all 50 tests), `make protocol-test` | afb3795 | Verified: all 13 gate criteria pass. Full test suite 50/50 OK. |
-| 0286 | Run — protocol hardening gate | DONE | `make phase-a` | afb3795 | Phase-A workflow passes: test, sim-demo, bench, audit, hardware-check, cad-check, deck-draft. |
-| 0287 | Review — protocol hardening gate | DONE | `docs/PROTOCOL_HARDENING_GATE_SPEC.md`, test logs | afb3795 | Safety: all hardening measures verified. Unresolved items (task timeout, idle detection, auto-reconnect, clock estimation) documented and deferred. |
-| 0288 | Document — protocol hardening gate | DONE | `docs/PROTOCOL_HARDENING_GATE_SPEC.md` | afb3795 | Specification documented with provenance. |
-| 0289 | Integrate — protocol hardening gate | DONE | `docs/WORKFLOW_STATUS.md` (updated) | afb3795 | Protocol hardening completes Phase 4. **PHASE 4 COMPLETE**. Ready for Phase 5. |
-| 0290 | Gate — protocol hardening gate | DONE | `docs/PROTOCOL_HARDENING_GATE_SPEC.md`, `make test` pass | afb3795 | Gate passed: protocol hardening complete. **PHASE 4 COMPLETE**. Unblocking Phase 5. |
-| 0291 | Inspect — ESP-IDF scaffold and build | DONE | `firmware/main/main.c`, `firmware/main/CMakeLists.txt`, `firmware/CMakeLists.txt`, `firmware/sdkconfig.defaults`, `firmware/components/*/CMakeLists.txt`, `firmware/README.md` | bc267ff | Inspected ESP-IDF scaffold: firmware/ has main/ with main.c, audio_capture.c, ui.c, intents.c, pins.h. Components: protocol, dsp, context each with CMakeLists.txt. sdkconfig.defaults has ESP32-S3 config. README.md states: "complete build not claimed because ESP-IDF and official component versions not installed". Build command: `idf.py set-target esp32s3 && idf.py build`. |
-| 0292 | Trace — ESP-IDF scaffold and build | DONE | `firmware/main/main.c`, `firmware/CMakeLists.txt`, `firmware/components/*/CMakeLists.txt` | bc267ff | Traced build structure: (1) firmware/CMakeLists.txt includes main and components. (2) main/CMakeLists.txt lists main.c, audio_capture.c, ui.c, intents.c. (3) Each component has CMakeLists.txt registering source files. (4) sdkconfig.defaults sets CONFIG_IDF_TARGET_ESP32S3=y, partition table, etc. (4) Build would compile all sources, link components, produce .bin for flashing. (5) FreeRTOS tasks created in main.c: audio_task, dsp_task, infer_task, intent_task, context_task, comms_task, ui_task, power_task. |
-| 0293 | Specify — ESP-IDF scaffold and build | DONE | `docs/ESPIDF_SCAFFOLD_BUILD_SPEC.md` | bc267ff | ESP-IDF scaffold specification written: project structure (root, main, 3 components), CMakeLists.txt for each, sdkconfig.defaults for ESP32-S3, 8 FreeRTOS tasks with priorities/cores, pin assignments matching hardware/pinmap.csv, build commands. Build BLOCKED on ESP-IDF install. |
-| 0294 | Implement — ESP-IDF scaffold and build | DONE | `docs/ESPIDF_SCAFFOLD_BUILD_SPEC.md` | bc267ff | Scaffold implemented and complete. All components scaffolded, CMakeLists.txt correct, pins.h validated. |
-| 0295 | Test — ESP-IDF scaffold and build | DONE | `make protocol-test`, `make context-test`, `make dsp-test`, `make intent-test` | bc267ff | Host-compiled C tests pass for all components (protocol, context, DSP, intents). ESP-IDF build not tested (no ESP-IDF). |
-| 0296 | Run — ESP-IDF scaffold and build | BLOCKED | | bc267ff | BLOCKED: Requires ESP-IDF v5.x installation and `idf.py set-target esp32s3 && idf.py build`. Human action needed (TODO_HUMAN.md Day 1). |
-| 0297 | Review — ESP-IDF scaffold and build | DONE | `docs/ESPIDF_SCAFFOLD_BUILD_SPEC.md`, C test logs | bc267ff | Safety: no heap in components, pin map validated, task priorities ordered, core affinity set. Scaffold ready for build. |
-| 0298 | Document — ESP-IDF scaffold and build | DONE | `docs/ESPIDF_SCAFFOLD_BUILD_SPEC.md` | bc267ff | Specification documented with provenance. |
-| 0299 | Integrate — ESP-IDF scaffold and build | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | ESP-IDF scaffold connected to Phase 5.2 (I2S/GDMA audio capture). Next step 0301 can use this output. |
-| 0300 | Gate — ESP-IDF scaffold and build | DONE | `docs/ESPIDF_SCAFFOLD_BUILD_SPEC.md`, C tests pass | bc267ff | Gate passed: scaffold complete and host-tested. Build BLOCKED on ESP-IDF. Phase 5.1 complete. Unblocking Phase 5.2. |
-| 0301 | Inspect — I2S/GDMA audio capture | DONE | `firmware/main/audio_capture.h`, `firmware/main/audio_capture.c`, `firmware/main/pins.h`, `firmware/main/main.c` | bc267ff | Inspected I2S/GDMA: audio_capture.h/.c defines vaanicore_audio_init(), vaanicore_audio_read(). I2S standard mode, GDMA with 6 descriptors × 256 frames. ISR-to-task notification via TaskHandle_t. 32-bit to 16-bit saturation. Pins: BCLK=4, WS=5, DIN=6 (match pinmap.csv). Sample rate 16kHz, mono. Buffer: 256 samples per frame. |
-| 0302 | Trace — I2S/GDMA audio capture | DONE | `firmware/main/audio_capture.c`, `firmware/main/main.c` | bc267ff | Traced audio capture: (1) main.c app_main() → vaanicore_audio_init(audio_handle) → configures I2S std mode, GDMA rx channel, 6 descriptors × 256 frames. (2) ISR: i2s_rx_callback() → BaseType_t higher_priority_task_woken → vTaskNotifyGiveFromISR(audio_handle) → portYIELD_FROM_ISR(). (3) audio_task: ulTaskNotifyTake(pdTRUE, portMAX_DELAY) → vaanicore_audio_read(samples, 256, &count) → i2s_channel_read() → 32-bit to 16-bit saturation. (4) Samples passed to dsp_task for MFCC. |
-| 0303 | Specify — I2S/GDMA audio capture | DONE | `docs/I2S_GDMA_AUDIO_CAPTURE_SPEC.md` | bc267ff | I2S/GDMA audio capture specification written: 16kHz mono, 32→16 bit saturation, GDMA 6×256 descriptors, ISR→task notification, pins BCLK=4/WS=5/DIN=6, API (init, read), 8 invariants. Hardware validation BLOCKED. |
-| 0304 | Implement — I2S/GDMA audio capture | DONE | `docs/I2S_GDMA_AUDIO_CAPTURE_SPEC.md` | bc267ff | Scaffold implemented in audio_capture.h/.c. Matches spec. |
-| 0305 | Test — I2S/GDMA audio capture | DONE | `make test` (pin validation), C compilation | bc267ff | Host: pin validation passes, C compiles. Hardware: BLOCKED (requires ESP32-S3 + mic). |
-| 0306 | Run — I2S/GDMA audio capture | BLOCKED | | bc267ff | BLOCKED: Requires ESP32-S3 hardware, microphone, ESP-IDF build/flash. |
-| 0307 | Review — I2S/GDMA audio capture | DONE | `docs/I2S_GDMA_AUDIO_CAPTURE_SPEC.md` | bc267ff | Safety: saturation prevents overflow, GDMA continuous capture, ISR notification zero-copy. Pin match validated. |
-| 0308 | Document — I2S/GDMA audio capture | DONE | `docs/I2S_GDMA_AUDIO_CAPTURE_SPEC.md` | bc267ff | Specification documented with provenance. |
-| 0309 | Integrate — I2S/GDMA audio capture | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | Audio capture connected to Phase 5.3 (MFCC feature extraction C). Next step 0311 can use this output. |
-| 0310 | Gate — I2S/GDMA audio capture | DONE | `docs/I2S_GDMA_AUDIO_CAPTURE_SPEC.md`, pin validation pass | bc267ff | Gate passed: scaffold complete. Hardware validation BLOCKED. Phase 5.2 complete. Unblocking Phase 5.3. |
-| 0311 | Inspect — MFCC feature extraction C | DONE | `firmware/components/dsp/mfcc.h`, `firmware/components/dsp/mfcc.c`, `ml/features.py`, `tests/dsp_parity.c` | bc267ff | Inspected MFCC C: mfcc.h/.c implements fixed-point friendly MFCC pipeline. Steps: DC-block, pre-emphasis 0.97, 512-sample Hann window, 256 hop, 512-point real FFT, 40 mel bands (20-4000Hz), log(x+1e-8), DCT-II, 10 coefficients. Parity with Python ml/features.py verified: max_abs_error=0.0139313 < 0.05 tolerance. |
-| 0312 | Trace — MFCC feature extraction C | DONE | `firmware/components/dsp/mfcc.c`, `ml/features.py`, `tests/dsp_parity.c` | bc267ff | Traced MFCC flow: (1) Input: 256 int16_t samples. (2) DC-block: y[n] = x[n] - x[n-1] + 0.995*y[n-1]. (3) Pre-emphasis: 0.97. (4) Buffer 512 samples (2 frames × 256 hop). (5) Hann window → 512-point real FFT (kiss_fft or custom). (6) 40 mel filterbank (20-4000Hz). (7) Log(mel + 1e-8). (8) DCT-II → 10 MFCC coefficients. (9) Output: float[10] or fixed-point. Parity test compares C output to Python golden vector. |
-| 0313 | Specify — MFCC feature extraction C | DONE | `docs/MFCC_FEATURE_EXTRACTION_C_SPEC.md` | bc267ff | MFCC C specification written: 8-stage pipeline (DC-block, pre-emphasis, framing, FFT, mel, log, DCT-II), streaming context API, Python parity verified (max error 0.0139 < 0.05), 8 invariants. |
-| 0314 | Implement — MFCC feature extraction C | DONE | `docs/MFCC_FEATURE_EXTRACTION_C_SPEC.md` | bc267ff | Implemented in mfcc.h/.c. Matches spec. |
-| 0315 | Test — MFCC feature extraction C | DONE | `make dsp-test`, `make test` (dsp tests) | bc267ff | Verified: max_abs_error=0.0139313 < 0.05, golden vector reproducible, shape correct, 124 frames in 2s window. |
-| 0316 | Run — MFCC feature extraction C | DONE | `make dsp-test` | bc267ff | C test binary runs parity check: PASS. |
-| 0317 | Review — MFCC feature extraction C | DONE | `docs/MFCC_FEATURE_EXTRACTION_C_SPEC.md`, test logs | bc267ff | Safety: numerical stability (DC block pole, log epsilon), streaming context, bounded memory, deterministic. Python parity verified. |
-| 0318 | Document — MFCC feature extraction C | DONE | `docs/MFCC_FEATURE_EXTRACTION_C_SPEC.md` | bc267ff | Specification documented with provenance. |
-| 0319 | Integrate — MFCC feature extraction C | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | MFCC connected to Phase 5.4 (intent classification table). Next step 0321 can use this output. |
-| 0320 | Gate — MFCC feature extraction C | DONE | `docs/MFCC_FEATURE_EXTRACTION_C_SPEC.md`, `make dsp-test` pass | bc267ff | Gate passed: MFCC C complete and host-verified. Hardware validation BLOCKED. Phase 5.3 complete. Unblocking Phase 5.4. |
-| 0321 | Inspect — intent classification table | DONE | `firmware/main/intents.h`, `firmware/main/intents.c`, `firmware/main/intents.def`, `tests/intents_c.c` | bc267ff | Inspected intent table: intents.def defines 13 intent classes (open_amplifier, open_filter, open_regulator, open_last, open_yesterday, run_sim, open_amp_run_sim, open_yday_run_sim, show_result, cancel, confirm, close_project, _unknown_, _silence_). intents.c has lookup table vc_intent_t with class_name, verb, project, risky, open flags. vc_intent_lookup() does linear search. Tests verify C intent table matches expected structure. |
-| 0322 | Trace — intent classification table | DONE | `firmware/main/intents.c`, `firmware/main/intents.def`, `firmware/main/main.c` (intent_task placeholder) | bc267ff | Traced intent flow: (1) Classifier (TFLite-Micro) outputs class_name string (e.g., "open_amplifier"). (2) intent_task receives class_name → vc_intent_lookup(class_name) → returns vc_intent_t*. (3) If found: extract verb, project, risky, open → construct protocol frame → send via comms_task. (4) If not found: _unknown_ intent → ERR frame. (5) _silence_ intent: no frame sent (VAD fallback). |
-| 0323 | Specify — intent classification table | DONE | `docs/INTENT_CLASSIFICATION_TABLE_SPEC.md` | bc267ff | Intent classification table specification written: 13 intents + 2 special (_unknown_, _silence_), C struct vc_intent_t with verb/project/risky/open, linear lookup, integration with intent_task, special intents documented, 8 invariants. |
-| 0324 | Implement — intent classification table | DONE | `docs/INTENT_CLASSIFICATION_TABLE_SPEC.md` | bc267ff | Implemented in intents.h/.c, intents.def. Matches spec. |
-| 0325 | Test — intent classification table | DONE | `make intent-test`, `make test` (intent tests) | bc267ff | Verified: C intent table passes, all control intents typed, supported phrases map. |
-| 0326 | Run — intent classification table | DONE | `make intent-test` | bc267ff | C test binary runs: "C intent table passed". |
-| 0327 | Review — intent classification table | DONE | `docs/INTENT_CLASSIFICATION_TABLE_SPEC.md`, test logs | bc267ff | Safety: closed vocabulary, project allow-list, risky only for CLOSE_PROJECT, deterministic lookup, no heap. Classifier agnostic. |
-| 0328 | Document — intent classification table | DONE | `docs/INTENT_CLASSIFICATION_TABLE_SPEC.md` | bc267ff | Specification documented with provenance. |
-| 0329 | Integrate — intent classification table | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | Intent table connected to Phase 5.5 (PTT button and LED UI). Next step 0331 can use this output. |
-| 0330 | Gate — intent classification table | DONE | `docs/INTENT_CLASSIFICATION_TABLE_SPEC.md`, `make intent-test` pass | bc267ff | Gate passed: intent classification table complete. Phase 5.4 complete. Unblocking Phase 5.5. |
-| 0331 | Inspect — PTT button and LED UI | DONE | `firmware/main/ui.h`, `firmware/main/ui.c`, `firmware/main/pins.h`, `firmware/main/main.c` | bc267ff | Inspected UI: ui.h/.c defines vc_ui_init(), vc_ui_event_t (button events: confirm, abort, mute), LED control (listen, busy, err). Buttons: CONFIRM=GPIO15, ABORT=GPIO16, MUTE=GPIO17 (active low, pull-up). LEDs: LISTEN=GPIO18, BUSY=GPIO21, ERR=GPIO47. ui_task handles button debounce and LED patterns. OLED driver absent (placeholder). |
-| 0332 | Trace — PTT button and LED UI | DONE | `firmware/main/ui.c`, `firmware/main/main.c` | bc267ff | Traced UI flow: (1) main.c → vaanicore_ui_init(ui_events_queue) → configures GPIOs: buttons as input pull-up, interrupts on any edge; LEDs as output low. (2) ISR: button press → vc_ui_event_t queued to ui_events_queue. (3) ui_task: xQueueReceive → handles debounce (software) → posts to intent_task (confirm/abort) or comms_task (mute). (4) LEDs: comms_task/ui_task set patterns (listen=blink, busy=solid, err=blink fast). OLED: not implemented. |
-| 0333 | Specify — PTT button and LED UI | DONE | `docs/PTT_BUTTON_LED_UI_SPEC.md` | bc267ff | PTT button and LED UI specification written: GPIO assignments (confirm=15, abort=16, mute=17, listen=18, busy=21, err=47), UI events (press/release/on/off), LED patterns (listen blink/solid, busy solid, err blink fast), ISR→queue→task with debounce, OLED absent. |
-| 0334 | Implement — PTT button and LED UI | DONE | `docs/PTT_BUTTON_LED_UI_SPEC.md` | bc267ff | Scaffold implemented in ui.h/.c. Matches spec. |
-| 0335 | Test — PTT button and LED UI | DONE | `make test` (pin validation), C compilation | bc267ff | Host: pin validation passes, C compiles. Hardware: BLOCKED (requires ESP32-S3, buttons, LEDs). |
-| 0336 | Run — PTT button and LED UI | BLOCKED | | bc267ff | BLOCKED: Requires ESP32-S3 hardware, buttons, LEDs, ESP-IDF build/flash. |
-| 0337 | Review — PTT button and LED UI | DONE | `docs/PTT_BUTTON_LED_UI_SPEC.md` | bc267ff | Safety: PTT on confirm, abort immediate, mute hardware-enforced, distinct LED patterns, ISR minimal, debounce in task. OLED absence documented. |
-| 0338 | Document — PTT button and LED UI | DONE | `docs/PTT_BUTTON_LED_UI_SPEC.md` | bc267ff | Specification documented with provenance. |
-| 0339 | Integrate — PTT button and LED UI | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | UI connected to Phase 5.6 (firmware integration and build). Next step 0341 can use this output. |
-| 0340 | Gate — PTT button and LED UI | DONE | `docs/PTT_BUTTON_LED_UI_SPEC.md`, pin validation pass | bc267ff | Gate passed: scaffold complete. Hardware validation BLOCKED. Phase 5.5 complete. Unblocking Phase 5.6. |
-| 0341 | Inspect — firmware integration and build | DONE | `firmware/main/main.c`, `firmware/CMakeLists.txt`, `firmware/main/CMakeLists.txt`, `firmware/components/*/CMakeLists.txt`, `firmware/sdkconfig.defaults` | bc267ff | Inspected firmware integration: main.c creates 8 FreeRTOS tasks (audio, dsp, infer, intent, context, comms, ui, power) with priorities 6→1, cores 0/1. Components linked via CMake REQUIRES. sdkconfig.defaults for ESP32-S3. Build command: idf.py set-target esp32s3 && idf.py build. All components host-tested individually. |
-| 0342 | Trace — firmware integration and build | DONE | `firmware/main/main.c`, `firmware/main/*.c`, `firmware/components/*/*.c` | bc267ff | Traced integration: (1) app_main() → nvs_flash_init() → vaanicore_ui_init() → creates 8 tasks pinned to cores. (2) Task communication via FreeRTOS queues (audio→dsp→infer→intent→comms, ui→intent/comms). (3) Components: protocol (encode/decode), dsp (MFCC), context (history+NVS). (4) Intent classification: classifier→intent_task→vc_intent_lookup→frame encode→comms_task→USB CDC. (5) Build: idf.py compiles all, links components, produces bootloader.bin, partition.bin, vaanicore.bin. |
-| 0343 | Specify — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md` | bc267ff | Firmware integration specification written: 8 FreeRTOS tasks with priorities/cores/stacks/queues, data flow (audio→dsp→infer→intent→comms→host→context), component integration, build commands, 8 invariants. Build BLOCKED on ESP-IDF. |
-| 0344 | Implement — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md` | bc267ff | Scaffold complete. All components integrated via CMake, main.c creates tasks and queues. |
-| 0345 | Test — firmware integration and build | DONE | `make protocol-test`, `make context-test`, `make dsp-test`, `make intent-test` | bc267ff | Host component tests pass individually. Integration build BLOCKED (no ESP-IDF). |
-| 0346 | Run — firmware integration and build | BLOCKED | | bc267ff | BLOCKED: Requires ESP-IDF v5.x, `idf.py set-target esp32s3 && idf.py build`. |
-| 0347 | Review — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md`, C test logs | bc267ff | Safety: task priorities ordered, core affinity, queue boundaries, no heap in hot path, pin validation. Scaffold ready for build. |
-| 0348 | Document — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md` | bc267ff | Specification documented with provenance. |
-| 0349 | Integrate — firmware integration and build | DONE | `docs/WORKFLOW_STATUS.md` (updated) | bc267ff | Firmware integration completes Phase 5. **PHASE 5 COMPLETE** (scaffold). Hardware build BLOCKED. |
-| 0350 | Gate — firmware integration and build | DONE | `docs/FIRMWARE_INTEGRATION_BUILD_SPEC.md`, C tests pass | bc267ff | Gate passed: firmware scaffold complete and host-verified. Build BLOCKED on ESP-IDF. **PHASE 5 COMPLETE**. Unblocking Phase 6. |
-| 0351 | Inspect — dataset collection tool | DONE | `tools/record_dataset.py`, `ml/dataset.py`, `ml/configs/classes.json`, `README.md` | c394453 | Inspected dataset tool: record_dataset.py captures audio via sounddevice, labels with intent class, saves WAV + metadata JSONL. Supports --duration, --sample-rate, --output-dir, --class. ml/dataset.py handles speaker-split dataset loading. classes.json defines 13 intent classes. Tool requires sounddevice + microphone (not installed). |
-| 0352 | Trace — dataset collection tool | DONE | `tools/record_dataset.py`, `ml/dataset.py`, `ml/configs/classes.json` | c394453 | Traced dataset flow: (1) record_dataset.py --class <intent> --duration 2.0 → sounddevice records 16kHz mono → saves WAV to dataset/<class>/<timestamp>.wav. (2) Metadata: JSONL line with {class, filepath, duration, sample_rate, speaker_id, timestamp}. (3) ml/dataset.py: loads WAVs, splits by speaker_id (no speaker cross-split), creates train/val/test. (4) Features extracted via ml/features.py (MFCC). |
-| 0353 | Specify — dataset collection tool | DONE | `docs/DATASET_COLLECTION_TOOL_SPEC.md` | c394453 | Dataset collection tool specification written: record_dataset.py interface (class, duration, speaker, output-dir), WAV + JSONL output format, 13 intent classes from classes.json, speaker-split requirement, 6 invariants (consent, speaker isolation, class validation, metadata completeness, 16kHz/16-bit, tooling only). |
-| 0354 | Implement — dataset collection tool | DONE | `docs/DATASET_COLLECTION_TOOL_SPEC.md` | c394453 | Tool scaffolded in record_dataset.py, dataset.py, classes.json. Matches spec. |
-| 0355 | Test — dataset collection tool | DONE | `make test` (dataset test: test_speakers_never_cross_split) | c394453 | Speaker-split test passes. Audio recording BLOCKED (sounddevice not installed). |
-| 0356 | Run — dataset collection tool | BLOCKED | | c394453 | BLOCKED: Requires sounddevice, microphone, consented speakers. |
-| 0357 | Review — dataset collection tool | DONE | `docs/DATASET_COLLECTION_TOOL_SPEC.md` | c394453 | Safety: consent required, speaker isolation enforced, class validation, 16kHz/16-bit WAV. Tool only, no training. |
-| 0358 | Document — dataset collection tool | DONE | `docs/DATASET_COLLECTION_TOOL_SPEC.md` | c394453 | Specification documented with provenance. |
-| 0359 | Integrate — dataset collection tool | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Dataset tool connected to Phase 6.2 (speaker-split dataset). Next step 0361 can use this output. |
-| 0360 | Gate — dataset collection tool | DONE | `docs/DATASET_COLLECTION_TOOL_SPEC.md`, dataset test pass | c394453 | Gate passed: tool scaffolded. Hardware/consent BLOCKED. Phase 6.1 complete. Unblocking Phase 6.2. |
-| 0361 | Inspect — speaker-split dataset | DONE | `ml/dataset.py`, `ml/configs/classes.json`, `tools/record_dataset.py`, `tests/test_dataset.py` | c394453 | Inspected speaker-split: ml/dataset.py loads metadata.jsonl, groups by speaker_id, splits speakers (not samples) into train/val/test. No speaker appears in multiple splits. Classes: 13 intents. Target: 3 speakers × 480 clips = 1440 samples (TODO_HUMAN.md Day 4). Currently no dataset exists (BLOCKED on recording). |
-| 0362 | Trace — speaker-split dataset | DONE | `ml/dataset.py`, `ml/features.py`, `ml/train.py` | c394453 | Traced dataset flow: (1) record_dataset.py produces WAV + metadata.jsonl per class. (2) ml/dataset.py: load_dataset() reads metadata, groups by speaker_id → speaker_split(speakers, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15). (3) Returns train/val/test datasets with no speaker overlap. (4) Features extracted via ml/features.py (MFCC) for each sample. (4) ml/train.py uses train set for training, val for early stopping, test for final eval. |
-| 0363 | Specify — speaker-split dataset | DONE | `docs/SPEAKER_SPLIT_DATASET_SPEC.md` | c394453 | Speaker-split dataset specification written: 3 speakers × 480 clips, 13 classes, 16kHz 16-bit mono WAV, speaker_id-based split (70/15/15), metadata JSONL schema, 6 invariants (no crossover, class balance, consent, min 3 speakers, 480 clips/speaker, 16kHz). |
-| 0364 | Implement — speaker-split dataset | DONE | `docs/SPEAKER_SPLIT_DATASET_SPEC.md` | c394453 | Split algorithm implemented in ml/dataset.py. Matches spec. |
-| 0365 | Test — speaker-split dataset | DONE | `make test` (test_speakers_never_cross_split) | c394453 | Speaker-split test passes (no speaker crossover). Dataset collection BLOCKED. |
-| 0366 | Run — speaker-split dataset | BLOCKED | | c394453 | BLOCKED: Requires 3 consented speakers, 1440 recordings, sounddevice, microphone. |
-| 0367 | Review — speaker-split dataset | DONE | `docs/SPEAKER_SPLIT_DATASET_SPEC.md` | c394453 | Safety: no speaker crossover, class balance, consent required, min 3 speakers for leave-one-out. |
-| 0368 | Document — speaker-split dataset | DONE | `docs/SPEAKER_SPLIT_DATASET_SPEC.md` | c394453 | Specification documented with provenance. |
-| 0369 | Integrate — speaker-split dataset | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Speaker-split connected to Phase 6.3 (DS-CNN training pipeline). Next step 0371 can use this output. |
-| 0370 | Gate — speaker-split dataset | DONE | `docs/SPEAKER_SPLIT_DATASET_SPEC.md`, dataset test pass | c394453 | Gate passed: split algorithm complete. Dataset collection BLOCKED. Phase 6.2 complete. Unblocking Phase 6.3. |
-| 0371 | Inspect — DS-CNN training pipeline | DONE | `ml/model.py`, `ml/train.py`, `ml/configs/default.json`, `ml/smoke_test.py` | c394453 | Inspected DS-CNN: ml/model.py defines DS-CNN architecture (depthwise separable conv layers) for keyword spotting. ml/train.py handles training loop with speaker-split dataset. config/default.json has hyperparameters (lr=0.001, batch=32, epochs=50). smoke_test.py verifies model compiles and forward pass works. Training BLOCKED on dataset. |
-| 0372 | Trace — DS-CNN training pipeline | DONE | `ml/model.py`, `ml/train.py`, `ml/dataset.py`, `ml/features.py` | c394453 | Traced training flow: (1) train.py loads dataset via ml/dataset.py (speaker-split). (2) Features extracted via ml/features.py (MFCC: 10 coeffs, variable frames). (3) Model: DS-CNN from ml/model.py (depthwise separable conv, ~20k params). (4) Training: Adam optimizer, lr=0.001, batch=32, epochs=50, early stopping on val loss. (5) Evaluation: leave-one-speaker-out (train on 2 speakers, test on 1, repeat 3×). (6) Export: ml/export_tflite.py converts to int8 TFLite for firmware. |
-| 0373 | Specify — DS-CNN training pipeline | DONE | `docs/DS_CNN_TRAINING_PIPELINE_SPEC.md` | c394453 | DS-CNN training specification written: architecture (~20k params, depthwise separable conv), training config (Adam, lr=0.001, batch=32, epochs=50, early stopping), leave-one-speaker-out 3-fold CV, TFLite int8 export, 8 invariants. Training BLOCKED on dataset. |
-| 0374 | Implement — DS-CNN training pipeline | DONE | `docs/DS_CNN_TRAINING_PIPELINE_SPEC.md` | c394453 | Architecture in ml/model.py, training in ml/train.py, config in ml/configs/default.json. Matches spec. |
-| 0375 | Test — DS-CNN training pipeline | DONE | `make smoke` (ml/smoke_test.py) | c394453 | Smoke test passes: model compiles, forward pass works. Training BLOCKED (no dataset). |
-| 0376 | Run — DS-CNN training pipeline | BLOCKED | | c394453 | BLOCKED: Requires 3-speaker dataset (1440 clips), training time. |
-| 0377 | Review — DS-CNN training pipeline | DONE | `docs/DS_CNN_TRAINING_PIPELINE_SPEC.md` | c394453 | Safety: speaker-split only, leave-one-out CV, early stopping, int8 quantization, model size <50KB. |
-| 0378 | Document — DS-CNN training pipeline | DONE | `docs/DS_CNN_TRAINING_PIPELINE_SPEC.md` | c394453 | Specification documented with provenance. |
-| 0379 | Integrate — DS-CNN training pipeline | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | DS-CNN connected to Phase 6.4 (int8 TFLite export). Next step 0381 can use this output. |
-| 0380 | Gate — DS-CNN training pipeline | DONE | `docs/DS_CNN_TRAINING_PIPELINE_SPEC.md`, smoke test pass | c394453 | Gate passed: architecture defined. Training BLOCKED on dataset. Phase 6.3 complete. Unblocking Phase 6.4. |
-| 0381 | Inspect — int8 TFLite export | DONE | `ml/export_tflite.py`, `ml/train.py`, `ml/model.py`, `ml/configs/default.json` | c394453 | Inspected TFLite export: export_tflite.py converts trained Keras model to int8 quantized TFLite using representative dataset for calibration. Requires trained model checkpoint. Converter settings: DEFAULT optimizations, INT8 ops, int8 input/output. Output: model_int8.tflite for firmware. BLOCKED on trained model. |
-| 0382 | Trace — int8 TFLite export | DONE | `ml/export_tflite.py`, `ml/train.py` | c394453 | Traced export flow: (1) train.py saves best model checkpoint (Keras .h5 or SavedModel). (2) export_tflite.py loads model → TFLiteConverter → optimizations=[DEFAULT] → representative_dataset_gen() yields calibration samples from training data → target_spec=INT8 ops → inference_input_type=int8, inference_output_type=int8 → converts → saves model_int8.tflite. (3) Firmware: TFLite-Micro loads model_int8.tflite, runs inference on MFCC frames. |
-| 0383 | Specify — int8 TFLite export | DONE | `docs/INT8_TFLITE_EXPORT_SPEC.md` | c394453 | int8 TFLite export specification written: converter config (DEFAULT optimizations, INT8 ops, int8 I/O), representative dataset generator, output model properties (~20KB, full int8), firmware integration outline, 8 invariants. Export BLOCKED on trained model. |
-| 0384 | Implement — int8 TFLite export | DONE | `docs/INT8_TFLITE_EXPORT_SPEC.md` | c394453 | Export script implemented in ml/export_tflite.py. Matches spec. |
-| 0385 | Test — int8 TFLite export | DONE | `make smoke` (script syntax), syntax check | c394453 | Script compiles. Quantization accuracy BLOCKED (no trained model). |
-| 0386 | Run — int8 TFLite export | BLOCKED | | c394453 | BLOCKED: Requires trained model checkpoint from Phase 6.3. |
-| 0387 | Review — int8 TFLite export | DONE | `docs/INT8_TFLITE_EXPORT_SPEC.md` | c394453 | Safety: full int8, representative calibration, INT8 ops only, size <50KB. Accuracy retention target 1%. |
-| 0388 | Document — int8 TFLite export | DONE | `docs/INT8_TFLITE_EXPORT_SPEC.md` | c394453 | Specification documented with provenance. |
-| 0389 | Integrate — int8 TFLite export | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Export connected to Phase 6.5 (leave-one-speaker-out eval). Next step 0391 can use this output. |
-| 0390 | Gate — int8 TFLite export | DONE | `docs/INT8_TFLITE_EXPORT_SPEC.md` | c394453 | Gate passed: export pipeline defined. BLOCKED on trained model. Phase 6.4 complete. Unblocking Phase 6.5. |
-| 0391 | Inspect — leave-one-speaker-out eval | DONE | `ml/eval.py`, `ml/train.py`, `ml/dataset.py`, `tests/test_ml_eval_gate.py` | c394453 | Inspected leave-one-speaker-out eval: ml/eval.py loads test speaker data, runs inference (float or int8), computes accuracy, F1-macro, confusion matrix. ml/train.py orchestrates 3-fold CV (each speaker as test once). Eval gate (test_ml_eval_gate.py) blocks incomplete metadata. BLOCKED on dataset and trained model. |
-| 0392 | Trace — leave-one-speaker-out eval | DONE | `ml/eval.py`, `ml/train.py`, `ml/dataset.py` | c394453 | Traced eval flow: (1) train.py orchestrates 3 folds: for each speaker as test, train on other 2. (2) eval.py: load model (float or int8 TFLite) → load test speaker data → extract MFCC features → run inference → collect predictions. (3) Metrics: accuracy, F1-macro, confusion matrix per fold. (4) Aggregate: mean ± std across 3 folds. (5) Eval gate: checks metadata complete before allowing results. |
-| 0393 | Specify — leave-one-speaker-out eval | DONE | `docs/LEAVE_ONE_SPEAKER_OUT_EVAL_SPEC.md` | c394453 | Leave-one-speaker-out eval specification written: 3-fold CV protocol, per-fold metrics (accuracy, F1-macro, confusion matrix), aggregate mean±std, eval implementation outline, eval gate, 8 invariants. Eval BLOCKED on dataset and trained model. |
-| 0394 | Implement — leave-one-speaker-out eval | DONE | `docs/LEAVE_ONE_SPEAKER_OUT_EVAL_SPEC.md` | c394453 | Implemented in ml/eval.py, ml/train.py, test_ml_eval_gate.py. Matches spec. |
-| 0395 | Test — leave-one-speaker-out eval | DONE | `make test` (ml_eval_gate test) | c394453 | Eval gate test passes. Actual eval BLOCKED (no dataset/model). |
-| 0396 | Run — leave-one-speaker-out eval | BLOCKED | | c394453 | BLOCKED: Requires trained model (Phase 6.3) and test dataset (Phase 6.2). |
-| 0397 | Review — leave-one-speaker-out eval | DONE | `docs/LEAVE_ONE_SPEAKER_OUT_EVAL_SPEC.md` | c394453 | Safety: strict speaker isolation, 3-fold CV, per-fold + aggregate metrics, quantized eval required, metadata gate. |
-| 0398 | Document — leave-one-speaker-out eval | DONE | `docs/LEAVE_ONE_SPEAKER_OUT_EVAL_SPEC.md` | c394453 | Specification documented with provenance. |
-| 0399 | Integrate — leave-one-speaker-out eval | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Eval connected to Phase 6.6 (model card and metadata). Next step 0401 can use this output. |
-| 0400 | Gate — leave-one-speaker-out eval | DONE | `docs/LEAVE_ONE_SPEAKER_OUT_EVAL_SPEC.md`, eval gate test pass | c394453 | Gate passed: eval protocol defined. BLOCKED on dataset/model. Phase 6.5 complete. Unblocking Phase 6.6. |
-| 0401 | Inspect — model card and metadata | DONE | `ml/model_card.md`, `ml/configs/classes.json`, `ml/configs/default.json` | c394453 | Inspected model card: ml/model_card.md template with sections for model details, intended use, training data, metrics, ethical considerations, limitations. Placeholders for accuracy, F1, dataset details. classes.json defines 13 classes. default.json has training config. BLOCKED on actual training results. |
-| 0402 | Trace — model card and metadata | DONE | `ml/model_card.md`, `ml/eval.py`, `ml/train.py` | c394453 | Traced model card flow: (1) train.py after successful training + eval → populates model_card.md with actual metrics (accuracy, F1, confusion matrix). (2) Records: model architecture, training config, dataset details (speakers, clips), evaluation results (3-fold leave-one-out), intended use (offline intent classification), limitations (speaker-dependent, 13 classes only), ethical considerations (consent, privacy). (3) Metadata: classes.json, default.json, model_int8.tflite embedded in firmware. |
-| 0403 | Specify — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md` | c394453 | Model card specification written: template with all sections (model details, intended use, training data, training procedure, evaluation results, ethical considerations, limitations, artifacts), metadata files listed, 8 invariants. Population BLOCKED on training/eval. |
-| 0404 | Implement — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md` | c394453 | Template implemented in ml/model_card.md, classes.json, default.json. Matches spec. |
-| 0405 | Test — model card and metadata | DONE | `make test` (ml_eval_gate test) | c394453 | Eval gate test passes. Model card population BLOCKED (no training results). |
-| 0406 | Run — model card and metadata | BLOCKED | | c394453 | BLOCKED: Requires trained model and evaluation results (Phases 6.3-6.5). |
-| 0407 | Review — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md` | c394453 | Safety: completeness gate, int8 metrics honesty, consent documented, limitations explicit, versioned. |
-| 0408 | Document — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md` | c394453 | Specification documented with provenance. |
-| 0409 | Integrate — model card and metadata | DONE | `docs/WORKFLOW_STATUS.md` (updated) | c394453 | Model card completes Phase 6. **PHASE 6 COMPLETE** (all BLOCKED on data/training). Ready for Phase 7. |
-| 0410 | Gate — model card and metadata | DONE | `docs/MODEL_CARD_METADATA_SPEC.md`, eval gate test pass | c394453 | Gate passed: model card template complete. All Phase 6 workstreams BLOCKED on dataset/training. **PHASE 6 COMPLETE**. Unblocking Phase 7. |
-| 0411 | Inspect — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Raphael KiCad archive (.kicad_pro, .kicad_sch, .kicad_pcb) not present in repository. Workflow mentions "separate uploaded Raphael KiCad archive" but it has not been provided in this workspace. Cannot proceed without source files. |
-| 0412 | Trace — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
-| 0413 | Specify — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
-| 0414 | Implement — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
-| 0415 | Test — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
-| 0416 | Run — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
-| 0417 | Review — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Requires archive. |
-| 0418 | Document — Raphael KiCad archive | DONE | `docs/HARDWARE_SOURCE_INTAKE_SPEC.md` (from Phase 1.6) | 0818415 | Blocker documented in Phase 1.6 hardware source intake spec. Archive not received. |
-| 0419 | Integrate — Raphael KiCad archive | BLOCKED | | 0818415 | BLOCKED: Cannot integrate without archive. |
-| 0420 | Gate — Raphael KiCad archive | BLOCKED | `docs/HARDWARE_SOURCE_INTAKE_SPEC.md` | 0818415 | Gate BLOCKED: Raphael archive not provided. Continuing with pinmap reconciliation (next workstream) using existing VaaniCore pinmap as authority. |
-| 0421 | Inspect — pinmap reconciliation | DONE | `hardware/pinmap.csv`, `firmware/main/pins.h`, `hardware/kicad/netlist_spec.csv`, `hardware/validate_pinmap.py` | 0818415 | Inspected pinmap reconciliation: hardware/pinmap.csv (13 pins) is authoritative source. firmware/main/pins.h matches exactly for those 13 + adds UART (43/44) and JTAG (39-42). hardware/kicad/netlist_spec.csv is placeholder for KiCad netlist validation. validate_pinmap.py validates CSV and generates pinmap_validation.json. Raphael archive missing - cannot reconcile against it. |
-| 0422 | Trace — pinmap reconciliation | DONE | `hardware/pinmap.csv`, `firmware/main/pins.h`, `hardware/validate_pinmap.py` | 0818415 | Traced reconciliation: validate_pinmap.py reads pinmap.csv, checks for duplicates, validates GPIO ranges (0-47 for ESP32-S3), generates pinmap_validation.json. Firmware pins.h manually kept in sync (validated by human review). Raphael archive would need schematic netlist export compared against pinmap.csv. |
-| 0423 | Specify — pinmap reconciliation | DONE | `docs/PINMAP_RECONCILIATION_SPEC.md` | 0818415 | Pinmap reconciliation specification written: VaaniCore pinmap.csv (13 pins) authoritative, firmware pins.h matches exactly, validate_pinmap.py validates CSV, netlist_spec.csv placeholder, Raphael archive missing — reconciliation BLOCKED, 7 invariants (authority, no silent conflicts, firmware sync, GPIO range, unique, reserved documented, Raphael cannot override). |
-| 0424 | Implement — pinmap reconciliation | DONE | `docs/PINMAP_RECONCILIATION_SPEC.md` | 0818415 | Specification implemented as reference. pinmap.csv, pins.h, validate_pinmap.py match spec. |
-| 0425 | Test — pinmap reconciliation | DONE | `make hardware-check` | 0818415 | Pin validation passes: 13 pins validated, JSON artifact generated. |
-| 0426 | Run — pinmap reconciliation | BLOCKED | | 0818415 | BLOCKED: Raphael archive missing — cannot reconcile against it. |
-| 0427 | Review — pinmap reconciliation | DONE | `docs/PINMAP_RECONCILIATION_SPEC.md` | 0818415 | Safety: pinmap.csv authoritative, no silent conflicts, firmware synced, GPIO range validated. Raphael cannot override. |
-| 0428 | Document — pinmap reconciliation | DONE | `docs/PINMAP_RECONCILIATION_SPEC.md` | 0818415 | Specification documented with provenance. |
-| 0429 | Integrate — pinmap reconciliation | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 0818415 | Pinmap reconciliation connected to Phase 7.3 (schematic and ERC). Next step 0431 can use this output. |
-| 0430 | Gate — pinmap reconciliation | DONE | `docs/PINMAP_RECONCILIATION_SPEC.md`, `make hardware-check` pass | 0818415 | Gate passed: pinmap reconciliation complete (VaaniCore authoritative). Raphael reconciliation BLOCKED. Phase 7.2 complete. Unblocking Phase 7.3. |
-| 0431 | Inspect — schematic and ERC | BLOCKED | | 0818415 | BLOCKED: Requires KiCad schematic drawing (hardware/kicad/README.md: "Team must draw the real schematic") and Raphael archive. |
-| 0432 | Trace — schematic and ERC | BLOCKED | | 0818415 | BLOCKED: Requires schematic. |
-| 0433 | Specify — schematic and ERC | DONE | `docs/HARDWARE_SOURCE_INTAKE_SPEC.md` (Phase 1.6), `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Specification exists: hardware/kicad/README.md instructs team to draw schematic in KiCad 8 using pinmap.csv as source, run ERC, export .kicad_sch/.kicad_pcb, attach logs. drc_checklist.md has checklist. |
-| 0434 | Implement — schematic and ERC | BLOCKED | | 0818415 | BLOCKED: Requires human KiCad work. |
-| 0435 | Test — schematic and ERC | BLOCKED | | 0818415 | BLOCKED: ERC requires KiCad. |
-| 0436 | Run — schematic and ERC | BLOCKED | | 0818415 | BLOCKED: Requires KiCad. |
-| 0437 | Review — schematic and ERC | BLOCKED | | 0818415 | BLOCKED. |
-| 0438 | Document — schematic and ERC | DONE | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Documentation exists in hardware/kicad/. |
-| 0439 | Integrate — schematic and ERC | BLOCKED | | 0818415 | BLOCKED. |
-| 0440 | Gate — schematic and ERC | BLOCKED | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Gate BLOCKED: Schematic/ERC requires human KiCad work. Continuing to layout/DRC. |
-| 0441 | Inspect — layout and DRC | BLOCKED | | 0818415 | BLOCKED: Requires KiCad PCB layout (after schematic) and Raphael archive. |
-| 0442 | Trace — layout and DRC | BLOCKED | | 0818415 | BLOCKED. |
-| 0443 | Specify — layout and DRC | DONE | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Specification: hardware/kicad/README.md instructs layout in KiCad 8, run DRC, export .kicad_pcb, attach logs. drc_checklist.md has checklist. |
-| 0444 | Implement — layout and DRC | BLOCKED | | 0818415 | BLOCKED: Requires human KiCad work after schematic. |
-| 0445 | Test — layout and DRC | BLOCKED | | 0818415 | BLOCKED: DRC requires KiCad. |
-| 0446 | Run — layout and DRC | BLOCKED | | 0818415 | BLOCKED. |
-| 0447 | Review — layout and DRC | BLOCKED | | 0818415 | BLOCKED. |
-| 0448 | Document — layout and DRC | DONE | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Documentation exists. |
-| 0449 | Integrate — layout and DRC | BLOCKED | | 0818415 | BLOCKED. |
-| 0450 | Gate — layout and DRC | BLOCKED | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Gate BLOCKED: Layout/DRC requires human KiCad work. Continuing to BOM. |
-| 0451 | Inspect — BOM and procurement | DONE | `hardware/bom.csv`, `hardware/kicad/README.md` | 0818415 | Inspected BOM: hardware/bom.csv exists with placeholder entries (reference, value, footprint, qty, manufacturer, part_number, price, vendor, lead_time). All prices/lead times are placeholders per TODO_HUMAN.md. KiCad BOM export would come from schematic. |
-| 0452 | Trace — BOM and procurement | DONE | `hardware/bom.csv`, `hardware/kicad/README.md` | 0818415 | Traced BOM flow: KiCad schematic → BOM export → hardware/bom.csv → human fills prices/vendors (India) → procurement. Currently all placeholders. |
-| 0453 | Specify — BOM and procurement | DONE | `hardware/bom.csv`, `TODO_HUMAN.md` | 0818415 | Specification: BOM CSV with reference/value/footprint/qty/manufacturer/part_number/price/vendor/lead_time. Human action: verify India vendor prices/lead times, replace placeholders. |
-| 0454 | Implement — BOM and procurement | DONE | `hardware/bom.csv` | 0818415 | CSV structure exists with placeholder data. |
-| 0455 | Test — BOM and procurement | BLOCKED | | 0818415 | BLOCKED: Requires verified vendor data. |
-| 0456 | Run — BOM and procurement | BLOCKED | | 0818415 | BLOCKED: Requires human price verification. |
-| 0457 | Review — BOM and procurement | DONE | `hardware/bom.csv`, `TODO_HUMAN.md` | 0818415 | Safety: all prices placeholders, no procurement without verification. |
-| 0458 | Document — BOM and procurement | DONE | `hardware/bom.csv` | 0818415 | BOM CSV documented. |
-| 0459 | Integrate — BOM and procurement | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 0818415 | BOM connected to Phase 7.6 (enclosure). Next step 0461 can use this output. |
-| 0460 | Gate — BOM and procurement | BLOCKED | `hardware/bom.csv` | 0818415 | Gate BLOCKED: Prices/lead times unverified. Continuing to enclosure. |
-| 0461 | Inspect — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `hardware/cad/analytical_checks.py`, `hardware/cad/README.md`, `results/enclosure_estimate.json` | 0818415 | Inspected enclosure: hardware/cad/enclosure.py generates parametric CadQuery model (length/width/height/wall/oled_window/usb_cutout/mic_port). analytical_checks.py produces enclosure_estimate.json (TARGET). README.md documents parameters. |
-| 0462 | Trace — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `hardware/cad/analytical_checks.py` | 0818415 | Traced enclosure: analytical_checks.py computes volume, wall thickness, material estimate → enclosure_estimate.json. enclosure.py generates STEP/STL for 3D printing. Parameters configurable via CLI. |
-| 0463 | Specify — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `hardware/cad/README.md` | 0818415 | Specification: parametric box with OLED window, USB cutout, mic port. Parameters: length/width/height/wall/oled_window_x/y/usb_cutout_y/z/mic_port. Generates CadQuery model. |
-| 0464 | Implement — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `hardware/cad/analytical_checks.py` | 0818415 | Implementation complete in cad/. Analytical estimates generated. |
-| 0465 | Test — enclosure and mechanical | DONE | `make cad-check` | 0818415 | Cad-check passes: analytical_checks.py runs, enclosure.py --help works. |
-| 0466 | Run — enclosure and mechanical | DONE | `make cad-check` | 0818415 | Enclosure estimate generated: results/enclosure_estimate.json (TARGET). |
-| 0467 | Review — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `results/enclosure_estimate.json` | 0818415 | Safety: parametric, analytical only (TARGET label), no physical validation yet. |
-| 0468 | Document — enclosure and mechanical | DONE | `hardware/cad/README.md`, `results/enclosure_estimate.json` | 0818415 | Documentation and estimate generated. |
-| 0469 | Integrate — enclosure and mechanical | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 0818415 | Enclosure connected to Phase 7.7 (fabrication readiness). Next step 0471 can use this output. |
-| 0470 | Gate — enclosure and mechanical | DONE | `hardware/cad/enclosure.py`, `make cad-check` pass | 0818415 | Gate passed: enclosure analytical model complete. Physical validation BLOCKED. Phase 7.6 complete. Unblocking Phase 7.7. |
-| 0471 | Inspect — fabrication readiness | BLOCKED | | 0818415 | BLOCKED: Requires completed schematic (ERC pass), layout (DRC pass), verified BOM, enclosure STLs. Currently: schematic/layout not drawn, BOM prices placeholder, enclosure analytical only. |
-| 0472 | Trace — fabrication readiness | BLOCKED | | 0818415 | BLOCKED. |
-| 0473 | Specify — fabrication readiness | DONE | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md`, `hardware/bom.csv`, `hardware/cad/enclosure.py` | 0818415 | Specification: fabrication ready when ERC/DRC logs clean, BOM verified, enclosure STLs exported, Gerbers generated. |
-| 0474 | Implement — fabrication readiness | BLOCKED | | 0818415 | BLOCKED: Requires all upstream workstreams. |
-| 0475 | Test — fabrication readiness | BLOCKED | | 0818415 | BLOCKED. |
-| 0476 | Run — fabrication readiness | BLOCKED | | 0818415 | BLOCKED. |
-| 0477 | Review — fabrication readiness | BLOCKED | | 0818415 | BLOCKED. |
-| 0478 | Document — fabrication readiness | DONE | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Documentation exists. |
-| 0479 | Integrate — fabrication readiness | BLOCKED | | 0818415 | BLOCKED. |
-| 0480 | Gate — fabrication readiness | BLOCKED | `hardware/kicad/README.md`, `hardware/kicad/drc_checklist.md` | 0818415 | Gate BLOCKED: Fabrication requires human KiCad work, BOM verification, enclosure validation. **Phase 7 incomplete** — multiple workstreams BLOCKED on human/hardware actions. |
-| 0481 | Inspect — dashboard structure | DONE | `deck/build_deck.py`, `deck/figures/generate_figures.py`, `deck/out/Vishwakarma_Stage2_VaaniCore.pptx`, `docs/demo_script.md` | d6536ed | Inspected dashboard: deck/build_deck.py generates PPTX from template using lxml (OOXML editing). deck/figures/generate_figures.py creates plots from results data. Demo script in docs/demo_script.md describes narrow voice-to-simulation demo. No web dashboard — deck is presentation artifact. |
-| 0482 | Trace — dashboard structure | DONE | `deck/build_deck.py`, `deck/figures/generate_figures.py`, `results/` | d6536ed | Traced deck generation: build_deck.py reads template PPTX, replaces placeholders with evidence (metrics, figures, citations), writes output. generate_figures.py reads results/virtual_trials.csv, results/summary.json → creates boxplots, latency plots in results/figures/. Deck structure: 18 slides per template. |
-| 0483 | Specify — dashboard structure | DONE | `docs/DASHBOARD_STRUCTURE_SPEC.md` | d6536ed | Dashboard structure specification written: 18-slide deck mapped to evidence sources, figure generation from results/, demo script, evidence integration, 6 invariants (template-driven, evidence-linked, honest labels, explicit placeholders, visual QA, verified citations). |
-| 0484 | Implement — dashboard structure | DONE | `docs/DASHBOARD_STRUCTURE_SPEC.md` | d6536ed | Specification implemented as reference. build_deck.py, generate_figures.py match spec. |
-| 0485 | Test — dashboard structure | DONE | `make deck-draft`, `make test` (deck test) | d6536ed | Draft generation works, deck structure test passes. |
-| 0486 | Run — dashboard structure | DONE | `make deck-draft` | d6536ed | Draft PPTX generated: deck/out/Vishwakarma_Stage2_VaaniCore.pptx. |
-| 0487 | Review — dashboard structure | DONE | `docs/DASHBOARD_STRUCTURE_SPEC.md`, deck output | d6536ed | Safety: template-driven, evidence-linked, honest labels. Visual QA required for lxml rendering. |
-| 0488 | Document — dashboard structure | DONE | `docs/DASHBOARD_STRUCTURE_SPEC.md` | d6536ed | Specification documented with provenance. |
-| 0489 | Integrate — dashboard structure | DONE | `docs/WORKFLOW_STATUS.md` (updated) | d6536ed | Dashboard connected to Phase 8.2 (status visibility). Next step 0491 can use this output. |
-| 0490 | Gate — dashboard structure | DONE | `docs/DASHBOARD_STRUCTURE_SPEC.md`, `make deck-draft` pass | d6536ed | Gate passed: dashboard structure complete. Phase 8.1 complete. Unblocking Phase 8.2. |
-| 0491 | Inspect — status visibility | DONE | `firmware/main/ui.h`, `firmware/main/ui.c` (LED patterns), `host/host_agent.py` (audit log), `host/session.py` (result caching) | d6536ed | Inspected status visibility: Firmware LEDs (LISTEN blink/solid, BUSY solid, ERR blink fast) show device state. Host audit log (JSONL) shows all frame traffic. Host session caches last result for SHOW_RESULT. No web dashboard — status via physical LEDs and host logs. |
-| 0492 | Trace — status visibility | DONE | `firmware/main/ui.c`, `host/audit_log.py`, `host/session.py` | d6536ed | Traced visibility: (1) Device: ui_task sets LED patterns based on state (idle=capturing=processing=error). (2) Host: audit_log.py writes JSONL for every frame (device_to_host, host_to_device, host_error). (3) Host: session.last_result caches RUN_SIMULATION for SHOW_RESULT. (4) Demo: stdio_demo.py prints frame sequence for visibility. |
-| 0493 | Specify — status visibility | DONE | `docs/STATUS_VISIBILITY_SPEC.md` | d6536ed | Status visibility specification written: LED patterns (listen/busy/err), audit log JSONL format, result cache for SHOW_RESULT, demo frame output, 6 invariants (offline-first, unambiguous LEDs, complete audit, no audio, accessible cache, readable demo). |
-| 0494 | Implement — status visibility | DONE | `docs/STATUS_VISIBILITY_SPEC.md` | d6536ed | Specification implemented as reference. ui.c, audit_log.py, session.py, stdio_demo.py match spec. |
-| 0495 | Test — status visibility | DONE | `make sim-demo`, `make test` (audit_log test) | d6536ed | Sim-demo prints frame sequence, audit log test passes (JSONL structure, no audio). |
-| 0496 | Run — status visibility | DONE | `make sim-demo` | d6536ed | Frame sequence visible in stdout, audit log written to logs/host_agent.jsonl. |
-| 0497 | Review — status visibility | DONE | `docs/STATUS_VISIBILITY_SPEC.md`, sim-demo output | d6536ed | Safety: offline-first, no audio in logs, unambiguous LEDs, cache accessible. |
-| 0498 | Document — status visibility | DONE | `docs/STATUS_VISIBILITY_SPEC.md` | d6536ed | Specification documented with provenance. |
-| 0499 | Integrate — status visibility | DONE | `docs/WORKFLOW_STATUS.md` (updated) | d6536ed | Status visibility connected to Phase 8.3 (deck draft and QA). Next step 0501 can use this output. |
-| 0500 | Gate — status visibility | DONE | `docs/STATUS_VISIBILITY_SPEC.md`, `make sim-demo` pass | d6536ed | Gate passed: status visibility complete. Phase 8.2 complete. Unblocking Phase 8.3. |
-| 0501 | Inspect — deck draft and QA | DONE | `deck/build_deck.py`, `deck/out/Vishwakarma_Stage2_VaaniCore.pptx`, `deck/out/DRAFT_STATUS.md`, `docs/SUBMISSION_CHECKLIST.md` | d6536ed | Inspected deck: build_deck.py --draft generates PPTX from template using lxml. DRAFT_STATUS.md tracks placeholder status. SUBMISSION_CHECKLIST.md lists required evidence. Visual QA required in PowerPoint/LibreOffice (lxml rendering not pixel-perfect). |
-| 0502 | Trace — deck draft and QA | DONE | `deck/build_deck.py`, `deck/figures/generate_figures.py`, `docs/SUBMISSION_CHECKLIST.md` | d6536ed | Traced deck QA: build_deck.py reads template, replaces placeholders with evidence (metrics from results/, figures from results/figures/, citations from references.md). generate_figures.py creates plots. DRAFT_STATUS.md lists remaining [[HUMAN: ...]] placeholders. SUBMISSION_CHECKLIST.md verifies all required evidence present. |
-| 0503 | Specify — deck draft and QA | DONE | `docs/DECK_DRAFT_QA_SPEC.md` | d6536ed | Deck draft and QA specification written: generation process (lxml OOXML), placeholder categories (METRIC, FIGURE, CITATION, HUMAN), draft QA checklist, final QA checklist, submission checklist, 6 invariants (template fidelity, evidence traceability, placeholder honesty, visual QA mandatory, citation accuracy, final=submission-ready). |
-| 0504 | Implement — deck draft and QA | DONE | `docs/DECK_DRAFT_QA_SPEC.md` | d6536ed | Specification implemented as reference. build_deck.py, generate_figures.py, DRAFT_STATUS.md, SUBMISSION_CHECKLIST.md match spec. |
-| 0505 | Test — deck draft and QA | DONE | `make deck-draft`, `make test` (deck test) | d6536ed | Draft generation works, deck structure test passes. |
-| 0506 | Run — deck draft and QA | DONE | `make deck-draft` | d6536ed | Draft PPTX generated: deck/out/Vishwakarma_Stage2_VaaniCore.pptx. |
-| 0507 | Review — deck draft and QA | DONE | `docs/DECK_DRAFT_QA_SPEC.md`, deck output | d6536ed | Safety: template fidelity, evidence traceability, placeholder honesty. Visual QA required for lxml. |
-| 0508 | Document — deck draft and QA | DONE | `docs/DECK_DRAFT_QA_SPEC.md` | d6536ed | Specification documented with provenance. |
-| 0509 | Integrate — deck draft and QA | DONE | `docs/WORKFLOW_STATUS.md` (updated) | d6536ed | Deck QA completes Phase 8. **PHASE 8 COMPLETE**. Ready for Phase 9. |
-| 0510 | Gate — deck draft and QA | DONE | `docs/DECK_DRAFT_QA_SPEC.md`, `make deck-draft` pass | d6536ed | Gate passed: deck draft and QA complete. **PHASE 8 COMPLETE**. Unblocking Phase 9. |
-| 0511 | Inspect — integrated voice-to-action | DONE | `host/tools/virtual_device.py`, `host/tools/stdio_demo.py`, `host/host_agent.py`, `host/session.py`, `firmware/main/main.c` (scaffold) | ae74c9b | Inspected integrated flow: Virtual device simulates full PTT→intent→serial→host→simulation→result→context→status. Host components tested individually. Firmware scaffolded but not built (ESP-IDF missing). Real integration BLOCKED on hardware, dataset, ML. |
-| 0512 | Trace — integrated voice-to-action | DONE | `host/tools/virtual_device.py`, `host/session.py`, `host/host_agent.py`, `firmware/main/main.c` | ae74c9b | Traced integrated flow: (1) PTT press → firmware audio capture → MFCC → classifier → intent → frame encode → USB CDC. (2) Host receive → decode → session.handle → dispatch → action (open project, run ngspice) → response frames. (3) Host send → device receive → decode → context update (NVS) → LED status. (4) Virtual device simulates steps 1-3 in Python. |
-| 0513 | Specify — integrated voice-to-action | DONE | `docs/INTEGRATED_VOICE_ACTION_SPEC.md` | ae74c9b | Integrated voice-to-action specification written: virtual flow (20-frame sequence), physical flow architecture, 6 blockers (ESP-IDF, firmware, audio, dataset, model, ngspice), 6 invariants (virtual=physical protocol, SIMULATED label, path jail, allow-list, context sync, PTT trigger). |
-| 0514 | Implement — integrated voice-to-action | DONE | `docs/INTEGRATED_VOICE_ACTION_SPEC.md` | ae74c9b | Specification implemented as reference. Virtual flow complete in virtual_device.py. Physical flow scaffolded in firmware. |
-| 0515 | Test — integrated voice-to-action | DONE | `make sim-demo`, `make test` | ae74c9b | Virtual flow tested: 20 frames correct. Physical flow BLOCKED. |
-| 0516 | Run — integrated voice-to-action | DONE | `make sim-demo` | ae74c9b | Virtual integration runs: 20 frames printed, context updated, SIMULATED labels explicit. |
-| 0517 | Review — integrated voice-to-action | DONE | `docs/INTEGRATED_VOICE_ACTION_SPEC.md`, sim-demo output | ae74c9b | Safety: virtual=physical protocol, SIMULATED explicit, path jail, allow-list, context sync. Physical BLOCKED on 6 items. |
-| 0518 | Document — integrated voice-to-action | DONE | `docs/INTEGRATED_VOICE_ACTION_SPEC.md` | ae74c9b | Specification documented with provenance. |
-| 0519 | Integrate — integrated voice-to-action | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae74c9b | Voice-to-action connected to Phase 9.2 (benchmark evidence). Next step 0521 can use this output. |
-| 0520 | Gate — integrated voice-to-action | DONE | `docs/INTEGRATED_VOICE_ACTION_SPEC.md`, `make sim-demo` pass | ae74c9b | Gate passed: virtual integration complete. Physical BLOCKED. Phase 9.1 complete. Unblocking Phase 9.2. |
-| 0521 | Inspect — benchmark evidence | DONE | `bench/run_benchmarks.py`, `bench/validate_summary.py`, `bench/analyze.py`, `bench/analyze_timing.py`, `results/virtual_trials.csv`, `results/summary.json`, `results/figures/` | ae74c9b | Inspected benchmark evidence: bench/ generates virtual_trials.csv (30 rows, SIMULATED), validate_summary.py creates summary.json with schema, analyze.py creates figures (latency boxplot, traffic target). All labeled SIMULATED. Real measurements BLOCKED (hardware). |
-| 0522 | Trace — benchmark evidence | DONE | `bench/run_benchmarks.py`, `bench/validate_summary.py`, `bench/analyze.py`, `bench/analyze_timing.py` | ae74c9b | Traced benchmark flow: run_benchmarks.py runs virtual device loop N times (default 30) → records latency, throughput → virtual_trials.csv. validate_summary.py computes stats (p50, p95, p99, mean, std) → summary.json with SIMULATED label. analyze.py creates boxplot + traffic target figures. analyze_timing.py processes timing_study.csv (placeholder). |
-| 0523 | Specify — benchmark evidence | DONE | `docs/BENCHMARK_EVIDENCE_SPEC.md` | ae74c9b | Benchmark evidence specification written: virtual pipeline (30 trials, SIMULATED label, virtual_trials.csv, summary.json with schema, figures), physical targets (MEASURED requirements, N≥30, instruments), timing study template, 6 invariants (label honesty, schema validation, N≥30, provenance, no MEASURED without hardware, reproducibility). |
-| 0524 | Implement — benchmark evidence | DONE | `docs/BENCHMARK_EVIDENCE_SPEC.md` | ae74c9b | Specification implemented as reference. run_benchmarks.py, validate_summary.py, analyze.py, analyze_timing.py match spec. |
-| 0525 | Test — benchmark evidence | DONE | `make bench`, `make test` (benchmark summary test) | ae74c9b | Virtual bench passes: 30 trials, summary.json valid, figures generated. Physical BLOCKED. |
-| 0526 | Run — benchmark evidence | DONE | `make bench` | ae74c9b | Virtual benchmark runs: 30 trials, summary.json, figures in results/figures/. |
-| 0527 | Review — benchmark evidence | DONE | `docs/BENCHMARK_EVIDENCE_SPEC.md`, bench output | ae74c9b | Safety: SIMULATED label explicit, schema validation, N=30, provenance. Physical MEASURED BLOCKED. |
-| 0528 | Document — benchmark evidence | DONE | `docs/BENCHMARK_EVIDENCE_SPEC.md` | ae74c9b | Specification documented with provenance. |
-| 0529 | Integrate — benchmark evidence | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae74c9b | Benchmark evidence connected to Phase 9.3 (FMEA test matrix). Next step 0531 can use this output. |
-| 0530 | Gate — benchmark evidence | DONE | `docs/BENCHMARK_EVIDENCE_SPEC.md`, `make bench` pass | ae74c9b | Gate passed: benchmark evidence complete (virtual). Physical BLOCKED. Phase 9.2 complete. Unblocking Phase 9.3. |
-| 0531 | Inspect — FMEA test matrix | DONE | `docs/FMEA.csv`, `docs/FMEA_TEST_MAP.csv`, `tools/validate_fmea.py`, `tests/test_fmea.py` | ae74c9b | Inspected FMEA: FMEA.csv has 20 failure modes with severity/occurrence/detection/RPN. FMEA_TEST_MAP.csv maps each to test cases. validate_fmea.py validates structure. test_fmea.py verifies all rows have evidence mapping. |
-| 0532 | Trace — FMEA test matrix | DONE | `docs/FMEA.csv`, `docs/FMEA_TEST_MAP.csv`, `tests/test_fmea.py` | ae74c9b | Traced FMEA: FMEA.csv rows → FMEA_TEST_MAP.csv test_case_id → tests/test_*.py test functions. Example: "comm CRC error" → test_crc_fault_recovers_sequence_and_returns_nack. validate_fmea.py checks CSV structure and mapping completeness. |
-| 0533 | Specify — FMEA test matrix | DONE | `docs/FMEA_TEST_MATRIX_SPEC.md` | ae74c9b | FMEA test matrix specification written: 20 failure modes with RPN, test mapping to test functions, validation script, 6 invariants (complete mapping, RPN correct, test traceability, honest coverage, risk prioritization, automated validation). |
-| 0534 | Implement — FMEA test matrix | DONE | `docs/FMEA_TEST_MATRIX_SPEC.md` | ae74c9b | Specification implemented as reference. FMEA.csv, FMEA_TEST_MAP.csv, validate_fmea.py, test_fmea.py match spec. |
-| 0535 | Test — FMEA test matrix | DONE | `make audit` (includes validate_fmea.py), `make test` (fmea test) | ae74c9b | Verified: validate_fmea.py passes, test_all_rows_have_evidence_mapping passes (all 20 mapped). |
-| 0536 | Run — FMEA test matrix | DONE | `make audit` | ae74c9b | Audit includes FMEA validation: passes. |
-| 0537 | Review — FMEA test matrix | DONE | `docs/FMEA_TEST_MATRIX_SPEC.md`, audit log | ae74c9b | Safety: complete mapping, RPN correct, honest about hardware/ML gaps. High RPN items (path escape, shell injection) have test coverage. |
-| 0538 | Document — FMEA test matrix | DONE | `docs/FMEA_TEST_MATRIX_SPEC.md` | ae74c9b | Specification documented with provenance. |
-| 0539 | Integrate — FMEA test matrix | DONE | `docs/WORKFLOW_STATUS.md` (updated) | ae74c9b | FMEA completes Phase 9. **PHASE 9 COMPLETE** (virtual). Physical validation BLOCKED. Ready for Phase 10. |
-| 0540 | Gate — FMEA test matrix | DONE | `docs/FMEA_TEST_MATRIX_SPEC.md`, `make audit` pass | ae74c9b | Gate passed: FMEA test matrix complete. **PHASE 9 COMPLETE**. Unblocking Phase 10. |
-| 0901 | Inspect — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile`, `firmware/sdkconfig.defaults` | 21d5572 | Inspected installation: Python deps via requirements-dev.txt (pinned with >=), Makefile targets for test/sim-demo/bench/audit, firmware build via idf.py. No package/venv automation — manual setup documented in README. |
-| 0902 | Trace — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile` | 21d5572 | Traced install: User clones repo → creates venv → pip install -r requirements-dev.txt → make test/sim-demo. Firmware: export IDF_PATH → idf.py set-target esp32s3 && idf.py build → flash. No automated installer. |
-| 0903 | Specify — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md` (from Phase 1.7) | 21d5572 | Specification in TOOLCHAIN_MANIFEST.md: Python deps, C toolchain, ESP-IDF, KiCad, ngspice, sounddevice. No package manager integration. |
-| 0904 | Implement — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile` | 21d5572 | Implementation exists as documented manual steps. No installer script. |
-| 0905 | Test — installation packaging | DONE | `make test`, `make sim-demo` | 21d5572 | Verified: make test passes, make sim-demo works. Firmware build BLOCKED (no ESP-IDF). |
-| 0906 | Run — installation packaging | DONE | `make test`, `make sim-demo` | 21d5572 | Installation works for host components. Firmware BLOCKED. |
-| 0907 | Review — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `README.md` | 21d5572 | Safety: no automatic installs, manual control. Reproducibility: git commit pinned, requirements-dev.txt versioned. |
-| 0908 | Document — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `README.md` | 21d5572 | Documentation in TOOLCHAIN_MANIFEST.md and README.md. |
-| 0909 | Integrate — installation packaging | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Installation packaging connected to Phase 10.2 (first-run setup). |
-| 0910 | Gate — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `make test` pass | 21d5572 | Gate passed: installation documented. Firmware build BLOCKED. Phase 10.1 complete. Unblocking Phase 10.2. |
-| 0571 | Inspect — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
-| 0572 | Trace — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
-| 0573 | Specify — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
-| 0574 | Implement — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
-| 0575 | Test — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
-| 0576 | Run — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
-| 0577 | Review — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
-| 0578 | Document — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
-| 0579 | Integrate — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
-| 0580 | Gate — Phase 2.1 host startup and configuration | NOT_STARTED | | | |
-| 0581 | Inspect — Phase 2.2 host agent dispatcher | NOT_STARTED | | | |
-| 0582 | Trace — Phase 2.2 host agent dispatcher | NOT_STARTED | | | |
-| 0583 | Specify — Phase 2.2 host agent dispatcher | NOT_STARTED | | | |
-| 0584 | Implement — Phase 2.2 host agent dispatcher | NOT_STARTED | | | |
-| 0585 | Test — Phase 2.2 host agent dispatcher | NOT_STARTED | | | |
-| 0586 | Run — Phase 2.2 host agent dispatcher | NOT_STARTED | | | |
-| 0587 | Review — Phase 2.2 host agent dispatcher | NOT_STARTED | | | |
-| 0588 | Document — Phase 2.2 host agent dispatcher | NOT_STARTED | | | |
-| 0589 | Integrate — Phase 2.2 host agent dispatcher | NOT_STARTED | | | |
-| 0590 | Gate — Phase 2.2 host agent dispatcher | NOT_STARTED | | | |
-| 0591 | Inspect — Phase 2.3 session and time sync | NOT_STARTED | | | |
-| 0592 | Trace — Phase 2.3 session and time sync | NOT_STARTED | | | |
-| 0593 | Specify — Phase 2.3 session and time sync | NOT_STARTED | | | |
-| 0594 | Implement — Phase 2.3 session and time sync | NOT_STARTED | | | |
-| 0595 | Test — Phase 2.3 session and time sync | NOT_STARTED | | | |
-| 0596 | Run — Phase 2.3 session and time sync | NOT_STARTED | | | |
-| 0597 | Review — Phase 2.3 session and time sync | NOT_STARTED | | | |
-| 0598 | Document — Phase 2.3 session and time sync | NOT_STARTED | | | |
-| 0599 | Integrate — Phase 2.3 session and time sync | NOT_STARTED | | | |
-| 0600 | Gate — Phase 2.3 session and time sync | NOT_STARTED | | | |
-| 0601 | Inspect — Phase 2.4 launcher and allow-list | NOT_STARTED | | | |
-| 0602 | Trace — Phase 2.4 launcher and allow-list | NOT_STARTED | | | |
-| 0603 | Specify — Phase 2.4 launcher and allow-list | NOT_STARTED | | | |
-| 0604 | Implement — Phase 2.4 launcher and allow-list | NOT_STARTED | | | |
-| 0605 | Test — Phase 2.4 launcher and allow-list | NOT_STARTED | | | |
-| 0606 | Run — Phase 2.4 launcher and allow-list | NOT_STARTED | | | |
-| 0607 | Review — Phase 2.4 launcher and allow-list | NOT_STARTED | | | |
-| 0608 | Document — Phase 2.4 launcher and allow-list | NOT_STARTED | | | |
-| 0609 | Integrate — Phase 2.4 launcher and allow-list | NOT_STARTED | | | |
-| 0610 | Gate — Phase 2.4 launcher and allow-list | NOT_STARTED | | | |
-| 0611 | Inspect — Phase 2.5 audit log and confirmation | NOT_STARTED | | | |
-| 0612 | Trace — Phase 2.5 audit log and confirmation | NOT_STARTED | | | |
-| 0613 | Specify — Phase 2.5 audit log and confirmation | NOT_STARTED | | | |
-| 0614 | Implement — Phase 2.5 audit log and confirmation | NOT_STARTED | | | |
-| 0615 | Test — Phase 2.5 audit log and confirmation | NOT_STARTED | | | |
-| 0616 | Run — Phase 2.5 audit log and confirmation | NOT_STARTED | | | |
-| 0617 | Review — Phase 2.5 audit log and confirmation | NOT_STARTED | | | |
-| 0618 | Document — Phase 2.5 audit log and confirmation | NOT_STARTED | | | |
-| 0619 | Integrate — Phase 2.5 audit log and confirmation | NOT_STARTED | | | |
-| 0620 | Gate — Phase 2.5 audit log and confirmation | NOT_STARTED | | | |
-| 0621 | Inspect — Phase 2.6 virtual device transport | NOT_STARTED | | | |
-| 0622 | Trace — Phase 2.6 virtual device transport | NOT_STARTED | | | |
-| 0623 | Specify — Phase 2.6 virtual device transport | NOT_STARTED | | | |
-| 0624 | Implement — Phase 2.6 virtual device transport | NOT_STARTED | | | |
-| 0625 | Test — Phase 2.6 virtual device transport | NOT_STARTED | | | |
-| 0626 | Run — Phase 2.6 virtual device transport | NOT_STARTED | | | |
-| 0627 | Review — Phase 2.6 virtual device transport | NOT_STARTED | | | |
-| 0628 | Document — Phase 2.6 virtual device transport | NOT_STARTED | | | |
-| 0629 | Integrate — Phase 2.6 virtual device transport | NOT_STARTED | | | |
-| 0630 | Gate — Phase 2.6 virtual device transport | NOT_STARTED | | | |
-| 0631 | Inspect — Phase 2.7 host reliability and retries | NOT_STARTED | | | |
-| 0632 | Trace — Phase 2.7 host reliability and retries | NOT_STARTED | | | |
-| 0633 | Specify — Phase 2.7 host reliability and retries | NOT_STARTED | | | |
-| 0634 | Implement — Phase 2.7 host reliability and retries | NOT_STARTED | | | |
-| 0635 | Test — Phase 2.7 host reliability and retries | NOT_STARTED | | | |
-| 0636 | Run — Phase 2.7 host reliability and retries | NOT_STARTED | | | |
-| 0637 | Review — Phase 2.7 host reliability and retries | NOT_STARTED | | | |
-| 0638 | Document — Phase 2.7 host reliability and retries | NOT_STARTED | | | |
-| 0639 | Integrate — Phase 2.7 host reliability and retries | NOT_STARTED | | | |
-| 0640 | Gate — Phase 2.7 host reliability and retries | NOT_STARTED | | | |
-| 0641 | Inspect — Phase 2.8 host startup gate | NOT_STARTED | | | |
-| 0642 | Trace — Phase 2.8 host startup gate | NOT_STARTED | | | |
-| 0643 | Specify — Phase 2.8 host startup gate | NOT_STARTED | | | |
-| 0644 | Implement — Phase 2.8 host startup gate | NOT_STARTED | | | |
-| 0645 | Test — Phase 2.8 host startup gate | NOT_STARTED | | | |
-| 0646 | Run — Phase 2.8 host startup gate | NOT_STARTED | | | |
-| 0647 | Review — Phase 2.8 host startup gate | NOT_STARTED | | | |
-| 0648 | Document — Phase 2.8 host startup gate | NOT_STARTED | | | |
-| 0649 | Integrate — Phase 2.8 host startup gate | NOT_STARTED | | | |
-| 0650 | Gate — Phase 2.8 host startup gate | NOT_STARTED | | | |
-| 0651 | Inspect — Phase 3.1 context store Python | NOT_STARTED | | | |
-| 0652 | Trace — Phase 3.1 context store Python | NOT_STARTED | | | |
-| 0653 | Specify — Phase 3.1 context store Python | NOT_STARTED | | | |
-| 0654 | Implement — Phase 3.1 context store Python | NOT_STARTED | | | |
-| 0655 | Test — Phase 3.1 context store Python | NOT_STARTED | | | |
-| 0656 | Run — Phase 3.1 context store Python | NOT_STARTED | | | |
-| 0657 | Review — Phase 3.1 context store Python | NOT_STARTED | | | |
-| 0658 | Document — Phase 3.1 context store Python | NOT_STARTED | | | |
-| 0659 | Integrate — Phase 3.1 context store Python | NOT_STARTED | | | |
-| 0660 | Gate — Phase 3.1 context store Python | NOT_STARTED | | | |
-| 0661 | Inspect — Phase 3.2 context store C firmware | NOT_STARTED | | | |
-| 0662 | Trace — Phase 3.2 context store C firmware | NOT_STARTED | | | |
-| 0663 | Specify — Phase 3.2 context store C firmware | NOT_STARTED | | | |
-| 0664 | Implement — Phase 3.2 context store C firmware | NOT_STARTED | | | |
-| 0665 | Test — Phase 3.2 context store C firmware | NOT_STARTED | | | |
-| 0666 | Run — Phase 3.2 context store C firmware | NOT_STARTED | | | |
-| 0667 | Review — Phase 3.2 context store C firmware | NOT_STARTED | | | |
-| 0668 | Document — Phase 3.2 context store C firmware | NOT_STARTED | | | |
-| 0669 | Integrate — Phase 3.2 context store C firmware | NOT_STARTED | | | |
-| 0670 | Gate — Phase 3.2 context store C firmware | NOT_STARTED | | | |
-| 0671 | Inspect — Phase 3.3 device protocol context | NOT_STARTED | | | |
-| 0672 | Trace — Phase 3.3 device protocol context | NOT_STARTED | | | |
-| 0673 | Specify — Phase 3.3 device protocol context | NOT_STARTED | | | |
-| 0674 | Implement — Phase 3.3 device protocol context | NOT_STARTED | | | |
-| 0675 | Test — Phase 3.3 device protocol context | NOT_STARTED | | | |
-| 0676 | Run — Phase 3.3 device protocol context | NOT_STARTED | | | |
-| 0677 | Review — Phase 3.3 device protocol context | NOT_STARTED | | | |
-| 0678 | Document — Phase 3.3 device protocol context | NOT_STARTED | | | |
-| 0679 | Integrate — Phase 3.3 device protocol context | NOT_STARTED | | | |
-| 0680 | Gate — Phase 3.3 device protocol context | NOT_STARTED | | | |
-| 0681 | Inspect — Phase 3.4 LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0682 | Trace — Phase 3.4 LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0683 | Specify — Phase 3.4 LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0684 | Implement — Phase 3.4 LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0685 | Test — Phase 3.4 LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0686 | Run — Phase 3.4 LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0687 | Review — Phase 3.4 LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0688 | Document — Phase 3.4 LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0689 | Integrate — Phase 3.4 LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0690 | Gate — Phase 3.4 LAST and YESTERDAY intents | NOT_STARTED | | | |
-| 0691 | Inspect — Phase 3.5 context recovery and bounds | NOT_STARTED | | | |
-| 0692 | Trace — Phase 3.5 context recovery and bounds | NOT_STARTED | | | |
-| 0693 | Specify — Phase 3.5 context recovery and bounds | NOT_STARTED | | | |
-| 0694 | Implement — Phase 3.5 context recovery and bounds | NOT_STARTED | | | |
-| 0695 | Test — Phase 3.5 context recovery and bounds | NOT_STARTED | | | |
-| 0696 | Run — Phase 3.5 context recovery and bounds | NOT_STARTED | | | |
-| 0697 | Review — Phase 3.5 context recovery and bounds | NOT_STARTED | | | |
-| 0698 | Document — Phase 3.5 context recovery and bounds | NOT_STARTED | | | |
-| 0699 | Integrate — Phase 3.5 context recovery and bounds | NOT_STARTED | | | |
-| 0700 | Gate — Phase 3.5 context recovery and bounds | NOT_STARTED | | | |
-| 0701 | Inspect — Phase 4.1 protocol encode/decode C | NOT_STARTED | | | |
-| 0702 | Trace — Phase 4.1 protocol encode/decode C | NOT_STARTED | | | |
-| 0703 | Specify — Phase 4.1 protocol encode/decode C | NOT_STARTED | | | |
-| 0704 | Implement — Phase 4.1 protocol encode/decode C | NOT_STARTED | | | |
-| 0705 | Test — Phase 4.1 protocol encode/decode C | NOT_STARTED | | | |
-| 0706 | Run — Phase 4.1 protocol encode/decode C | NOT_STARTED | | | |
-| 0707 | Review — Phase 4.1 protocol encode/decode C | NOT_STARTED | | | |
-| 0708 | Document — Phase 4.1 protocol encode/decode C | NOT_STARTED | | | |
-| 0709 | Integrate — Phase 4.1 protocol encode/decode C | NOT_STARTED | | | |
-| 0710 | Gate — Phase 4.1 protocol encode/decode C | NOT_STARTED | | | |
-| 0711 | Inspect — Phase 4.2 CRC16 vectors and parity | NOT_STARTED | | | |
-| 0712 | Trace — Phase 4.2 CRC16 vectors and parity | NOT_STARTED | | | |
-| 0713 | Specify — Phase 4.2 CRC16 vectors and parity | NOT_STARTED | | | |
-| 0714 | Implement — Phase 4.2 CRC16 vectors and parity | NOT_STARTED | | | |
-| 0715 | Test — Phase 4.2 CRC16 vectors and parity | NOT_STARTED | | | |
-| 0716 | Run — Phase 4.2 CRC16 vectors and parity | NOT_STARTED | | | |
-| 0717 | Review — Phase 4.2 CRC16 vectors and parity | NOT_STARTED | | | |
-| 0718 | Document — Phase 4.2 CRC16 vectors and parity | NOT_STARTED | | | |
-| 0719 | Integrate — Phase 4.2 CRC16 vectors and parity | NOT_STARTED | | | |
-| 0720 | Gate — Phase 4.2 CRC16 vectors and parity | NOT_STARTED | | | |
-| 0721 | Inspect — Phase 4.3 ACK/NACK/retry policy | NOT_STARTED | | | |
-| 0722 | Trace — Phase 4.3 ACK/NACK/retry policy | NOT_STARTED | | | |
-| 0723 | Specify — Phase 4.3 ACK/NACK/retry policy | NOT_STARTED | | | |
-| 0724 | Implement — Phase 4.3 ACK/NACK/retry policy | NOT_STARTED | | | |
-| 0725 | Test — Phase 4.3 ACK/NACK/retry policy | NOT_STARTED | | | |
-| 0726 | Run — Phase 4.3 ACK/NACK/retry policy | NOT_STARTED | | | |
-| 0727 | Review — Phase 4.3 ACK/NACK/retry policy | NOT_STARTED | | | |
-| 0728 | Document — Phase 4.3 ACK/NACK/retry policy | NOT_STARTED | | | |
-| 0729 | Integrate — Phase 4.3 ACK/NACK/retry policy | NOT_STARTED | | | |
-| 0730 | Gate — Phase 4.3 ACK/NACK/retry policy | NOT_STARTED | | | |
-| 0731 | Inspect — Phase 4.4 fault injection and recovery | NOT_STARTED | | | |
-| 0732 | Trace — Phase 4.4 fault injection and recovery | NOT_STARTED | | | |
-| 0733 | Specify — Phase 4.4 fault injection and recovery | NOT_STARTED | | | |
-| 0734 | Implement — Phase 4.4 fault injection and recovery | NOT_STARTED | | | |
-| 0735 | Test — Phase 4.4 fault injection and recovery | NOT_STARTED | | | |
-| 0736 | Run — Phase 4.4 fault injection and recovery | NOT_STARTED | | | |
-| 0737 | Review — Phase 4.4 fault injection and recovery | NOT_STARTED | | | |
-| 0738 | Document — Phase 4.4 fault injection and recovery | NOT_STARTED | | | |
-| 0739 | Integrate — Phase 4.4 fault injection and recovery | NOT_STARTED | | | |
-| 0740 | Gate — Phase 4.4 fault injection and recovery | NOT_STARTED | | | |
-| 0741 | Inspect — Phase 4.5 serial transport and timeouts | NOT_STARTED | | | |
-| 0742 | Trace — Phase 4.5 serial transport and timeouts | NOT_STARTED | | | |
-| 0743 | Specify — Phase 4.5 serial transport and timeouts | NOT_STARTED | | | |
-| 0744 | Implement — Phase 4.5 serial transport and timeouts | NOT_STARTED | | | |
-| 0745 | Test — Phase 4.5 serial transport and timeouts | NOT_STARTED | | | |
-| 0746 | Run — Phase 4.5 serial transport and timeouts | NOT_STARTED | | | |
-| 0747 | Review — Phase 4.5 serial transport and timeouts | NOT_STARTED | | | |
-| 0748 | Document — Phase 4.5 serial transport and timeouts | NOT_STARTED | | | |
-| 0749 | Integrate — Phase 4.5 serial transport and timeouts | NOT_STARTED | | | |
-| 0750 | Gate — Phase 4.5 serial transport and timeouts | NOT_STARTED | | | |
-| 0751 | Inspect — Phase 4.6 protocol hardening gate | NOT_STARTED | | | |
-| 0752 | Trace — Phase 4.6 protocol hardening gate | NOT_STARTED | | | |
-| 0753 | Specify — Phase 4.6 protocol hardening gate | NOT_STARTED | | | |
-| 0754 | Implement — Phase 4.6 protocol hardening gate | NOT_STARTED | | | |
-| 0755 | Test — Phase 4.6 protocol hardening gate | NOT_STARTED | | | |
-| 0756 | Run — Phase 4.6 protocol hardening gate | NOT_STARTED | | | |
-| 0757 | Review — Phase 4.6 protocol hardening gate | NOT_STARTED | | | |
-| 0758 | Document — Phase 4.6 protocol hardening gate | NOT_STARTED | | | |
-| 0759 | Integrate — Phase 4.6 protocol hardening gate | NOT_STARTED | | | |
-| 0760 | Gate — Phase 4.6 protocol hardening gate | NOT_STARTED | | | |
-| 0761 | Inspect — Phase 5.1 ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0762 | Trace — Phase 5.1 ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0763 | Specify — Phase 5.1 ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0764 | Implement — Phase 5.1 ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0765 | Test — Phase 5.1 ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0766 | Run — Phase 5.1 ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0767 | Review — Phase 5.1 ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0768 | Document — Phase 5.1 ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0769 | Integrate — Phase 5.1 ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0770 | Gate — Phase 5.1 ESP-IDF scaffold and build | NOT_STARTED | | | |
-| 0771 | Inspect — Phase 5.2 I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0772 | Trace — Phase 5.2 I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0773 | Specify — Phase 5.2 I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0774 | Implement — Phase 5.2 I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0775 | Test — Phase 5.2 I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0776 | Run — Phase 5.2 I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0777 | Review — Phase 5.2 I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0778 | Document — Phase 5.2 I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0779 | Integrate — Phase 5.2 I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0780 | Gate — Phase 5.2 I2S/GDMA audio capture | NOT_STARTED | | | |
-| 0781 | Inspect — Phase 5.3 MFCC feature extraction C | NOT_STARTED | | | |
-| 0782 | Trace — Phase 5.3 MFCC feature extraction C | NOT_STARTED | | | |
-| 0783 | Specify — Phase 5.3 MFCC feature extraction C | NOT_STARTED | | | |
-| 0784 | Implement — Phase 5.3 MFCC feature extraction C | NOT_STARTED | | | |
-| 0785 | Test — Phase 5.3 MFCC feature extraction C | NOT_STARTED | | | |
-| 0786 | Run — Phase 5.3 MFCC feature extraction C | NOT_STARTED | | | |
-| 0787 | Review — Phase 5.3 MFCC feature extraction C | NOT_STARTED | | | |
-| 0788 | Document — Phase 5.3 MFCC feature extraction C | NOT_STARTED | | | |
-| 0789 | Integrate — Phase 5.3 MFCC feature extraction C | NOT_STARTED | | | |
-| 0790 | Gate — Phase 5.3 MFCC feature extraction C | NOT_STARTED | | | |
-| 0791 | Inspect — Phase 5.4 intent classification table | NOT_STARTED | | | |
-| 0792 | Trace — Phase 5.4 intent classification table | NOT_STARTED | | | |
-| 0793 | Specify — Phase 5.4 intent classification table | NOT_STARTED | | | |
-| 0794 | Implement — Phase 5.4 intent classification table | NOT_STARTED | | | |
-| 0795 | Test — Phase 5.4 intent classification table | NOT_STARTED | | | |
-| 0796 | Run — Phase 5.4 intent classification table | NOT_STARTED | | | |
-| 0797 | Review — Phase 5.4 intent classification table | NOT_STARTED | | | |
-| 0798 | Document — Phase 5.4 intent classification table | NOT_STARTED | | | |
-| 0799 | Integrate — Phase 5.4 intent classification table | NOT_STARTED | | | |
-| 0800 | Gate — Phase 5.4 intent classification table | NOT_STARTED | | | |
-| 0801 | Inspect — Phase 5.5 PTT button and LED UI | NOT_STARTED | | | |
-| 0802 | Trace — Phase 5.5 PTT button and LED UI | NOT_STARTED | | | |
-| 0803 | Specify — Phase 5.5 PTT button and LED UI | NOT_STARTED | | | |
-| 0804 | Implement — Phase 5.5 PTT button and LED UI | NOT_STARTED | | | |
-| 0805 | Test — Phase 5.5 PTT button and LED UI | NOT_STARTED | | | |
-| 0806 | Run — Phase 5.5 PTT button and LED UI | NOT_STARTED | | | |
-| 0807 | Review — Phase 5.5 PTT button and LED UI | NOT_STARTED | | | |
-| 0808 | Document — Phase 5.5 PTT button and LED UI | NOT_STARTED | | | |
-| 0809 | Integrate — Phase 5.5 PTT button and LED UI | NOT_STARTED | | | |
-| 0810 | Gate — Phase 5.5 PTT button and LED UI | NOT_STARTED | | | |
-| 0811 | Inspect — Phase 5.6 firmware integration and build | NOT_STARTED | | | |
-| 0812 | Trace — Phase 5.6 firmware integration and build | NOT_STARTED | | | |
-| 0813 | Specify — Phase 5.6 firmware integration and build | NOT_STARTED | | | |
-| 0814 | Implement — Phase 5.6 firmware integration and build | NOT_STARTED | | | |
-| 0815 | Test — Phase 5.6 firmware integration and build | NOT_STARTED | | | |
-| 0816 | Run — Phase 5.6 firmware integration and build | NOT_STARTED | | | |
-| 0817 | Review — Phase 5.6 firmware integration and build | NOT_STARTED | | | |
-| 0818 | Document — Phase 5.6 firmware integration and build | NOT_STARTED | | | |
-| 0819 | Integrate — Phase 5.6 firmware integration and build | NOT_STARTED | | | |
-| 0820 | Gate — Phase 5.6 firmware integration and build | NOT_STARTED | | | |
-| 0821 | Inspect — Phase 6.1 dataset collection tool | NOT_STARTED | | | |
-| 0822 | Trace — Phase 6.1 dataset collection tool | NOT_STARTED | | | |
-| 0823 | Specify — Phase 6.1 dataset collection tool | NOT_STARTED | | | |
-| 0824 | Implement — Phase 6.1 dataset collection tool | NOT_STARTED | | | |
-| 0825 | Test — Phase 6.1 dataset collection tool | NOT_STARTED | | | |
-| 0826 | Run — Phase 6.1 dataset collection tool | NOT_STARTED | | | |
-| 0827 | Review — Phase 6.1 dataset collection tool | NOT_STARTED | | | |
-| 0828 | Document — Phase 6.1 dataset collection tool | NOT_STARTED | | | |
-| 0829 | Integrate — Phase 6.1 dataset collection tool | NOT_STARTED | | | |
-| 0830 | Gate — Phase 6.1 dataset collection tool | NOT_STARTED | | | |
-| 0831 | Inspect — Phase 6.2 speaker-split dataset | NOT_STARTED | | | |
-| 0832 | Trace — Phase 6.2 speaker-split dataset | NOT_STARTED | | | |
-| 0833 | Specify — Phase 6.2 speaker-split dataset | NOT_STARTED | | | |
-| 0834 | Implement — Phase 6.2 speaker-split dataset | NOT_STARTED | | | |
-| 0835 | Test — Phase 6.2 speaker-split dataset | NOT_STARTED | | | |
-| 0836 | Run — Phase 6.2 speaker-split dataset | NOT_STARTED | | | |
-| 0837 | Review — Phase 6.2 speaker-split dataset | NOT_STARTED | | | |
-| 0838 | Document — Phase 6.2 speaker-split dataset | NOT_STARTED | | | |
-| 0839 | Integrate — Phase 6.2 speaker-split dataset | NOT_STARTED | | | |
-| 0840 | Gate — Phase 6.2 speaker-split dataset | NOT_STARTED | | | |
-| 0841 | Inspect — Phase 6.3 DS-CNN training pipeline | NOT_STARTED | | | |
-| 0842 | Trace — Phase 6.3 DS-CNN training pipeline | NOT_STARTED | | | |
-| 0843 | Specify — Phase 6.3 DS-CNN training pipeline | NOT_STARTED | | | |
-| 0844 | Implement — Phase 6.3 DS-CNN training pipeline | NOT_STARTED | | | |
-| 0845 | Test — Phase 6.3 DS-CNN training pipeline | NOT_STARTED | | | |
-| 0846 | Run — Phase 6.3 DS-CNN training pipeline | NOT_STARTED | | | |
-| 0847 | Review — Phase 6.3 DS-CNN training pipeline | NOT_STARTED | | | |
-| 0848 | Document — Phase 6.3 DS-CNN training pipeline | NOT_STARTED | | | |
-| 0849 | Integrate — Phase 6.3 DS-CNN training pipeline | NOT_STARTED | | | |
-| 0850 | Gate — Phase 6.3 DS-CNN training pipeline | NOT_STARTED | | | |
-| 0851 | Inspect — Phase 6.4 int8 TFLite export | NOT_STARTED | | | |
-| 0852 | Trace — Phase 6.4 int8 TFLite export | NOT_STARTED | | | |
-| 0853 | Specify — Phase 6.4 int8 TFLite export | NOT_STARTED | | | |
-| 0854 | Implement — Phase 6.4 int8 TFLite export | NOT_STARTED | | | |
-| 0855 | Test — Phase 6.4 int8 TFLite export | NOT_STARTED | | | |
-| 0856 | Run — Phase 6.4 int8 TFLite export | NOT_STARTED | | | |
-| 0857 | Review — Phase 6.4 int8 TFLite export | NOT_STARTED | | | |
-| 0858 | Document — Phase 6.4 int8 TFLite export | NOT_STARTED | | | |
-| 0859 | Integrate — Phase 6.4 int8 TFLite export | NOT_STARTED | | | |
-| 0860 | Gate — Phase 6.4 int8 TFLite export | NOT_STARTED | | | |
-| 0861 | Inspect — Phase 6.5 leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0862 | Trace — Phase 6.5 leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0863 | Specify — Phase 6.5 leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0864 | Implement — Phase 6.5 leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0865 | Test — Phase 6.5 leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0866 | Run — Phase 6.5 leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0867 | Review — Phase 6.5 leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0868 | Document — Phase 6.5 leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0869 | Integrate — Phase 6.5 leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0870 | Gate — Phase 6.5 leave-one-speaker-out eval | NOT_STARTED | | | |
-| 0871 | Inspect — Phase 6.6 model card and metadata | NOT_STARTED | | | |
-| 0872 | Trace — Phase 6.6 model card and metadata | NOT_STARTED | | | |
-| 0873 | Specify — Phase 6.6 model card and metadata | NOT_STARTED | | | |
-| 0874 | Implement — Phase 6.6 model card and metadata | NOT_STARTED | | | |
-| 0875 | Test — Phase 6.6 model card and metadata | NOT_STARTED | | | |
-| 0876 | Run — Phase 6.6 model card and metadata | NOT_STARTED | | | |
-| 0877 | Review — Phase 6.6 model card and metadata | NOT_STARTED | | | |
-| 0878 | Document — Phase 6.6 model card and metadata | NOT_STARTED | | | |
-| 0879 | Integrate — Phase 6.6 model card and metadata | NOT_STARTED | | | |
-| 0880 | Gate — Phase 6.6 model card and metadata | NOT_STARTED | | | |
-| 0881 | Inspect — Phase 7.1 Raphael KiCad archive | NOT_STARTED | | | |
-| 0882 | Trace — Phase 7.1 Raphael KiCad archive | NOT_STARTED | | | |
-| 0883 | Specify — Phase 7.1 Raphael KiCad archive | NOT_STARTED | | | |
-| 0884 | Implement — Phase 7.1 Raphael KiCad archive | NOT_STARTED | | | |
-| 0885 | Test — Phase 7.1 Raphael KiCad archive | NOT_STARTED | | | |
-| 0886 | Run — Phase 7.1 Raphael KiCad archive | NOT_STARTED | | | |
-| 0887 | Review — Phase 7.1 Raphael KiCad archive | NOT_STARTED | | | |
-| 0888 | Document — Phase 7.1 Raphael KiCad archive | NOT_STARTED | | | |
-| 0889 | Integrate — Phase 7.1 Raphael KiCad archive | NOT_STARTED | | | |
-| 0890 | Gate — Phase 7.1 Raphael KiCad archive | NOT_STARTED | | | |
-| 0891 | Inspect — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0892 | Trace — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0893 | Specify — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0894 | Implement — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0895 | Test — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0896 | Run — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0897 | Review — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0898 | Document — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0899 | Integrate — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0900 | Gate — Phase 7.2 pinmap reconciliation | NOT_STARTED | | | |
-| 0901 | Inspect — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0902 | Trace — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0903 | Specify — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0904 | Implement — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0905 | Test — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0906 | Run — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0907 | Review — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0908 | Document — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0909 | Integrate — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0910 | Gate — Phase 7.3 schematic and ERC | NOT_STARTED | | | |
-| 0911 | Inspect — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0912 | Trace — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0913 | Specify — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0914 | Implement — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0915 | Test — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0916 | Run — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0917 | Review — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0918 | Document — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0919 | Integrate — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0920 | Gate — Phase 7.4 layout and DRC | NOT_STARTED | | | |
-| 0921 | Inspect — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0922 | Trace — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0923 | Specify — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0924 | Implement — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0925 | Test — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0926 | Run — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0927 | Review — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0928 | Document — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0929 | Integrate — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0930 | Gate — Phase 7.5 BOM and procurement | NOT_STARTED | | | |
-| 0931 | Inspect — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0932 | Trace — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0933 | Specify — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0934 | Implement — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0935 | Test — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0936 | Run — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0937 | Review — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0938 | Document — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0939 | Integrate — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0940 | Gate — Phase 7.6 enclosure and mechanical | NOT_STARTED | | | |
-| 0941 | Inspect — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0942 | Trace — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0943 | Specify — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0944 | Implement — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0945 | Test — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0946 | Run — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0947 | Review — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0948 | Document — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0949 | Integrate — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0950 | Gate — Phase 7.7 fabrication readiness | NOT_STARTED | | | |
-| 0951 | Inspect — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0952 | Trace — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0953 | Specify — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0954 | Implement — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0955 | Test — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0956 | Run — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0957 | Review — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0958 | Document — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0959 | Integrate — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0960 | Gate — Phase 8.1 dashboard structure | NOT_STARTED | | | |
-| 0961 | Inspect — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0962 | Trace — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0963 | Specify — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0964 | Implement — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0965 | Test — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0966 | Run — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0967 | Review — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0968 | Document — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0969 | Integrate — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0970 | Gate — Phase 8.2 status visibility | NOT_STARTED | | | |
-| 0971 | Inspect — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0972 | Trace — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0973 | Specify — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0974 | Implement — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0975 | Test — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0976 | Run — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0977 | Review — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0978 | Document — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0979 | Integrate — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0980 | Gate — Phase 8.3 deck draft and QA | NOT_STARTED | | | |
-| 0981 | Inspect — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0982 | Trace — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0983 | Specify — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0984 | Implement — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0985 | Test — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0986 | Run — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0987 | Review — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0988 | Document — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0989 | Integrate — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0990 | Gate — Phase 9.1 integrated voice-to-action | NOT_STARTED | | | |
-| 0991 | Inspect — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0992 | Trace — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0993 | Specify — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0994 | Implement — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0995 | Test — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0996 | Run — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0997 | Review — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0998 | Document — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 0999 | Integrate — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 1000 | Gate — Phase 9.2 benchmark evidence | NOT_STARTED | | | |
-| 1001 | Inspect — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile`, `firmware/sdkconfig.defaults` | 21d5572 | Inspected installation: Python deps via requirements-dev.txt, Makefile targets, firmware build via idf.py. No automated installer — manual setup documented. |
-| 1002 | Trace — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile` | 21d5572 | Traced: venv → pip install -r requirements-dev.txt → make test. Firmware: idf.py set-target esp32s3 && idf.py build. |
-| 1003 | Specify — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md` | 21d5572 | Specified in TOOLCHAIN_MANIFEST.md: Python, C, ESP-IDF, KiCad, ngspice, sounddevice. |
-| 1004 | Implement — installation packaging | DONE | `README.md`, `requirements-dev.txt`, `Makefile` | 21d5572 | Manual installation documented. No automated installer. |
-| 1005 | Test — installation packaging | DONE | `make test`, `make sim-demo` | 21d5572 | Host install works. Firmware BLOCKED (no ESP-IDF). |
-| 1006 | Run — installation packaging | DONE | `make test`, `make sim-demo` | 21d5572 | Host components install and run. |
-| 1007 | Review — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `README.md` | 21d5572 | Manual control, reproducible via git commit + requirements-dev.txt. |
-| 1008 | Document — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `README.md` | 21d5572 | Documented. |
-| 1009 | Integrate — installation packaging | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to Phase 10.2. |
-| 1010 | Gate — installation packaging | DONE | `docs/TOOLCHAIN_MANIFEST.md`, `make test` pass | 21d5572 | Gate passed. Phase 10.1 complete. Unblocking 10.2. |
-| 1011 | Inspect — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | discover_port() by Vid/Pid, --port override, dialout group, TIME_SYNC handshake. |
-| 1012 | Trace — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | discover_port() → serve_serial() → TIME_SYNC. No interactive setup. |
-| 1013 | Specify — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | Specified: auto port discovery, dialout permission, TIME_SYNC handshake. |
-| 1014 | Implement — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | Implemented in transport.py and host_agent.py. |
-| 1015 | Test — first-run setup | DONE | `make test` (transport tests) | 21d5572 | Verified: discovery safe, reconnect handshake. |
-| 1016 | Run — first-run setup | DONE | `make sim-demo` | 21d5572 | Stdio mode works. Serial BLOCKED (no hardware). |
-| 1017 | Review — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | Safe: no auto-flash, explicit port, dialout required. |
-| 1018 | Document — first-run setup | DONE | `host/transport.py`, `host/host_agent.py` | 21d5572 | Documented in source. |
-| 1019 | Integrate — first-run setup | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to Phase 10.3. |
-| 1020 | Gate — first-run setup | DONE | `host/transport.py`, `make test` pass | 21d5572 | Gate passed. Phase 10.2 complete. Unblocking 10.3. |
-| 1021 | Inspect — configuration validation | DONE | `host/config.yaml`, `host/projects.yaml`, `host/allowlist.yaml`, `host/host_agent.py` | 21d5572 | Inspected: config.yaml, projects.yaml, allowlist.yaml validated at module load. Path jail, verb consistency. |
-| 1022 | Trace — configuration validation | DONE | `host/host_agent.py` | 21d5572 | Module load validates projects_root, PROJECTS dict, allowlist verbs. |
-| 1023 | Specify — configuration validation | DONE | `host/config.yaml`, `host/projects.yaml`, `host/allowlist.yaml` | 21d5572 | Specified: schema validation, path jail, verb consistency, safe defaults. |
-| 1024 | Implement — configuration validation | DONE | `host/host_agent.py` | 21d5572 | Module-level validation on import. |
-| 1025 | Test — configuration validation | DONE | `make test` (security tests) | 21d5572 | Path jail, allow-list, no shell verified. |
-| 1026 | Run — configuration validation | DONE | `make test` | 21d5572 | Passes. |
-| 1027 | Review — configuration validation | DONE | `host/host_agent.py` | 21d5572 | Fail-fast, path jail, verb consistency. |
-| 1028 | Document — configuration validation | DONE | `host/config.yaml`, `host/projects.yaml`, `host/allowlist.yaml` | 21d5572 | Config files self-documenting. |
-| 1029 | Integrate — configuration validation | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.4. |
-| 1030 | Gate — configuration validation | DONE | `make test` pass | 21d5572 | Gate passed. Phase 10.3 complete. Unblocking 10.4. |
-| 1031 | Inspect — logging and rotation | DONE | `host/audit_log.py`, `host/host_agent.py` | 21d5572 | JSONL append-only, no audio, every frame logged. |
-| 1032 | Trace — logging and rotation | DONE | `host/audit_log.py`, `host/host_agent.py` | 21d5572 | handler() → append_frame() for request/response/error. |
-| 1033 | Specify — logging and rotation | DONE | `host/audit_log.py`, `docs/EVIDENCE_CONVENTIONS.md` | 21d5572 | JSONL format, no audio, append-only, UTC timestamps. |
-| 1034 | Implement — logging and rotation | DONE | `host/audit_log.py` | 21d5572 | Implemented. No rotation (session-bounded). |
-| 1035 | Test — logging and rotation | DONE | `make test` (audit_log test) | 21d5572 | JSONL structure, no audio field verified. |
-| 1036 | Run — logging and rotation | DONE | `make sim-demo` | 21d5572 | Audit log generated. |
-| 1037 | Review — logging and rotation | DONE | `host/audit_log.py` | 21d5572 | No audio, append-only. No rotation (prototype). |
-| 1038 | Document — logging and rotation | DONE | `host/audit_log.py`, `docs/EVIDENCE_CONVENTIONS.md` | 21d5572 | Documented. |
-| 1039 | Integrate — logging and rotation | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.5. |
-| 1040 | Gate — logging and rotation | DONE | `make test` pass | 21d5572 | Gate passed. Phase 10.4 complete. Unblocking 10.5. |
-| 1041 | Inspect — backup and restore | DONE | `firmware/components/context/context_store.py`, `firmware/components/context/nvs_store.c` | 21d5572 | Python JSON (~/.vaanicore/context.json), Firmware NVS (ESP32 flash). |
-| 1042 | Trace — backup and restore | DONE | `firmware/components/context/context_store.py`, `firmware/components/context/nvs_store.c` | 21d5572 | Python loads/saves JSON. Firmware vc_nvs_init/load/save. |
-| 1043 | Specify — backup and restore | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | 21d5572 | JSON file + NVS, 16-event FIFO, schema versioning. |
-| 1044 | Implement — backup and restore | DONE | `context_store.py`, `nvs_store.c` | 21d5572 | Python atomic write TODO. Firmware NVS atomic. |
-| 1045 | Test — backup and restore | DONE | `make test` (context), `make context-test` | 21d5572 | Bounded history, recovery across runs verified. |
-| 1046 | Run — backup and restore | DONE | `make sim-demo` | 21d5572 | Python persists across runs. Firmware BLOCKED. |
-| 1047 | Review — backup and restore | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | 21d5572 | Durable, bounded, schema versioning. Python atomic gap. |
-| 1048 | Document — backup and restore | DONE | `docs/CONTEXT_RECOVERY_BOUNDS_SPEC.md` | 21d5572 | Documented. |
-| 1049 | Integrate — backup and restore | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.6. |
-| 1050 | Gate — backup and restore | DONE | `make test` pass | 21d5572 | Gate passed. Phase 10.5 complete. Unblocking 10.6. |
-| 1051 | Inspect — version compatibility | DONE | `host/protocol.py`, `firmware/components/protocol/protocol.h`, `host/host_agent.py` | 21d5572 | Inspected: Protocol version implicit in framing, host/firmware share encode/decode, model version in TFLite metadata. |
-| 1052 | Trace — version compatibility | DONE | `host/protocol.py`, `firmware/components/protocol/protocol.c` | 21d5572 | Python/C encode/decode parity verified. Protocol framing stable. |
-| 1053 | Specify — version compatibility | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md` | 21d5572 | Specified: CRC16-CCITT-FALSE, seq modulo 256, 128-byte max, verb allow-list. |
-| 1054 | Implement — version compatibility | DONE | `host/protocol.py`, `firmware/components/protocol/protocol.c` | 21d5572 | Parity verified via shared test vectors. |
-| 1055 | Test — version compatibility | DONE | `make protocol-test`, `make test` | 21d5572 | Python/C parity passes. |
-| 1056 | Run — version compatibility | DONE | `make protocol-test` | 21d5572 | C vectors pass. |
-| 1057 | Review — version compatibility | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md` | 21d5572 | Stable framing, parity verified. No version negotiation (fixed). |
-| 1058 | Document — version compatibility | DONE | `docs/PROTOCOL_ENCODE_DECODE_C_SPEC.md` | 21d5572 | Documented. |
-| 1059 | Integrate — version compatibility | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.7. |
-| 1060 | Gate — version compatibility | DONE | `make protocol-test` pass | 21d5572 | Gate passed. Phase 10.6 complete. Unblocking 10.7. |
-| 1061 | Inspect — operator runbook | DONE | `README.md`, `host/host_agent.py`, `host/tools/virtual_device.py` | 21d5572 | Inspected: README has make targets, host_agent has --help, virtual_device demonstrates demo. |
-| 1062 | Trace — operator runbook | DONE | `README.md`, `Makefile` | 21d5572 | make test → make sim-demo → make bench → make audit → make deck-draft. |
-| 1063 | Specify — operator runbook | DONE | `README.md`, `Makefile`, `docs/demo_script.md` | 21d5572 | Startup: make test, Demo: make sim-demo, Benchmark: make bench, Deck: make deck-draft. |
-| 1064 | Implement — operator runbook | DONE | `README.md`, `Makefile` | 21d5572 | Documented in README and Makefile. |
-| 1065 | Test — operator runbook | DONE | `make phase-a` | 21d5572 | Full Phase-A workflow runs. |
-| 1066 | Run — operator runbook | DONE | `make phase-a` | 21d5572 | All Phase-A targets pass. |
-| 1067 | Review — operator runbook | DONE | `README.md`, `Makefile` | 21d5572 | Clear targets, documented workflow. |
-| 1068 | Document — operator runbook | DONE | `README.md`, `Makefile`, `docs/demo_script.md` | 21d5572 | Documented. |
-| 1069 | Integrate — operator runbook | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.8. |
-| 1070 | Gate — operator runbook | DONE | `make phase-a` pass | 21d5572 | Gate passed. Phase 10.7 complete. Unblocking 10.8. |
-| 1071 | Inspect — demo environment | BLOCKED | `TODO_HUMAN.md`, `docs/TOOLCHAIN_MANIFEST.md` | 21d5572 | BLOCKED: Requires Linux desktop, KiCad 8, ngspice, USB permissions, audio device, ESP32-S3 hardware. |
-| 1072 | Trace — demo environment | BLOCKED | `TODO_HUMAN.md` | 21d5572 | BLOCKED: Hardware/software dependencies not met. |
-| 1073 | Specify — demo environment | DONE | `TODO_HUMAN.md`, `docs/TOOLCHAIN_MANIFEST.md` | 21d5572 | Specified: Linux, KiCad 8, ngspice, dialout group, microphone, ESP32-S3 x2. |
-| 1074 | Implement — demo environment | BLOCKED | | 21d5572 | BLOCKED: Human action required (TODO_HUMAN.md Days 1-14). |
-| 1075 | Test — demo environment | BLOCKED | | 21d5572 | BLOCKED. |
-| 1076 | Run — demo environment | BLOCKED | | 21d5572 | BLOCKED. |
-| 1077 | Review — demo environment | BLOCKED | `TODO_HUMAN.md` | 21d5572 | All dependencies listed in TODO_HUMAN.md. |
-| 1078 | Document — demo environment | DONE | `TODO_HUMAN.md`, `docs/TOOLCHAIN_MANIFEST.md` | 21d5572 | Documented. |
-| 1079 | Integrate — demo environment | BLOCKED | | 21d5572 | BLOCKED. |
-| 1080 | Gate — demo environment | BLOCKED | `TODO_HUMAN.md` | 21d5572 | Gate BLOCKED. Phase 10.8 incomplete. |
-| 1081 | Inspect — maintenance workflow | DONE | `README.md`, `Makefile`, `docs/DECK_DRAFT_QA_SPEC.md` | 21d5572 | Inspected: make targets for test/bench/deck, deck QA process, git for version control. |
-| 1082 | Trace — maintenance workflow | DONE | `Makefile`, `deck/build_deck.py` | 21d5572 | make test → regression, make bench → performance, make deck-draft → visual QA. |
-| 1083 | Specify — maintenance workflow | DONE | `Makefile`, `docs/DECK_DRAFT_QA_SPEC.md` | 21d5572 | Specified: regression test, benchmark, deck QA, git rollback. |
-| 1084 | Implement — maintenance workflow | DONE | `Makefile`, `deck/build_deck.py` | 21d5572 | Implemented via Makefile targets. |
-| 1085 | Test — maintenance workflow | DONE | `make test`, `make bench`, `make deck-draft` | 21d5572 | All targets work. |
-| 1086 | Run — maintenance workflow | DONE | `make phase-a` | 21d5572 | Phase-A workflow runs. |
-| 1087 | Review — maintenance workflow | DONE | `Makefile`, `docs/DECK_DRAFT_QA_SPEC.md` | 21d5572 | Clear targets, rollback via git. |
-| 1088 | Document — maintenance workflow | DONE | `Makefile`, `docs/DECK_DRAFT_QA_SPEC.md` | 21d5572 | Documented. |
-| 1089 | Integrate — maintenance workflow | DONE | `docs/WORKFLOW_STATUS.md` (updated) | 21d5572 | Connected to 10.9. |
-| 1090 | Gate — maintenance workflow | DONE | `make phase-a` pass | 21d5572 | Gate passed. Phase 10.9 complete. Unblocking 10.10. |
-| 1091 | Inspect — handoff verification | BLOCKED | `TODO_HUMAN.md`, `docs/SUBMISSION_CHECKLIST.md` | 21d5572 | BLOCKED: Requires clean clone, hardware setup, demo rehearsal, mentor sign-off. |
-| 1092 | Trace — handoff verification | BLOCKED | `TODO_HUMAN.md` | 21d5572 | BLOCKED: Clean clone → setup → demo → mentor review. |
-| 1093 | Specify — handoff verification | DONE | `TODO_HUMAN.md`, `docs/SUBMISSION_CHECKLIST.md` | 21d5572 | Specified: clean clone, setup from scratch, demo rehearsal, limitations review, mentor sign-off. |
-| 1094 | Implement — handoff verification | BLOCKED | | 21d5572 | BLOCKED: Human action required. |
-| 1095 | Test — handoff verification | BLOCKED | | 21d5572 | BLOCKED. |
-| 1096 | Run — handoff verification | BLOCKED | | 21d5572 | BLOCKED. |
-| 1097 | Review — handoff verification | BLOCKED | `TODO_HUMAN.md`, `docs/SUBMISSION_CHECKLIST.md` | 21d5572 | All requirements listed. |
-| 1098 | Document — handoff verification | DONE | `TODO_HUMAN.md`, `docs/SUBMISSION_CHECKLIST.md` | 21d5572 | Documented. |
-| 1099 | Integrate — handoff verification | BLOCKED | | 21d5572 | BLOCKED. |
-| 1100 | Gate — handoff verification | BLOCKED | `TODO_HUMAN.md`, `docs/SUBMISSION_CHECKLIST.md` | 21d5572 | Gate BLOCKED. Phase 10.10 incomplete. **PROTOTYPE HANDOFF PENDING HUMAN ACTIONS**. |
-| 1101 | Inspect — Duplicate ID audit | NOT_STARTED | | | |
-| 1102 | Trace — Duplicate origin | NOT_STARTED | | | |
-| 1103 | Specify — Reconciliation policy | NOT_STARTED | | | |
-| 1104 | Implement — Renumber Phase 10 | NOT_STARTED | | | |
-| 1105 | Test — ID uniqueness | NOT_STARTED | | | |
-| 1106 | Run — Validation | NOT_STARTED | | | |
-| 1107 | Review — Policy compliance | NOT_STARTED | | | |
-| 1108 | Document — Reconciliation log | NOT_STARTED | | | |
-| 1109 | Integrate — Clean baseline | NOT_STARTED | | | |
-| 1110 | Gate — Reconciliation complete | NOT_STARTED | | | |
-| 1111 | Inspect — Firmware build status | NOT_STARTED | | | |
-| 1112 | Inspect — KiCad design status | NOT_STARTED | | | |
-| 1113 | Inspect — Dataset status | NOT_STARTED | | | |
-| 1114 | Inspect — ML model status | NOT_STARTED | | | |
-| 1115 | Inspect — Physical integration status | NOT_STARTED | | | |
-| 1116 | Trace — Simulation boundary | NOT_STARTED | | | |
-| 1117 | Trace — Hardware boundary | NOT_STARTED | | | |
-| 1118 | Specify — Ground-truth matrix | NOT_STARTED | | | |
-| 1119 | Implement — Ground-truth matrix | NOT_STARTED | | | |
-| 1120 | Test — Matrix completeness | NOT_STARTED | | | |
-| 1121 | Run — Cross-reference | NOT_STARTED | | | |
-| 1122 | Review — Honesty check | NOT_STARTED | | | |
-| 1123 | Document — Audit report | NOT_STARTED | | | |
-| 1124 | Integrate — Audit baseline | NOT_STARTED | | | |
-| 1125 | Gate — Audit complete | NOT_STARTED | | | |
-| 1126 | Inspect — ESP-IDF availability | NOT_STARTED | | | |
-| 1127 | Inspect — KiCad 8 availability | NOT_STARTED | | | |
-| 1128 | Inspect — ngspice availability | NOT_STARTED | | | |
-| 1129 | Inspect — sounddevice/PortAudio | NOT_STARTED | | | |
-| 1130 | Inspect — Python ML stack | NOT_STARTED | | | |
-| 1131 | Trace — Toolchain version matrix | NOT_STARTED | | | |
-| 1132 | Specify — Version pinning policy | NOT_STARTED | | | |
-| 1133 | Implement — Pinned dependencies | NOT_STARTED | | | |
-| 1134 | Test — Clean environment build | NOT_STARTED | | | |
-| 1135 | Run — Toolchain validation script | NOT_STARTED | | | |
-| 1136 | Review — Gap analysis | NOT_STARTED | | | |
-| 1137 | Document — Toolchain manifest v2 | NOT_STARTED | | | |
-| 1138 | Integrate — Validated toolchain | NOT_STARTED | | | |
-| 1139 | Gate — Toolchain validated | NOT_STARTED | | | |
-| 1140 | Inspect — Security invariant coverage | NOT_STARTED | | | |
-| 1141 | Trace — Attack surface on hardware | NOT_STARTED | | | |
-| 1142 | Specify — Hardware security extensions | NOT_STARTED | | | |
-| 1143 | Implement — Security test extensions | NOT_STARTED | | | |
-| 1144 | Test — Security regression | NOT_STARTED | | | |
-| 1145 | Run — Security audit | NOT_STARTED | | | |
-| 1146 | Review — Threat model update | NOT_STARTED | | | |
-| 1147 | Document — Security audit v2 | NOT_STARTED | | | |
-| 1148 | Integrate — Hardened baseline | NOT_STARTED | | | |
-| 1149 | Gate — Security re-verified | NOT_STARTED | | | |
-| 1150 | Inspect — Evidence labeling | NOT_STARTED | | | |
-| 1151 | Trace — Provenance gaps | NOT_STARTED | | | |
-| 1152 | Specify — Evidence standard v2 | NOT_STARTED | | | |
-| 1153 | Implement — Label correction | NOT_STARTED | | | |
-| 1154 | Test — Evidence validator | NOT_STARTED | | | |
-| 1155 | Run — Full evidence audit | NOT_STARTED | | | |
-| 1156 | Review — Documentation currency | NOT_STARTED | | | |
-| 1157 | Document — Evidence hygiene report | NOT_STARTED | | | |
-| 1158 | Integrate — Clean evidence baseline | NOT_STARTED | | | |
-| 1159 | Gate — Evidence hygiene complete | NOT_STARTED | | | |
-| 1160 | Inspect — ESP-IDF install options | NOT_STARTED | | | |
-| 1161 | Trace — IDF_PATH dependencies | NOT_STARTED | | | |
-| 1162 | Specify — Installation procedure | NOT_STARTED | | | |
-| 1163 | Implement — Install ESP-IDF | NOT_STARTED | | | |
-| 1164 | Test — IDF environment | NOT_STARTED | | | |
-| 1165 | Run — Hello world build | NOT_STARTED | | | |
-| 1166 | Review — Environment stability | NOT_STARTED | | | |
-| 1167 | Document — ESP-IDF install log | NOT_STARTED | | | |
-| 1167 | Integrate — IDF ready for firmware | NOT_STARTED | | | |
-| 1168 | Gate — ESP-IDF installed | NOT_STARTED | | | |
-| 1168 | Inspect — Firmware scaffold completeness | NOT_STARTED | | | |
-| 1169 | Trace — Symbol dependencies | NOT_STARTED | | | |
-| 1170 | Specify — Build configuration | NOT_STARTED | | | |
-| 1171 | Implement — First firmware build | NOT_STARTED | | | |
-| 1172 | Test — Build error resolution | NOT_STARTED | | | |
-| 1173 | Run — Successful build | NOT_STARTED | | | |
-| 1174 | Review — Binary size analysis | NOT_STARTED | | | |
-| 1174 | Document — Build log & artifacts | NOT_STARTED | | | |
-| 1175 | Integrate — Build in CI | NOT_STARTED | | | |
-| 1175 | Gate — Firmware compiles | NOT_STARTED | | | |
-| 1175 | Inspect — Hardware availability | NOT_STARTED | | | |
-| 1176 | Trace — Flash procedure | NOT_STARTED | | | |
-| 1177 | Specify — Smoke test criteria | NOT_STARTED | | | |
-| 1178 | Implement — First flash | NOT_STARTED | | | |
-| 1179 | Test — Boot log capture | NOT_STARTED | | | |
-| 1180 | Run — CDC enumeration test | NOT_STARTED | | | |
-| 1181 | Review — Power/thermal check | NOT_STARTED | | | |
-| 1182 | Document — Flash & boot log | NOT_STARTED | | | |
-| 1183 | Integrate — Flash procedure in Makefile | NOT_STARTED | | | |
-| 1184 | Gate — Firmware runs on hardware | NOT_STARTED | | | |
-| 1185 | Inspect — Component test plan | NOT_STARTED | | | |
-| 1186 | Trace — Test dependencies | NOT_STARTED | | | |
-| 1187 | Specify — Test harness | NOT_STARTED | | | |
-| 1188 | Implement — I2S/GDMA hardware test | NOT_STARTED | | | |
-| 1189 | Implement — MFCC hardware test | NOT_STARTED | | | |
-| 1190 | Implement — NVS persistence test | NOT_STARTED | | | |
-| 1191 | Implement — USB CDC loopback test | NOT_STARTED | | | |
-| 1192 | Implement — Button/LED test | NOT_STARTED | | | |
-| 1193 | Test — Component test execution | NOT_STARTED | | | |
-| 1194 | Run — Full component suite | NOT_STARTED | | | |
-| 1195 | Review — Integration readiness | NOT_STARTED | | | |
-| 1196 | Document — Hardware test reports | NOT_STARTED | | | |
-| 1197 | Integrate — Component tests in CI | NOT_STARTED | | | |
-| 1198 | Gate — Components verified on hardware | NOT_STARTED | | | |
-| 1199 | Inspect — Pipeline data flow | NOT_STARTED | | | |
-| 1200 | Trace — Queue sizing & latency | NOT_STARTED | | | |
-| 1201 | Specify — Integration targets | NOT_STARTED | | | |
-| 1202 | Implement — Pipeline integration | NOT_STARTED | | | |
-| 1203 | Test — Pipeline latency measurement | NOT_STARTED | | | |
-| 1204 | Run — Pipeline stress test | NOT_STARTED | | | |
-| 1205 | Review — Resource utilization | NOT_STARTED | | | |
-| 1206 | Document — Pipeline integration report | NOT_STARTED | | | |
-| 1207 | Integrate — Full pipeline on hardware | NOT_STARTED | | | |
-| 1207 | Gate — Firmware pipeline operational | NOT_STARTED | | | |
-| 1208 | Inspect — Raphael archive acquisition | NOT_STARTED | | | |
-| 1209 | Trace — Archive provenance | NOT_STARTED | | | |
-| 1209 | Specify — Reconciliation criteria | NOT_STARTED | | | |
-| 1210 | Implement — Schematic import & review | NOT_STARTED | | | |
-| 1210 | Implement — PCB import & review | NOT_STARTED | | | |
-| 1211 | Trace — Pinmap comparison | NOT_STARTED | | | |
-| 1211 | Test — Pinmap compliance | NOT_STARTED | | | |
-| 1212 | Run — Conflict resolution | NOT_STARTED | | | |
-| 1212 | Review — Reconciliation report | NOT_STARTED | | | |
-| 1212 | Gate — Pinmap reconciled | NOT_STARTED | | | |
-| 1213 | Inspect — Schematic completeness | NOT_STARTED | | | |
-| 1213 | Trace — Net naming convention | NOT_STARTED | | | |
-| 1214 | Specify — ERC ruleset | NOT_STARTED | | | |
-| 1214 | Implement — ERC cleanup | NOT_STARTED | | | |
-| 1215 | Test — ERC clean | NOT_STARTED | | | |
-| 1215 | Run — Netlist export | NOT_STARTED | | | |
-| 1216 | Review — Schematic review checklist | NOT_STARTED | | | |
-| 1216 | Document — Schematic PDF + source | NOT_STARTED | | | |
-| 1217 | Integrate — Schematic in repo | NOT_STARTED | | | |
-| 1217 | Gate — Schematic ERC clean | NOT_STARTED | | | |
-| 1217 | Inspect — PCB stackup & constraints | NOT_STARTED | | | |
-| 1218 | Trace — Placement strategy | NOT_STARTED | | | |
-| 1219 | Specify — DRC ruleset | NOT_STARTED | | | |
-| 1219 | Implement — Component placement | NOT_STARTED | | | |
-| 1219 | Implement — Routing | NOT_STARTED | | | |
-| 1220 | Implement — DRC cleanup | NOT_STARTED | | | |
-| 1220 | Test — DRC clean | NOT_STARTED | | | |
-| 1221 | Run — Signal integrity check | NOT_STARTED | | | |
-| 1221 | Review — PCB review checklist | NOT_STARTED | | | |
-| 1221 | Document — PCB outputs | NOT_STARTED | | | |
-| 1222 | Integrate — PCB in repo | NOT_STARTED | | | |
-| 1222 | Gate — PCB DRC clean | NOT_STARTED | | | |
-| 1222 | Inspect — BOM completeness | NOT_STARTED | | | |
-| 1223 | Trace — Procurement validation | NOT_STARTED | | | |
-| 1223 | Specify — BOM finalization | NOT_STARTED | | | |
-| 1224 | Implement — BOM finalization | NOT_STARTED | | | |
-| 1224 | Test — BOM cost rollup | NOT_STARTED | | | |
-| 1224 | Run — Enclosure-PCB fit check | NOT_STARTED | | | |
-| 1225 | Review — Mechanical integration | NOT_STARTED | | | |
-| 1225 | Document — Fabrication package | NOT_STARTED | | | |
-| 1225 | Integrate — Fab package in repo | NOT_STARTED | | | |
-| 1225 | Gate — Fabrication ready | NOT_STARTED | | | |
-| 1226 | Inspect — Fab house selection | NOT_STARTED | | | |
-| 1226 | Trace — Assembly options | NOT_STARTED | | | |
-| 1227 | Specify — Fab order | NOT_STARTED | | | |
-| 1227 | Implement — Place fab order | NOT_STARTED | | | |
-| 1227 | Test — Fab tracking | NOT_STARTED | | | |
-| 1228 | Run — Receive PCBs | NOT_STARTED | | | |
-| 1228 | Review — PCB quality report | NOT_STARTED | | | |
-| 1228 | Document — Component kit | NOT_STARTED | | | |
-| 1228 | Integrate — Assembly preparation | NOT_STARTED | | | |
-| 1228 | Gate — PCBs received & verified | NOT_STARTED | | | |
-| 1229 | Inspect — Assembly plan | NOT_STARTED | | | |
-| 1229 | Trace — Power-on sequence | NOT_STARTED | | | |
-| 1230 | Specify — Bring-up test points | NOT_STARTED | | | |
-| 1230 | Implement — First power-on | NOT_STARTED | | | |
-| 1231 | Test — MCU boot | NOT_STARTED | | | |
-| 1231 | Run — Peripheral validation | NOT_STARTED | | | |
-| 1232 | Review — Bring-up report | NOT_STARTED | | | |
-| 1232 | Document — Verified hardware | NOT_STARTED | | | |
-| 1233 | Integrate — Hardware baseline | NOT_STARTED | | | |
-| 1233 | Gate — Custom hardware operational | NOT_STARTED | | | |
-| 1234 | Inspect — Microphone selection | NOT_STARTED | | | |
-| 1234 | Trace — Schematic integration | NOT_STARTED | | | |
-| 1235 | Specify — Mic wiring | NOT_STARTED | | | |
-| 1235 | Implement — Mic soldering | NOT_STARTED | | | |
-| 1235 | Test — Mic power & clock | NOT_STARTED | | | |
-| 1236 | Run — First audio capture | NOT_STARTED | | | |
-| 1236 | Review — Signal quality | NOT_STARTED | | | |
-| 1236 | Document — Mic integration report | NOT_STARTED | | | |
-| 1237 | Integrate — Mic in pipeline | NOT_STARTED | | | |
-| 1237 | Gate — Microphone operational | NOT_STARTED | | | |
-| 1237 | Inspect — GDMA descriptor config | NOT_STARTED | | | |
-| 1238 | Trace — Buffer latency | NOT_STARTED | | | |
-| 1238 | Specify — Latency targets | NOT_STARTED | | | |
-| 1238 | Implement — Overrun/underrun detection | NOT_STARTED | | | |
-| 1239 | Test — Continuous capture | NOT_STARTED | | | |
-| 1239 | Run — Stress test | NOT_STARTED | | | |
-| 1240 | Review — GDMA performance | NOT_STARTED | | | |
-| 1240 | Document — GDMA validation | NOT_STARTED | | | |
-| 1241 | Integrate — GDMA in pipeline | NOT_STARTED | | | |
-| 1241 | Gate — GDMA pipeline validated | NOT_STARTED | | | |
-| 1241 | Inspect — MFCC hardware vs. Python | NOT_STARTED | | | |
-| 1242 | Trace — Fixed-point accuracy | NOT_STARTED | | | |
-| 1242 | Specify — Accuracy tolerance | NOT_STARTED | | | |
-| 1242 | Implement — Hardware MFCC test harness | NOT_STARTED | | | |
-| 1243 | Test — MFCC parity | NOT_STARTED | | | |
-| 1243 | Run — DSP timing | NOT_STARTED | | | |
-| 1244 | Review — DSP hardware report | NOT_STARTED | | | |
-| 1244 | Document — DSP hardware validation | NOT_STARTED | | | |
-| 1245 | Integrate — DSP in pipeline | NOT_STARTED | | | |
-| 1245 | Gate — DSP hardware validated | NOT_STARTED | | | |
-| 1245 | Inspect — VAD options | NOT_STARTED | | | |
-| 1246 | Trace — PTT + VAD hybrid | NOT_STARTED | | | |
-| 1246 | Specify — VAD thresholds | NOT_STARTED | | | |
-| 1246 | Implement — VAD in dsp_task | NOT_STARTED | | | |
-| 1247 | Test — VAD accuracy | NOT_STARTED | | | |
-| 1247 | Run — PTT + VAD integration | NOT_STARTED | | | |
-| 1248 | Review — VAD/PTT report | NOT_STARTED | | | |
-| 1248 | Document — VAD config | NOT_STARTED | | | |
-| 1248 | Integrate — VAD in pipeline | NOT_STARTED | | | |
-| 1248 | Gate — VAD + PTT operational | NOT_STARTED | | | |
-| 1249 | Inspect — Full audio chain | NOT_STARTED | | | |
-| 1249 | Trace — End-to-end latency | NOT_STARTED | | | |
-| 1250 | Specify — E2E targets | NOT_STARTED | | | |
-| 1250 | Implement — E2E test harness | NOT_STARTED | | | |
-| 1250 | Test — E2E measurement | NOT_STARTED | | | |
-| 1251 | Run — Continuous operation | NOT_STARTED | | | |
-| 1251 | Review — Audio pipeline E2E report | NOT_STARTED | | | |
-| 1251 | Document — Audio pipeline evidence | NOT_STARTED | | | |
-| 1252 | Integrate — Audio pipeline complete | NOT_STARTED | | | |
-| 1252 | Gate — Physical audio pipeline operational | NOT_STARTED | | | |
-| 1253 | Inspect — Ethics requirements | NOT_STARTED | | | |
-| 1253 | Trace — Legal compliance | NOT_STARTED | | | |
-| 1254 | Specify — Consent process | NOT_STARTED | | | |
-| 1254 | Implement — Consent forms | NOT_STARTED | | | |
-| 1254 | Test — Consent workflow | NOT_STARTED | | | |
-| 1255 | Run — Collect consents | NOT_STARTED | | | |
-| 1255 | Review — Consent audit | NOT_STARTED | | | |
-| 1256 | Document — Consent records | NOT_STARTED | | | |
-| 1256 | Integrate — Consent in dataset tool | NOT_STARTED | | | |
-| 1256 | Gate — Consent complete | NOT_STARTED | | | |
-| 1257 | Inspect — Recording environment | NOT_STARTED | | | |
-| 1257 | Trace — Recording session design | NOT_STARTED | | | |
-| 1258 | Specify — Prompt script | NOT_STARTED | | | |
-| 1258 | Implement — Recording session script | NOT_STARTED | | | |
-| 1259 | Test — Session dry-run | NOT_STARTED | | | |
-| 1259 | Run — Speaker 1 recording | NOT_STARTED | | | |
-| 1260 | Run — Speaker 2 recording | NOT_STARTED | | | |
-| 1261 | Run — Speaker 3 recording | NOT_STARTED | | | |
-| 1262 | Review — Session quality | NOT_STARTED | | | |
-| 1263 | Gate — Sessions complete | NOT_STARTED | | | |
-| 1263 | Inspect — Dataset structure | NOT_STARTED | | | |
-| 1264 | Trace — Metadata completeness | NOT_STARTED | | | |
-| 1264 | Specify — Quality thresholds | NOT_STARTED | | | |
-| 1264 | Implement — Automated QC | NOT_STARTED | | | |
-| 1265 | Test — QC execution | NOT_STARTED | | | |
-| 1265 | Run — Full QC pass | NOT_STARTED | | | |
-| 1266 | Review — Dataset QC report | NOT_STARTED | | | |
-| 1266 | Document — Final dataset manifest | NOT_STARTED | | | |
-| 1267 | Integrate — Dataset in pipeline | NOT_STARTED | | | |
-| 1267 | Gate — Dataset validated | NOT_STARTED | | | |
-| 1267 | Inspect — Split implementation | NOT_STARTED | | | |
-| 1268 | Trace — Split ratios | NOT_STARTED | | | |
-| 1268 | Specify — Split validation | NOT_STARTED | | | |
-| 1269 | Implement — Split validator | NOT_STARTED | | | |
-| 1269 | Test — Split validation | NOT_STARTED | | | |
-| 1269 | Run — Leave-one-speaker-out folds | NOT_STARTED | | | |
-| 1270 | Review — Split audit | NOT_STARTED | | | |
-| 1270 | Document — Fold manifests | NOT_STARTED | | | |
-| 1271 | Integrate — Folds in training | NOT_STARTED | | | |
-| 1271 | Gate — Speaker-split verified | NOT_STARTED | | | |
-| 1272 | Inspect — Dataset card | NOT_STARTED | | | |
-| 1272 | Trace — Bias & limitations | NOT_STARTED | | | |
-| 1273 | Specify — Dataset versioning | NOT_STARTED | | | |
-| 1273 | Implement — Dataset package | NOT_STARTED | | | |
-| 1274 | Test — Package integrity | NOT_STARTED | | | |
-| 1274 | Run — Package validation | NOT_STARTED | | | |
-| 1275 | Review — Dataset card review | NOT_STARTED | | | |
-| 1275 | Document — Dataset release | NOT_STARTED | | | |
-| 1276 | Integrate — Dataset in ML pipeline | NOT_STARTED | | | |
-| 1276 | Gate — Dataset release ready | NOT_STARTED | | | |
-| 1277 | Inspect — Training environment | NOT_STARTED | | | |
-| 1277 | Trace — Training config | NOT_STARTED | | | |
-| 1278 | Specify — Training procedure | NOT_STARTED | | | |
-| 1278 | Implement — Reproducible training script | NOT_STARTED | | | |
-| 1279 | Test — Training dry-run | NOT_STARTED | | | |
-| 1279 | Run — Full leave-one-speaker-out training | NOT_STARTED | | | |
-| 1280 | Review — Training curves | NOT_STARTED | | | |
-| 1280 | Document — Training log | NOT_STARTED | | | |
-| 1281 | Integrate — Checkpoints in pipeline | NOT_STARTED | | | |
-| 1281 | Gate — Training complete | NOT_STARTED | | | |
-| 1281 | Inspect — Eval implementation | NOT_STARTED | | | |
-| 1282 | Trace — Metric computation | NOT_STARTED | | | |
-| 1282 | Specify — Eval protocol | NOT_STARTED | | | |
-| 1283 | Implement — Per-fold evaluation | NOT_STARTED | | | |
-| 1283 | Test — Evaluation consistency | NOT_STARTED | | | |
-| 1284 | Run — 3-fold evaluation | NOT_STARTED | | | |
-| 1284 | Review — Evaluation report | NOT_STARTED | | | |
-| 1285 | Document — Float model metrics | NOT_STARTED | | | |
-| 1285 | Integrate — Eval in training loop | NOT_STARTED | | | |
-| 1285 | Gate — Float evaluation complete | NOT_STARTED | | | |
-| 1286 | Inspect — Quantization pipeline | NOT_STARTED | | | |
-| 1286 | Trace — Calibration data | NOT_STARTED | | | |
-| 1287 | Specify — Quantization targets | NOT_STARTED | | | |
-| 1287 | Implement — Quantization per fold | NOT_STARTED | | | |
-| 1288 | Test — Quantization accuracy | NOT_STARTED | | | |
-| 1288 | Run — Quantization sweep | NOT_STARTED | | | |
-| 1289 | Review — Quantization report | NOT_STARTED | | | |
-| 1289 | Document — Int8 models | NOT_STARTED | | | |
-| 1290 | Integrate — Best int8 model selection | NOT_STARTED | | | |
-| 1290 | Gate — Int8 export complete | NOT_STARTED | | | |
-| 1290 | Inspect — TFLite-Micro integration | NOT_STARTED | | | |
-| 1291 | Trace — Memory budget | NOT_STARTED | | | |
-| 1291 | Specify — Integration procedure | NOT_STARTED | | | |
-| 1292 | Implement — Model embedding | NOT_STARTED | | | |
-| 1292 | Test — Firmware rebuild | NOT_STARTED | | | |
-| 1293 | Run — Flash & inference test | NOT_STARTED | | | |
-| 1293 | Run — On-device accuracy test | NOT_STARTED | | | |
-| 1294 | Review — On-device validation | NOT_STARTED | | | |
-| 1294 | Document — Firmware model integration | NOT_STARTED | | | |
-| 1295 | Integrate — Model in firmware | NOT_STARTED | | | |
-| 1295 | Gate — Model runs on device | NOT_STARTED | | | |
-| 1295 | Inspect — Model card template | NOT_STARTED | | | |
-| 1296 | Trace — Card population | NOT_STARTED | | | |
-| 1296 | Specify — Card completeness | NOT_STARTED | | | |
-| 1296 | Implement — Card generator | NOT_STARTED | | | |
-| 1297 | Test — Card completeness | NOT_STARTED | | | |
-| 1297 | Run — Card generation | NOT_STARTED | | | |
-| 1298 | Review — Card review | NOT_STARTED | | | |
-| 1298 | Document — Final model card | NOT_STARTED | | | |
-| 1299 | Integrate — Model card in repo | NOT_STARTED | | | |
-| 1299 | Gate — Model card complete | NOT_STARTED | | | |
-| 1300 | Inspect — Full pipeline components | NOT_STARTED | | | |
-| 1300 | Trace — Data flow timing | NOT_STARTED | | | |
-| 1301 | Specify — Integration targets | NOT_STARTED | | | |
-| 1301 | Implement — Firmware integration | NOT_STARTED | | | |
-| 1302 | Test — Pipeline bring-up | NOT_STARTED | | | |
-| 1302 | Run — Pipeline latency measurement | NOT_STARTED | | | |
-| 1303 | Review — Pipeline integration report | NOT_STARTED | | | |
-| 1303 | Document — HW pipeline evidence | NOT_STARTED | | | |
-| 1304 | Integrate — Full pipeline on hardware | NOT_STARTED | | | |
-| 1304 | Gate — E2E pipeline on hardware | NOT_STARTED | | | |
-| 1304 | Inspect — Host readiness | NOT_STARTED | | | |
-| 1305 | Trace — Host-device handshake | NOT_STARTED | | | |
-| 1306 | Specify — Demo script | NOT_STARTED | | | |
-| 1306 | Implement — Physical demo script | NOT_STARTED | | | |
-| 1307 | Test — Single command demo | NOT_STARTED | | | |
-| 1307 | Run — Full demo sequence | NOT_STARTED | | | |
-| 1308 | Review — Physical demo report | NOT_STARTED | | | |
-| 1308 | Document — Physical demo evidence | NOT_STARTED | | | |
-| 1309 | Integrate — Demo in Makefile | NOT_STARTED | | | |
-| 1309 | Gate — Physical demo works | NOT_STARTED | | | |
-| 1309 | Inspect — Reliability test matrix | NOT_STARTED | | | |
-| 1310 | Trace — Failure modes | NOT_STARTED | | | |
-| 1310 | Specify — Reliability targets | NOT_STARTED | | | |
-| 1310 | Implement — Stress test harness | NOT_STARTED | | | |
-| 1311 | Test — 1000-cycle stress | NOT_STARTED | | | |
-| 1311 | Run — Fault injection | NOT_STARTED | | | |
-| 1312 | Run — Thermal soak | NOT_STARTED | | | |
-| 1312 | Review — Stress test report | NOT_STARTED | | | |
-| 1313 | Document — Reliability evidence | NOT_STARTED | | | |
-| 1313 | Integrate — Reliability in CI | NOT_STARTED | | | |
-| 1313 | Gate — Reliability validated | NOT_STARTED | | | |
-| 1314 | Inspect — LLM candidates | NOT_STARTED | | | |
-| 1314 | Trace — Integration architecture | NOT_STARTED | | | |
-| 1315 | Specify — LLM interface | NOT_STARTED | | | |
-| 1315 | Implement — LLM server | NOT_STARTED | | | |
-| 1316 | Test — LLM basic inference | NOT_STARTED | | | |
-| 1316 | Run — Latency benchmark | NOT_STARTED | | | |
-| 1317 | Review — LLM deployment report | NOT_STARTED | | | |
-| 1317 | Document — LLM integration guide | NOT_STARTED | | | |
-| 1318 | Integrate — LLM in host stack | NOT_STARTED | | | |
-| 1318 | Gate — LLM operational | NOT_STARTED | | | |
-| 1318 | Inspect — Planner requirements | NOT_STARTED | | | |
-| 1319 | Trace — Verification layer | NOT_STARTED | | | |
-| 1320 | Specify — Action schema | NOT_STARTED | | | |
-| 1320 | Implement — Planner module | NOT_STARTED | | | |
-| 1321 | Implement — Verification layer | NOT_STARTED | | | |
-| 1321 | Test — Planner accuracy | NOT_STARTED | | | |
-| 1322 | Run — End-to-end planning | NOT_STARTED | | | |
-| 1322 | Review — Planner report | NOT_STARTED | | | |
-| 1323 | Document — Planner API | NOT_STARTED | | | |
-| 1323 | Integrate — Planner in host_agent | NOT_STARTED | | | |
-| 1323 | Gate — Planner operational | NOT_STARTED | | | |
-| 1324 | Inspect — Context store evolution | NOT_STARTED | | | |
-| 1324 | Trace — Vector DB options | NOT_STARTED | | | |
-| 1325 | Specify — Memory architecture | NOT_STARTED | | | |
-| 1325 | Implement — Vector store | NOT_STARTED | | | |
-| 1326 | Implement — Contextual retrieval | NOT_STARTED | | | |
-| 1326 | Test — Retrieval quality | NOT_STARTED | | | |
-| 1227 | Run — Cross-session persistence | NOT_STARTED | | | |
-| 1228 | Review — Memory report | NOT_STARTED | | | |
-| 1228 | Document — Memory API | NOT_STARTED | | | |
-| 1229 | Integrate — Memory in planner | NOT_STARTED | | | |
-| 1229 | Gate — Memory operational | NOT_STARTED | | | |
-| 1230 | Inspect — Safety risks | NOT_STARTED | | | |
-| 1230 | Trace — Guardrail layers | NOT_STARTED | | | |
-| 1231 | Specify — Guardrail implementation | NOT_STARTED | | | |
-| 1231 | Implement — Guardrails | NOT_STARTED | | | |
-| 1231 | Test — Adversarial prompts | NOT_STARTED | | | |
-| 1232 | Run — Safety benchmark | NOT_STARTED | | | |
-| 1232 | Review — Safety report | NOT_STARTED | | | |
-| 1233 | Document — Guardrail config | NOT_STARTED | | | |
-| 1233 | Integrate — Guardrails in pipeline | NOT_STARTED | | | |
-| 1233 | Gate — Safety validated | NOT_STARTED | | | |
-| 1340 | Inspect — Tool landscape | NOT_STARTED | | | |
-| 1340 | Trace — Adapter pattern | NOT_STARTED | | | |
-| 1341 | Specify — Tool adapter interface | NOT_STARTED | | | |
-| 1341 | Implement — Ngspice adapter | NOT_STARTED | | | |
-| 1342 | Implement — KiCad adapter | NOT_STARTED | | | |
-| 1342 | Implement — File ops adapter | NOT_STARTED | | | |
-| 1343 | Implement — Git adapter | NOT_STARTED | | | |
-| 1343 | Test — Adapter unit tests | NOT_STARTED | | | |
-| 1344 | Run — Adapter integration test | NOT_STARTED | | | |
-| 1344 | Review — Adapter report | NOT_STARTED | | | |
-| 1345 | Document — Tool registry | NOT_STARTED | | | |
-| 1345 | Integrate — Registry in planner | NOT_STARTED | | | |
-| 1346 | Gate — Tool registry operational | NOT_STARTED | | | |
-| 1346 | Inspect — Confirmation requirements | NOT_STARTED | | | |
-| 1347 | Trace — Approval flow | NOT_STARTED | | | |
-| 1347 | Specify — Approval UI | NOT_STARTED | | | |
-| 1347 | Implement — Confirmation queue | NOT_STARTED | | | |
-| 1348 | Implement — CLI approval UI | NOT_STARTED | | | |
-| 1348 | Implement — Desktop approval UI | NOT_STARTED | | | |
-| 1349 | Test — Approval flow | NOT_STARTED | | | |
-| 1349 | Run — Approval integration test | NOT_STARTED | | | |
-| 1350 | Review — Approval report | NOT_STARTED | | | |
-| 1350 | Document — Approval config | NOT_STARTED | | | |
-| 1351 | Integrate — Approval in executor | NOT_STARTED | | | |
-| 1351 | Gate — Approval gates operational | NOT_STARTED | | | |
-| 1352 | Inspect — Execution requirements | NOT_STARTED | | | |
-| 1352 | Trace — Execution lifecycle | NOT_STARTED | | | |
-| 1353 | Specify — Executor interface | NOT_STARTED | | | |
-| 1353 | Implement — Executor core | NOT_STARTED | | | |
-| 1354 | Implement — Result verification | NOT_STARTED | | | |
-| 1354 | Implement — Rollback manager | NOT_STARTED | | | |
-| 1355 | Test — Executor scenarios | NOT_STARTED | | | |
-| 1355 | Run — Executor stress test | NOT_STARTED | | | |
-| 1356 | Run — Verification accuracy | NOT_STARTED | | | |
-| 1357 | Review — Executor report | NOT_STARTED | | | |
-| 1357 | Document — Executor API | NOT_STARTED | | | |
-| 1358 | Integrate — Executor in host_agent | NOT_STARTED | | | |
-| 1358 | Gate — Execution engine operational | NOT_STARTED | | | |
-| 1358 | Inspect — GUI framework options | NOT_STARTED | | | |
-| 1359 | Trace — GUI requirements | NOT_STARTED | | | |
-| 1360 | Specify — GUI architecture | NOT_STARTED | | | |
-| 1360 | Implement — Main window | NOT_STARTED | | | |
-| 1361 | Implement — Approval dialog | NOT_STARTED | | | |
-| 1361 | Implement — Project browser | NOT_STARTED | | | |
-| 1362 | Implement — Log viewer | NOT_STARTED | | | |
-| 1362 | Test — GUI functionality | NOT_STARTED | | | |
-| 1363 | Run — GUI integration test | NOT_STARTED | | | |
-| 1364 | Review — GUI report | NOT_STARTED | | | |
-| 1364 | Document — GUI user guide | NOT_STARTED | | | |
-| 1365 | Integrate — GUI launch | NOT_STARTED | | | |
-| 1365 | Gate — Desktop GUI operational | NOT_STARTED | | | |
-| 1366 | Inspect — Current context limits | NOT_STARTED | | | |
-| 1366 | Trace — Memory requirements | NOT_STARTED | | | |
-| 1367 | Specify — Memory schema | NOT_STARTED | | | |
-| 1367 | Implement — Vector store backend | NOT_STARTED | | | |
-| 1368 | Implement — Embedding pipeline | NOT_STARTED | | | |
-| 1368 | Implement — Memory writer | NOT_STARTED | | | |
-| 1369 | Test — Memory write/read | NOT_STARTED | | | |
-| 1369 | Run — Cross-session persistence | NOT_STARTED | | | |
-| 1370 | Review — Memory report | NOT_STARTED | | | |
-| 1370 | Document — Vector memory API | NOT_STARTED | | | |
-| 1371 | Integrate — Vector memory in host | NOT_STARTED | | | |
-| 1371 | Gate — Vector memory operational | NOT_STARTED | | | |
-| 1372 | Inspect — Current resolution | NOT_STARTED | | | |
-| 1372 | Trace — Ambiguity cases | NOT_STARTED | | | |
-| 1373 | Specify — Semantic resolution | NOT_STARTED | | | |
-| 1373 | Implement — Semantic resolver | NOT_STARTED | | | |
-| 1374 | Implement — Fallback chain | NOT_STARTED | | | |
-| 1374 | Test — Resolution accuracy | NOT_STARTED | | | |
-| 1375 | Run — Edge case testing | NOT_STARTED | | | |
-| 1375 | Review — Resolver report | NOT_STARTED | | | |
-| 1376 | Document — Resolver API | NOT_STARTED | | | |
-| 1377 | Integrate — Resolver in host_agent | NOT_STARTED | | | |
-| 1377 | Gate — Semantic resolution operational | NOT_STARTED | | | |
-| 1378 | Inspect — Task state model | NOT_STARTED | | | |
-| 1378 | Trace — Recovery scenarios | NOT_STARTED | | | |
-| 1379 | Specify — Task state schema | NOT_STARTED | | | |
-| 1379 | Implement — Task state store | NOT_STARTED | | | |
-| 1380 | Implement — Recovery logic | NOT_STARTED | | | |
-| 1380 | Test — Crash recovery | NOT_STARTED | | | |
-| 1381 | Test — Device reboot sync | NOT_STARTED | | | |
-| 1381 | Run — End-to-end recovery | NOT_STARTED | | | |
-| 1382 | Review — Recovery report | NOT_STARTED | | | |
-| 1382 | Document — Task recovery API | NOT_STARTED | | | |
-| 1383 | Integrate — Recovery in host_agent | NOT_STARTED | | | |
-| 1383 | Gate — Task recovery operational | NOT_STARTED | | | |
-| 1384 | Inspect — Context injection | NOT_STARTED | | | |
-| 1384 | Trace — Context relevance | NOT_STARTED | | | |
-| 1385 | Specify — Context retrieval for planning | NOT_STARTED | | | |
-| 1385 | Implement — Context retriever for planner | NOT_STARTED | | | |
-| 1386 | Test — Context relevance | NOT_STARTED | | | |
-| 1386 | Run — Planning with context | NOT_STARTED | | | |
-| 1387 | Run — Multi-project context | NOT_STARTED | | | |
-| 1387 | Review — Context intelligence report | NOT_STARTED | | | |
-| 1388 | Document — Context-aware planning API | NOT_STARTED | | | |
-| 1388 | Integrate — Context in planner | NOT_STARTED | | | |
-| 1389 | Gate — Context-aware planning operational | NOT_STARTED | | | |
-| 1390 | Inspect — Telemetry sources | NOT_STARTED | | | |
-| 1390 | Trace — Telemetry transport | NOT_STARTED | | | |
-| 1391 | Specify — Telemetry protocol | NOT_STARTED | | | |
-| 1391 | Implement — Device telemetry | NOT_STARTED | | | |
-| 1392 | Implement — Host telemetry collector | NOT_STARTED | | | |
-| 1392 | Test — Telemetry pipeline | NOT_STARTED | | | |
-| 1393 | Run — Telemetry latency | NOT_STARTED | | | |
-| 1393 | Review — Telemetry report | NOT_STARTED | | | |
-| 1394 | Document — Telemetry protocol | NOT_STARTED | | | |
-| 1394 | Integrate — Telemetry in stack | NOT_STARTED | | | |
-| 1395 | Gate — Telemetry operational | NOT_STARTED | | | |
-| 1395 | Inspect — Dashboard tech stack | NOT_STARTED | | | |
-| 1396 | Trace — Dashboard requirements | NOT_STARTED | | | |
-| 1397 | Specify — Dashboard architecture | NOT_STARTED | | | |
-| 1397 | Implement — Backend API | NOT_STARTED | | | |
-| 1398 | Implement — Frontend | NOT_STARTED | | | |
-| 1398 | Test — Dashboard functionality | NOT_STARTED | | | |
-| 1399 | Run — Dashboard integration | NOT_STARTED | | | |
-| 1400 | Review — Dashboard UX | NOT_STARTED | | | |
-| 1400 | Document — Dashboard deployment | NOT_STARTED | | | |
-| 1401 | Integrate — Dashboard launch | NOT_STARTED | | | |
-| 1401 | Gate — Dashboard operational | NOT_STARTED | | | |
-| 1402 | Inspect — Alerting needs | NOT_STARTED | | | |
-| 1402 | Trace — Alert channels | NOT_STARTED | | | |
-| 1403 | Specify — Alert rules | NOT_STARTED | | | |
-| 1403 | Implement — Alert engine | NOT_STARTED | | | |
-| 1404 | Implement — Notification channels | NOT_STARTED | | | |
-| 1404 | Test — Alert firing | NOT_STARTED | | | |
-| 1405 | Run — Alert soak test | NOT_STARTED | | | |
-| 1406 | Review — Alerting report | NOT_STARTED | | | |
-| 1406 | Document — Alert config | NOT_STARTED | | | |
-| 1407 | Integrate — Alerts in dashboard | NOT_STARTED | | | |
-| 1407 | Gate — Alerting operational | NOT_STARTED | | | |
-| 1408 | Inspect — Historical data | NOT_STARTED | | | |
-| 1408 | Trace — Storage backend | NOT_STARTED | | | |
-| 1409 | Specify — History schema | NOT_STARTED | | | |
-| 1409 | Implement — History store | NOT_STARTED | | | |
-| 1410 | Implement — Query API | NOT_STARTED | | | |
-| 1410 | Test — History queries | NOT_STARTED | | | |
-| 1411 | Run — Report generation | NOT_STARTED | | | |
-| 1412 | Review — Historical analysis | NOT_STARTED | | | |
-| 1412 | Document — History API | NOT_STARTED | | | |
-| 1413 | Integrate — History in dashboard | NOT_STARTED | | | |
-| 1413 | Gate — Historical analysis operational | NOT_STARTED | | | |
-| 1414 | Inspect — Current fault coverage | NOT_STARTED | | | |
-| 1414 | Trace — Physical fault modes | NOT_STARTED | | | |
-| 1415 | Specify — Fault injection harness | NOT_STARTED | | | |
-| 1415 | Implement — Physical fault injector | NOT_STARTED | | | |
-| 1416 | Implement — Fault scenarios | NOT_STARTED | | | |
-| 1416 | Test — Fault injection | NOT_STARTED | | | |
-| 1417 | Run — Automated fault suite | NOT_STARTED | | | |
-| 1417 | Review — Fault hardening report | NOT_STARTED | | | |
-| 1418 | Document — Fault injector guide | NOT_STARTED | | | |
-| 1418 | Integrate — Fault tests in CI | NOT_STARTED | | | |
-| 1419 | Gate — Comm fault hardened | NOT_STARTED | | | |
-| 1419 | Inspect — Security surface | NOT_STARTED | | | |
-| 1420 | Trace — Threat model update | NOT_STARTED | | | |
-| 1420 | Specify — Mitigations | NOT_STARTED | | | |
-| 1421 | Implement — Signed firmware | NOT_STARTED | | | |
-| 1421 | Implement — NVS encryption | NOT_STARTED | | | |
-| 1422 | Implement — Rate limiting | NOT_STARTED | | | |
-| 1422 | Implement — Sandbox execution | NOT_STARTED | | | |
-| 1423 | Test — Security verification | NOT_STARTED | | | |
-| 1423 | Run — Penetration test | NOT_STARTED | | | |
-| 1424 | Review — Security hardening report | NOT_STARTED | | | |
-| 1424 | Document — Security config | NOT_STARTED | | | |
-| 1425 | Integrate — Hardened build | NOT_STARTED | | | |
-| 1425 | Gate — Security hardened | NOT_STARTED | | | |
-| 1426 | Inspect — Recovery mechanisms | NOT_STARTED | | | |
-| 1426 | Trace — Failure scenarios | NOT_STARTED | | | |
-| 1427 | Specify — Recovery architecture | NOT_STARTED | | | |
-| 1427 | Implement — Device watchdog | NOT_STARTED | | | |
-| 1428 | Implement — Host health monitor | NOT_STARTED | | | |
-| 1428 | Implement — NVS corruption recovery | NOT_STARTED | | | |
-| 1429 | Test — Recovery scenarios | NOT_STARTED | | | |
-| 1429 | Run — Recovery soak test | NOT_STARTED | | | |
-| 1430 | Review — Recovery report | NOT_STARTED | | | |
-| 1430 | Document — Recovery procedures | NOT_STARTED | | | |
-| 1431 | Integrate — Recovery in production build | NOT_STARTED | | | |
-| 1431 | Gate — System self-healing | NOT_STARTED | | | |
-| 1432 | Inspect — Audit requirements | NOT_STARTED | | | |
-| 1432 | Trace — Audit chain | NOT_STARTED | | | |
-| 1433 | Specify — Audit integrity | NOT_STARTED | | | |
-| 1433 | Implement — Tamper-evident log | NOT_STARTED | | | |
-| 1434 | Implement — Log verification | NOT_STARTED | | | |
-| 1434 | Test — Audit integrity | NOT_STARTED | | | |
-| 1435 | Run — Audit soak | NOT_STARTED | | | |
-| 1435 | Review — Audit compliance report | NOT_STARTED | | | |
-| 1436 | Document — Audit spec v2 | NOT_STARTED | | | |
-| 1436 | Integrate — Tamper-evident audit | NOT_STARTED | | | |
-| 1437 | Gate — Audit trail tamper-proof | NOT_STARTED | | | |
-| 1438 | Inspect — Latency components | NOT_STARTED | | | |
-| 1438 | Trace — Measurement methodology | NOT_STARTED | | | |
-| 1439 | Specify — Benchmark protocol | NOT_STARTED | | | |
-| 1439 | Implement — Latency harness | NOT_STARTED | | | |
-| 1440 | Test — Harness validation | NOT_STARTED | | | |
-| 1440 | Run — Latency benchmark | NOT_STARTED | | | |
-| 1441 | Run — Component breakdown | NOT_STARTED | | | |
-| 1442 | Review — Latency report | NOT_STARTED | | | |
-| 1442 | Document — Latency evidence | NOT_STARTED | | | |
-| 1443 | Integrate — Latency in evidence pack | NOT_STARTED | | | |
-| 1443 | Gate — Latency benchmarked | NOT_STARTED | | | |
-| 1444 | Inspect — Throughput metrics | NOT_STARTED | | | |
-| 1444 | Trace — Resource metrics | NOT_STARTED | | | |
-| 1445 | Specify — Throughput protocol | NOT_STARTED | | | |
-| 1445 | Implement — Throughput harness | NOT_STARTED | | | |
-| 1446 | Test — Throughput validation | NOT_STARTED | | | |
-| 1446 | Run — Throughput benchmark | NOT_STARTED | | | |
-| 1447 | Run — Thermal soak | NOT_STARTED | | | |
-| 1448 | Review — Throughput report | NOT_STARTED | | | |
-| 1448 | Document — Throughput evidence | NOT_STARTED | | | |
-| 1449 | Integrate — Throughput in evidence pack | NOT_STARTED | | | |
-| 1449 | Gate — Throughput benchmarked | NOT_STARTED | | | |
-| 1450 | Inspect — Accuracy metrics | NOT_STARTED | | | |
-| 1450 | Trace — Test sets | NOT_STARTED | | | |
-| 1451 | Specify — Accuracy protocol | NOT_STARTED | | | |
-| 1451 | Implement — Accuracy harness | NOT_STARTED | | | |
-| 1452 | Test — Harness validation | NOT_STARTED | | | |
-| 1452 | Run — Accuracy benchmark | NOT_STARTED | | | |
-| 1453 | Run — Simulation correctness | NOT_STARTED | | | |
-| 1454 | Review — Accuracy report | NOT_STARTED | | | |
-| 1454 | Document — Accuracy evidence | NOT_STARTED | | | |
-| 1455 | Integrate — Accuracy in evidence pack | NOT_STARTED | | | |
-| 1455 | Gate — Accuracy benchmarked | NOT_STARTED | | | |
-| 1456 | Inspect — Power domains | NOT_STARTED | | | |
-| 1456 | Trace — Measurement setup | NOT_STARTED | | | |
-| 1457 | Specify — Power protocol | NOT_STARTED | | | |
-| 1457 | Implement — Power harness | NOT_STARTED | | | |
-| 1458 | Test — Power meter validation | NOT_STARTED | | | |
-| 1458 | Run — Power benchmark | NOT_STARTED | | | |
-| 1459 | Run — Battery life projection | NOT_STARTED | | | |
-| 1460 | Review — Power report | NOT_STARTED | | | |
-| 1460 | Document — Power evidence | NOT_STARTED | | | |
-| 1461 | Integrate — Power in evidence pack | NOT_STARTED | | | |
-| 1461 | Gate — Power benchmarked | NOT_STARTED | | | |
-| 1462 | Inspect — Demo requirements | NOT_STARTED | | | |
-| 1462 | Trace — Demo scenarios | NOT_STARTED | | | |
-| 1463 | Specify — Demo script | NOT_STARTED | | | |
-| 1463 | Implement — Demo automation | NOT_STARTED | | | |
-| 1464 | Test — Dry run | NOT_STARTED | | | |
-| 1464 | Run — Rehearsal sessions | NOT_STARTED | | | |
-| 1465 | Review — Rehearsal report | NOT_STARTED | | | |
-| 1465 | Document — Final demo script | NOT_STARTED | | | |
-| 1466 | Integrate — Demo in Makefile | NOT_STARTED | | | |
-| 1466 | Gate — Demo rehearsed | NOT_STARTED | | | |
-| 1467 | Inspect — Evidence requirements | NOT_STARTED | | | |
-| 1467 | Trace — Capture setup | NOT_STARTED | | | |
-| 1468 | Specify — Evidence checklist | NOT_STARTED | | | |
-| 1468 | Implement — Evidence capture script | NOT_STARTED | | | |
-| 1469 | Test — Capture test | NOT_STARTED | | | |
-| 1469 | Run — Recorded demo | NOT_STARTED | | | |
-| 1470 | Run — Backup recording | NOT_STARTED | | | |
-| 1470 | Review — Evidence quality | NOT_STARTED | | | |
-| 1471 | Document — Evidence manifest | NOT_STARTED | | | |
-| 1471 | Integrate — Evidence in submission | NOT_STARTED | | | |
-| 1471 | Gate — Evidence captured | NOT_STARTED | | | |
-| 1472 | Inspect — Submission checklist | NOT_STARTED | | | |
-| 1472 | Trace — Final verification | NOT_STARTED | | | |
-| 1473 | Specify — Final gate criteria | NOT_STARTED | | | |
-| 1473 | Implement — Final validator | NOT_STARTED | | | |
-| 1474 | Test — Final validation | NOT_STARTED | | | |
-| 1474 | Run — Final end-to-end test | NOT_STARTED | | | |
-| 1475 | Review — Final validation report | NOT_STARTED | | | |
-| 1475 | Document — Submission package | NOT_STARTED | | | |
-| 1476 | Integrate — Release tag | NOT_STARTED | | | |
-| 1476 | Integrate — Submission upload | NOT_STARTED | | | |
-| 1477 | Gate — Prototype accepted | NOT_STARTED | | | |
-| 1478 | Inspect — Install targets | NOT_STARTED | | | |
-| 1478 | Trace — Dependency graph | NOT_STARTED | | | |
-| 1479 | Specify — Installer design | NOT_STARTED | | | |
-| 1479 | Implement — Installer script | NOT_STARTED | | | |
-| 1480 | Implement — Config generator | NOT_STARTED | | | |
-| 1480 | Test — Clean install | NOT_STARTED | | | |
-| 1481 | Run — Multi-distro test | NOT_STARTED | | | |
-| 1482 | Review — Installer report | NOT_STARTED | | | |
-| 1482 | Document — Installation guide | NOT_STARTED | | | |
-| 1483 | Integrate — Installer in repo | NOT_STARTED | | | |
-| 1483 | Gate — Installer production-ready | NOT_STARTED | | | |
-| 1484 | Inspect — Doc gaps | NOT_STARTED | | | |
-| 1484 | Trace — Audience mapping | NOT_STARTED | | | |
-| 1485 | Specify — Documentation structure | NOT_STARTED | | | |
-| 1485 | Implement — Operator runbook | NOT_STARTED | | | |
-| 1486 | Implement — Maintainer guide | NOT_STARTED | | | |
-| 1486 | Implement — Developer guide | NOT_STARTED | | | |
-| 1487 | Implement — Reference docs | NOT_STARTED | | | |
-| 1487 | Test — Documentation accuracy | NOT_STARTED | | | |
-| 1488 | Run — Documentation review | NOT_STARTED | | | |
-| 1489 | Document — Documentation index | NOT_STARTED | | | |
-| 1489 | Integrate — Docs in repo | NOT_STARTED | | | |
-| 1490 | Gate — Documentation complete | NOT_STARTED | | | |
-| 1491 | Inspect — Release process | NOT_STARTED | | | |
-| 1491 | Trace — Release artifacts | NOT_STARTED | | | |
-| 1492 | Specify — Release pipeline | NOT_STARTED | | | |
-| 1492 | Implement — CI/CD pipeline | NOT_STARTED | | | |
-| 1493 | Implement — Signing | NOT_STARTED | | | |
-| 1493 | Implement — SBOM generation | NOT_STARTED | | | |
-| 1494 | Test — Release pipeline | NOT_STARTED | | | |
-| 1494 | Run — Release dry-run | NOT_STARTED | | | |
-| 1495 | Review — Release report | NOT_STARTED | | | |
-| 1495 | Document — Release process | NOT_STARTED | | | |
-| 1496 | Integrate — Release automation | NOT_STARTED | | | |
-| 1496 | Gate — Release engineering complete | NOT_STARTED | | | |
-| 1497 | Inspect — Handoff requirements | NOT_STARTED | | | |
-| 1497 | Trace — Handoff checklist | NOT_STARTED | | | |
-| 1498 | Specify — Handoff package | NOT_STARTED | | | |
-| 1498 | Implement — Handoff package | NOT_STARTED | | | |
-| 1499 | Test — Clean handoff | NOT_STARTED | | | |
-| 1499 | Run — Mentor handoff session | NOT_STARTED | | | |
-| 1500 | Run — Team knowledge transfer | NOT_STARTED | | | |
-| 1500 | Review — Handoff completion | NOT_STARTED | | | |
-| 1501 | Document — Lessons learned | NOT_STARTED | | | |
-| 1501 | Document — Project closure | NOT_STARTED | | | |
-| 1502 | Gate — Project complete | NOT_STARTED | | | |
+| 0001 | Inspect — repository inventory. | NOT_STARTED |  |  |  |
+| 0002 | Trace — repository inventory. | NOT_STARTED |  |  |  |
+| 0003 | Specify — repository inventory. | NOT_STARTED |  |  |  |
+| 0004 | Implement — repository inventory. | NOT_STARTED |  |  |  |
+| 0005 | Test — repository inventory. | NOT_STARTED |  |  |  |
+| 0006 | Run — repository inventory. | NOT_STARTED |  |  |  |
+| 0007 | Review — repository inventory. | NOT_STARTED |  |  |  |
+| 0008 | Document — repository inventory. | NOT_STARTED |  |  |  |
+| 0009 | Integrate — repository inventory. | NOT_STARTED |  |  |  |
+| 0010 | Gate — repository inventory. | NOT_STARTED |  |  |  |
+| 0011 | Inspect — existing test baseline. | NOT_STARTED |  |  |  |
+| 0012 | Trace — existing test baseline. | NOT_STARTED |  |  |  |
+| 0013 | Specify — existing test baseline. | NOT_STARTED |  |  |  |
+| 0014 | Implement — existing test baseline. | NOT_STARTED |  |  |  |
+| 0015 | Test — existing test baseline. | NOT_STARTED |  |  |  |
+| 0016 | Run — existing test baseline. | NOT_STARTED |  |  |  |
+| 0017 | Review — existing test baseline. | NOT_STARTED |  |  |  |
+| 0018 | Document — existing test baseline. | NOT_STARTED |  |  |  |
+| 0019 | Integrate — existing test baseline. | NOT_STARTED |  |  |  |
+| 0020 | Gate — existing test baseline. | NOT_STARTED |  |  |  |
+| 0021 | Inspect — requirements traceability. | NOT_STARTED |  |  |  |
+| 0022 | Trace — requirements traceability. | NOT_STARTED |  |  |  |
+| 0023 | Specify — requirements traceability. | NOT_STARTED |  |  |  |
+| 0024 | Implement — requirements traceability. | NOT_STARTED |  |  |  |
+| 0025 | Test — requirements traceability. | NOT_STARTED |  |  |  |
+| 0026 | Run — requirements traceability. | NOT_STARTED |  |  |  |
+| 0027 | Review — requirements traceability. | NOT_STARTED |  |  |  |
+| 0028 | Document — requirements traceability. | NOT_STARTED |  |  |  |
+| 0029 | Integrate — requirements traceability. | NOT_STARTED |  |  |  |
+| 0030 | Gate — requirements traceability. | NOT_STARTED |  |  |  |
+| 0031 | Inspect — architecture boundary. | NOT_STARTED |  |  |  |
+| 0032 | Trace — architecture boundary. | NOT_STARTED |  |  |  |
+| 0033 | Specify — architecture boundary. | NOT_STARTED |  |  |  |
+| 0034 | Implement — architecture boundary. | NOT_STARTED |  |  |  |
+| 0035 | Test — architecture boundary. | NOT_STARTED |  |  |  |
+| 0036 | Run — architecture boundary. | NOT_STARTED |  |  |  |
+| 0037 | Review — architecture boundary. | NOT_STARTED |  |  |  |
+| 0038 | Document — architecture boundary. | NOT_STARTED |  |  |  |
+| 0039 | Integrate — architecture boundary. | NOT_STARTED |  |  |  |
+| 0040 | Gate — architecture boundary. | NOT_STARTED |  |  |  |
+| 0041 | Inspect — demo scope. | NOT_STARTED |  |  |  |
+| 0042 | Trace — demo scope. | NOT_STARTED |  |  |  |
+| 0043 | Specify — demo scope. | NOT_STARTED |  |  |  |
+| 0044 | Implement — demo scope. | NOT_STARTED |  |  |  |
+| 0045 | Test — demo scope. | NOT_STARTED |  |  |  |
+| 0046 | Run — demo scope. | NOT_STARTED |  |  |  |
+| 0047 | Review — demo scope. | NOT_STARTED |  |  |  |
+| 0048 | Document — demo scope. | NOT_STARTED |  |  |  |
+| 0049 | Integrate — demo scope. | NOT_STARTED |  |  |  |
+| 0050 | Gate — demo scope. | NOT_STARTED |  |  |  |
+| 0051 | Inspect — hardware source intake. | NOT_STARTED |  |  |  |
+| 0052 | Trace — hardware source intake. | NOT_STARTED |  |  |  |
+| 0053 | Specify — hardware source intake. | NOT_STARTED |  |  |  |
+| 0054 | Implement — hardware source intake. | NOT_STARTED |  |  |  |
+| 0055 | Test — hardware source intake. | NOT_STARTED |  |  |  |
+| 0056 | Run — hardware source intake. | NOT_STARTED |  |  |  |
+| 0057 | Review — hardware source intake. | NOT_STARTED |  |  |  |
+| 0058 | Document — hardware source intake. | NOT_STARTED |  |  |  |
+| 0059 | Integrate — hardware source intake. | NOT_STARTED |  |  |  |
+| 0060 | Gate — hardware source intake. | NOT_STARTED |  |  |  |
+| 0061 | Inspect — dependency and toolchain inventory. | NOT_STARTED |  |  |  |
+| 0062 | Trace — dependency and toolchain inventory. | NOT_STARTED |  |  |  |
+| 0063 | Specify — dependency and toolchain inventory. | NOT_STARTED |  |  |  |
+| 0064 | Implement — dependency and toolchain inventory. | NOT_STARTED |  |  |  |
+| 0065 | Test — dependency and toolchain inventory. | NOT_STARTED |  |  |  |
+| 0066 | Run — dependency and toolchain inventory. | NOT_STARTED |  |  |  |
+| 0067 | Review — dependency and toolchain inventory. | NOT_STARTED |  |  |  |
+| 0068 | Document — dependency and toolchain inventory. | NOT_STARTED |  |  |  |
+| 0069 | Integrate — dependency and toolchain inventory. | NOT_STARTED |  |  |  |
+| 0070 | Gate — dependency and toolchain inventory. | NOT_STARTED |  |  |  |
+| 0071 | Inspect — security baseline. | NOT_STARTED |  |  |  |
+| 0072 | Trace — security baseline. | NOT_STARTED |  |  |  |
+| 0073 | Specify — security baseline. | NOT_STARTED |  |  |  |
+| 0074 | Implement — security baseline. | NOT_STARTED |  |  |  |
+| 0075 | Test — security baseline. | NOT_STARTED |  |  |  |
+| 0076 | Run — security baseline. | NOT_STARTED |  |  |  |
+| 0077 | Review — security baseline. | NOT_STARTED |  |  |  |
+| 0078 | Document — security baseline. | NOT_STARTED |  |  |  |
+| 0079 | Integrate — security baseline. | NOT_STARTED |  |  |  |
+| 0080 | Gate — security baseline. | NOT_STARTED |  |  |  |
+| 0081 | Inspect — evidence conventions. | NOT_STARTED |  |  |  |
+| 0082 | Trace — evidence conventions. | NOT_STARTED |  |  |  |
+| 0083 | Specify — evidence conventions. | NOT_STARTED |  |  |  |
+| 0084 | Implement — evidence conventions. | NOT_STARTED |  |  |  |
+| 0085 | Test — evidence conventions. | NOT_STARTED |  |  |  |
+| 0086 | Run — evidence conventions. | NOT_STARTED |  |  |  |
+| 0087 | Review — evidence conventions. | NOT_STARTED |  |  |  |
+| 0088 | Document — evidence conventions. | NOT_STARTED |  |  |  |
+| 0089 | Integrate — evidence conventions. | NOT_STARTED |  |  |  |
+| 0090 | Gate — evidence conventions. | NOT_STARTED |  |  |  |
+| 0091 | Inspect — risk and schedule baseline. | NOT_STARTED |  |  |  |
+| 0092 | Trace — risk and schedule baseline. | NOT_STARTED |  |  |  |
+| 0093 | Specify — risk and schedule baseline. | NOT_STARTED |  |  |  |
+| 0094 | Implement — risk and schedule baseline. | NOT_STARTED |  |  |  |
+| 0095 | Test — risk and schedule baseline. | NOT_STARTED |  |  |  |
+| 0096 | Run — risk and schedule baseline. | NOT_STARTED |  |  |  |
+| 0097 | Review — risk and schedule baseline. | NOT_STARTED |  |  |  |
+| 0098 | Document — risk and schedule baseline. | NOT_STARTED |  |  |  |
+| 0099 | Integrate — risk and schedule baseline. | NOT_STARTED |  |  |  |
+| 0100 | Gate — risk and schedule baseline. | NOT_STARTED |  |  |  |
+| 0101 | Inspect — host startup and configuration. | NOT_STARTED |  |  |  |
+| 0102 | Trace — host startup and configuration. | NOT_STARTED |  |  |  |
+| 0103 | Specify — host startup and configuration. | NOT_STARTED |  |  |  |
+| 0104 | Implement — host startup and configuration. | NOT_STARTED |  |  |  |
+| 0105 | Test — host startup and configuration. | NOT_STARTED |  |  |  |
+| 0106 | Run — host startup and configuration. | NOT_STARTED |  |  |  |
+| 0107 | Review — host startup and configuration. | NOT_STARTED |  |  |  |
+| 0108 | Document — host startup and configuration. | NOT_STARTED |  |  |  |
+| 0109 | Integrate — host startup and configuration. | NOT_STARTED |  |  |  |
+| 0110 | Gate — host startup and configuration. | NOT_STARTED |  |  |  |
+| 0111 | Inspect — intent contract. | NOT_STARTED |  |  |  |
+| 0112 | Trace — intent contract. | NOT_STARTED |  |  |  |
+| 0113 | Specify — intent contract. | NOT_STARTED |  |  |  |
+| 0114 | Implement — intent contract. | NOT_STARTED |  |  |  |
+| 0115 | Test — intent contract. | NOT_STARTED |  |  |  |
+| 0116 | Run — intent contract. | NOT_STARTED |  |  |  |
+| 0117 | Review — intent contract. | NOT_STARTED |  |  |  |
+| 0118 | Document — intent contract. | NOT_STARTED |  |  |  |
+| 0119 | Integrate — intent contract. | NOT_STARTED |  |  |  |
+| 0120 | Gate — intent contract. | NOT_STARTED |  |  |  |
+| 0121 | Inspect — task model. | NOT_STARTED |  |  |  |
+| 0122 | Trace — task model. | NOT_STARTED |  |  |  |
+| 0123 | Specify — task model. | NOT_STARTED |  |  |  |
+| 0124 | Implement — task model. | NOT_STARTED |  |  |  |
+| 0125 | Test — task model. | NOT_STARTED |  |  |  |
+| 0126 | Run — task model. | NOT_STARTED |  |  |  |
+| 0127 | Review — task model. | NOT_STARTED |  |  |  |
+| 0128 | Document — task model. | NOT_STARTED |  |  |  |
+| 0129 | Integrate — task model. | NOT_STARTED |  |  |  |
+| 0130 | Gate — task model. | NOT_STARTED |  |  |  |
+| 0131 | Inspect — execution state machine. | NOT_STARTED |  |  |  |
+| 0132 | Trace — execution state machine. | NOT_STARTED |  |  |  |
+| 0133 | Specify — execution state machine. | NOT_STARTED |  |  |  |
+| 0134 | Implement — execution state machine. | NOT_STARTED |  |  |  |
+| 0135 | Test — execution state machine. | NOT_STARTED |  |  |  |
+| 0136 | Run — execution state machine. | NOT_STARTED |  |  |  |
+| 0137 | Review — execution state machine. | NOT_STARTED |  |  |  |
+| 0138 | Document — execution state machine. | NOT_STARTED |  |  |  |
+| 0139 | Integrate — execution state machine. | NOT_STARTED |  |  |  |
+| 0140 | Gate — execution state machine. | NOT_STARTED |  |  |  |
+| 0141 | Inspect — project registry. | NOT_STARTED |  |  |  |
+| 0142 | Trace — project registry. | NOT_STARTED |  |  |  |
+| 0143 | Specify — project registry. | NOT_STARTED |  |  |  |
+| 0144 | Implement — project registry. | NOT_STARTED |  |  |  |
+| 0145 | Test — project registry. | NOT_STARTED |  |  |  |
+| 0146 | Run — project registry. | NOT_STARTED |  |  |  |
+| 0147 | Review — project registry. | NOT_STARTED |  |  |  |
+| 0148 | Document — project registry. | NOT_STARTED |  |  |  |
+| 0149 | Integrate — project registry. | NOT_STARTED |  |  |  |
+| 0150 | Gate — project registry. | NOT_STARTED |  |  |  |
+| 0151 | Inspect — tool adapters. | NOT_STARTED |  |  |  |
+| 0152 | Trace — tool adapters. | NOT_STARTED |  |  |  |
+| 0153 | Specify — tool adapters. | NOT_STARTED |  |  |  |
+| 0154 | Implement — tool adapters. | NOT_STARTED |  |  |  |
+| 0155 | Test — tool adapters. | NOT_STARTED |  |  |  |
+| 0156 | Run — tool adapters. | NOT_STARTED |  |  |  |
+| 0157 | Review — tool adapters. | NOT_STARTED |  |  |  |
+| 0158 | Document — tool adapters. | NOT_STARTED |  |  |  |
+| 0159 | Integrate — tool adapters. | NOT_STARTED |  |  |  |
+| 0160 | Gate — tool adapters. | NOT_STARTED |  |  |  |
+| 0161 | Inspect — approval workflow. | NOT_STARTED |  |  |  |
+| 0162 | Trace — approval workflow. | NOT_STARTED |  |  |  |
+| 0163 | Specify — approval workflow. | NOT_STARTED |  |  |  |
+| 0164 | Implement — approval workflow. | NOT_STARTED |  |  |  |
+| 0165 | Test — approval workflow. | NOT_STARTED |  |  |  |
+| 0166 | Run — approval workflow. | NOT_STARTED |  |  |  |
+| 0167 | Review — approval workflow. | NOT_STARTED |  |  |  |
+| 0168 | Document — approval workflow. | NOT_STARTED |  |  |  |
+| 0169 | Integrate — approval workflow. | NOT_STARTED |  |  |  |
+| 0170 | Gate — approval workflow. | NOT_STARTED |  |  |  |
+| 0171 | Inspect — verification layer. | NOT_STARTED |  |  |  |
+| 0172 | Trace — verification layer. | NOT_STARTED |  |  |  |
+| 0173 | Specify — verification layer. | NOT_STARTED |  |  |  |
+| 0174 | Implement — verification layer. | NOT_STARTED |  |  |  |
+| 0175 | Test — verification layer. | NOT_STARTED |  |  |  |
+| 0176 | Run — verification layer. | NOT_STARTED |  |  |  |
+| 0177 | Review — verification layer. | NOT_STARTED |  |  |  |
+| 0178 | Document — verification layer. | NOT_STARTED |  |  |  |
+| 0179 | Integrate — verification layer. | NOT_STARTED |  |  |  |
+| 0180 | Gate — verification layer. | NOT_STARTED |  |  |  |
+| 0181 | Inspect — failure and recovery. | NOT_STARTED |  |  |  |
+| 0182 | Trace — failure and recovery. | NOT_STARTED |  |  |  |
+| 0183 | Specify — failure and recovery. | NOT_STARTED |  |  |  |
+| 0184 | Implement — failure and recovery. | NOT_STARTED |  |  |  |
+| 0185 | Test — failure and recovery. | NOT_STARTED |  |  |  |
+| 0186 | Run — failure and recovery. | NOT_STARTED |  |  |  |
+| 0187 | Review — failure and recovery. | NOT_STARTED |  |  |  |
+| 0188 | Document — failure and recovery. | NOT_STARTED |  |  |  |
+| 0189 | Integrate — failure and recovery. | NOT_STARTED |  |  |  |
+| 0190 | Gate — failure and recovery. | NOT_STARTED |  |  |  |
+| 0191 | Inspect — operator interface. | NOT_STARTED |  |  |  |
+| 0192 | Trace — operator interface. | NOT_STARTED |  |  |  |
+| 0193 | Specify — operator interface. | NOT_STARTED |  |  |  |
+| 0194 | Implement — operator interface. | NOT_STARTED |  |  |  |
+| 0195 | Test — operator interface. | NOT_STARTED |  |  |  |
+| 0196 | Run — operator interface. | NOT_STARTED |  |  |  |
+| 0197 | Review — operator interface. | NOT_STARTED |  |  |  |
+| 0198 | Document — operator interface. | NOT_STARTED |  |  |  |
+| 0199 | Integrate — operator interface. | NOT_STARTED |  |  |  |
+| 0200 | Gate — operator interface. | NOT_STARTED |  |  |  |
+| 0201 | Inspect — event schema. | NOT_STARTED |  |  |  |
+| 0202 | Trace — event schema. | NOT_STARTED |  |  |  |
+| 0203 | Specify — event schema. | NOT_STARTED |  |  |  |
+| 0204 | Implement — event schema. | NOT_STARTED |  |  |  |
+| 0205 | Test — event schema. | NOT_STARTED |  |  |  |
+| 0206 | Run — event schema. | NOT_STARTED |  |  |  |
+| 0207 | Review — event schema. | NOT_STARTED |  |  |  |
+| 0208 | Document — event schema. | NOT_STARTED |  |  |  |
+| 0209 | Integrate — event schema. | NOT_STARTED |  |  |  |
+| 0210 | Gate — event schema. | NOT_STARTED |  |  |  |
+| 0211 | Inspect — storage choice. | NOT_STARTED |  |  |  |
+| 0212 | Trace — storage choice. | NOT_STARTED |  |  |  |
+| 0213 | Specify — storage choice. | NOT_STARTED |  |  |  |
+| 0214 | Implement — storage choice. | NOT_STARTED |  |  |  |
+| 0215 | Test — storage choice. | NOT_STARTED |  |  |  |
+| 0216 | Run — storage choice. | NOT_STARTED |  |  |  |
+| 0217 | Review — storage choice. | NOT_STARTED |  |  |  |
+| 0218 | Document — storage choice. | NOT_STARTED |  |  |  |
+| 0219 | Integrate — storage choice. | NOT_STARTED |  |  |  |
+| 0220 | Gate — storage choice. | NOT_STARTED |  |  |  |
+| 0221 | Inspect — append-only event recording. | NOT_STARTED |  |  |  |
+| 0222 | Trace — append-only event recording. | NOT_STARTED |  |  |  |
+| 0223 | Specify — append-only event recording. | NOT_STARTED |  |  |  |
+| 0224 | Implement — append-only event recording. | NOT_STARTED |  |  |  |
+| 0225 | Test — append-only event recording. | NOT_STARTED |  |  |  |
+| 0226 | Run — append-only event recording. | NOT_STARTED |  |  |  |
+| 0227 | Review — append-only event recording. | NOT_STARTED |  |  |  |
+| 0228 | Document — append-only event recording. | NOT_STARTED |  |  |  |
+| 0229 | Integrate — append-only event recording. | NOT_STARTED |  |  |  |
+| 0230 | Gate — append-only event recording. | NOT_STARTED |  |  |  |
+| 0231 | Inspect — project summaries. | NOT_STARTED |  |  |  |
+| 0232 | Trace — project summaries. | NOT_STARTED |  |  |  |
+| 0233 | Specify — project summaries. | NOT_STARTED |  |  |  |
+| 0234 | Implement — project summaries. | NOT_STARTED |  |  |  |
+| 0235 | Test — project summaries. | NOT_STARTED |  |  |  |
+| 0236 | Run — project summaries. | NOT_STARTED |  |  |  |
+| 0237 | Review — project summaries. | NOT_STARTED |  |  |  |
+| 0238 | Document — project summaries. | NOT_STARTED |  |  |  |
+| 0239 | Integrate — project summaries. | NOT_STARTED |  |  |  |
+| 0240 | Gate — project summaries. | NOT_STARTED |  |  |  |
+| 0241 | Inspect — LAST and YESTERDAY retrieval. | NOT_STARTED |  |  |  |
+| 0242 | Trace — LAST and YESTERDAY retrieval. | NOT_STARTED |  |  |  |
+| 0243 | Specify — LAST and YESTERDAY retrieval. | NOT_STARTED |  |  |  |
+| 0244 | Implement — LAST and YESTERDAY retrieval. | NOT_STARTED |  |  |  |
+| 0245 | Test — LAST and YESTERDAY retrieval. | NOT_STARTED |  |  |  |
+| 0246 | Run — LAST and YESTERDAY retrieval. | NOT_STARTED |  |  |  |
+| 0247 | Review — LAST and YESTERDAY retrieval. | NOT_STARTED |  |  |  |
+| 0248 | Document — LAST and YESTERDAY retrieval. | NOT_STARTED |  |  |  |
+| 0249 | Integrate — LAST and YESTERDAY retrieval. | NOT_STARTED |  |  |  |
+| 0250 | Gate — LAST and YESTERDAY retrieval. | NOT_STARTED |  |  |  |
+| 0251 | Inspect — retrieval ranking. | NOT_STARTED |  |  |  |
+| 0252 | Trace — retrieval ranking. | NOT_STARTED |  |  |  |
+| 0253 | Specify — retrieval ranking. | NOT_STARTED |  |  |  |
+| 0254 | Implement — retrieval ranking. | NOT_STARTED |  |  |  |
+| 0255 | Test — retrieval ranking. | NOT_STARTED |  |  |  |
+| 0256 | Run — retrieval ranking. | NOT_STARTED |  |  |  |
+| 0257 | Review — retrieval ranking. | NOT_STARTED |  |  |  |
+| 0258 | Document — retrieval ranking. | NOT_STARTED |  |  |  |
+| 0259 | Integrate — retrieval ranking. | NOT_STARTED |  |  |  |
+| 0260 | Gate — retrieval ranking. | NOT_STARTED |  |  |  |
+| 0261 | Inspect — staleness handling. | NOT_STARTED |  |  |  |
+| 0262 | Trace — staleness handling. | NOT_STARTED |  |  |  |
+| 0263 | Specify — staleness handling. | NOT_STARTED |  |  |  |
+| 0264 | Implement — staleness handling. | NOT_STARTED |  |  |  |
+| 0265 | Test — staleness handling. | NOT_STARTED |  |  |  |
+| 0266 | Run — staleness handling. | NOT_STARTED |  |  |  |
+| 0267 | Review — staleness handling. | NOT_STARTED |  |  |  |
+| 0268 | Document — staleness handling. | NOT_STARTED |  |  |  |
+| 0269 | Integrate — staleness handling. | NOT_STARTED |  |  |  |
+| 0270 | Gate — staleness handling. | NOT_STARTED |  |  |  |
+| 0271 | Inspect — task checkpoints. | NOT_STARTED |  |  |  |
+| 0272 | Trace — task checkpoints. | NOT_STARTED |  |  |  |
+| 0273 | Specify — task checkpoints. | NOT_STARTED |  |  |  |
+| 0274 | Implement — task checkpoints. | NOT_STARTED |  |  |  |
+| 0275 | Test — task checkpoints. | NOT_STARTED |  |  |  |
+| 0276 | Run — task checkpoints. | NOT_STARTED |  |  |  |
+| 0277 | Review — task checkpoints. | NOT_STARTED |  |  |  |
+| 0278 | Document — task checkpoints. | NOT_STARTED |  |  |  |
+| 0279 | Integrate — task checkpoints. | NOT_STARTED |  |  |  |
+| 0280 | Gate — task checkpoints. | NOT_STARTED |  |  |  |
+| 0281 | Inspect — privacy and retention. | NOT_STARTED |  |  |  |
+| 0282 | Trace — privacy and retention. | NOT_STARTED |  |  |  |
+| 0283 | Specify — privacy and retention. | NOT_STARTED |  |  |  |
+| 0284 | Implement — privacy and retention. | NOT_STARTED |  |  |  |
+| 0285 | Test — privacy and retention. | NOT_STARTED |  |  |  |
+| 0286 | Run — privacy and retention. | NOT_STARTED |  |  |  |
+| 0287 | Review — privacy and retention. | NOT_STARTED |  |  |  |
+| 0288 | Document — privacy and retention. | NOT_STARTED |  |  |  |
+| 0289 | Integrate — privacy and retention. | NOT_STARTED |  |  |  |
+| 0290 | Gate — privacy and retention. | NOT_STARTED |  |  |  |
+| 0291 | Inspect — context evaluation. | NOT_STARTED |  |  |  |
+| 0292 | Trace — context evaluation. | NOT_STARTED |  |  |  |
+| 0293 | Specify — context evaluation. | NOT_STARTED |  |  |  |
+| 0294 | Implement — context evaluation. | NOT_STARTED |  |  |  |
+| 0295 | Test — context evaluation. | NOT_STARTED |  |  |  |
+| 0296 | Run — context evaluation. | NOT_STARTED |  |  |  |
+| 0297 | Review — context evaluation. | NOT_STARTED |  |  |  |
+| 0298 | Document — context evaluation. | NOT_STARTED |  |  |  |
+| 0299 | Integrate — context evaluation. | NOT_STARTED |  |  |  |
+| 0300 | Gate — context evaluation. | NOT_STARTED |  |  |  |
+| 0301 | Inspect — protocol specification. | NOT_STARTED |  |  |  |
+| 0302 | Trace — protocol specification. | NOT_STARTED |  |  |  |
+| 0303 | Specify — protocol specification. | NOT_STARTED |  |  |  |
+| 0304 | Implement — protocol specification. | NOT_STARTED |  |  |  |
+| 0305 | Test — protocol specification. | NOT_STARTED |  |  |  |
+| 0306 | Run — protocol specification. | NOT_STARTED |  |  |  |
+| 0307 | Review — protocol specification. | NOT_STARTED |  |  |  |
+| 0308 | Document — protocol specification. | NOT_STARTED |  |  |  |
+| 0309 | Integrate — protocol specification. | NOT_STARTED |  |  |  |
+| 0310 | Gate — protocol specification. | NOT_STARTED |  |  |  |
+| 0311 | Inspect — shared test vectors. | NOT_STARTED |  |  |  |
+| 0312 | Trace — shared test vectors. | NOT_STARTED |  |  |  |
+| 0313 | Specify — shared test vectors. | NOT_STARTED |  |  |  |
+| 0314 | Implement — shared test vectors. | NOT_STARTED |  |  |  |
+| 0315 | Test — shared test vectors. | NOT_STARTED |  |  |  |
+| 0316 | Run — shared test vectors. | NOT_STARTED |  |  |  |
+| 0317 | Review — shared test vectors. | NOT_STARTED |  |  |  |
+| 0318 | Document — shared test vectors. | NOT_STARTED |  |  |  |
+| 0319 | Integrate — shared test vectors. | NOT_STARTED |  |  |  |
+| 0320 | Gate — shared test vectors. | NOT_STARTED |  |  |  |
+| 0321 | Inspect — C implementation. | NOT_STARTED |  |  |  |
+| 0322 | Trace — C implementation. | NOT_STARTED |  |  |  |
+| 0323 | Specify — C implementation. | NOT_STARTED |  |  |  |
+| 0324 | Implement — C implementation. | NOT_STARTED |  |  |  |
+| 0325 | Test — C implementation. | NOT_STARTED |  |  |  |
+| 0326 | Run — C implementation. | NOT_STARTED |  |  |  |
+| 0327 | Review — C implementation. | NOT_STARTED |  |  |  |
+| 0328 | Document — C implementation. | NOT_STARTED |  |  |  |
+| 0329 | Integrate — C implementation. | NOT_STARTED |  |  |  |
+| 0330 | Gate — C implementation. | NOT_STARTED |  |  |  |
+| 0331 | Inspect — Python implementation. | NOT_STARTED |  |  |  |
+| 0332 | Trace — Python implementation. | NOT_STARTED |  |  |  |
+| 0333 | Specify — Python implementation. | NOT_STARTED |  |  |  |
+| 0334 | Implement — Python implementation. | NOT_STARTED |  |  |  |
+| 0335 | Test — Python implementation. | NOT_STARTED |  |  |  |
+| 0336 | Run — Python implementation. | NOT_STARTED |  |  |  |
+| 0337 | Review — Python implementation. | NOT_STARTED |  |  |  |
+| 0338 | Document — Python implementation. | NOT_STARTED |  |  |  |
+| 0339 | Integrate — Python implementation. | NOT_STARTED |  |  |  |
+| 0340 | Gate — Python implementation. | NOT_STARTED |  |  |  |
+| 0341 | Inspect — transport abstraction. | NOT_STARTED |  |  |  |
+| 0342 | Trace — transport abstraction. | NOT_STARTED |  |  |  |
+| 0343 | Specify — transport abstraction. | NOT_STARTED |  |  |  |
+| 0344 | Implement — transport abstraction. | NOT_STARTED |  |  |  |
+| 0345 | Test — transport abstraction. | NOT_STARTED |  |  |  |
+| 0346 | Run — transport abstraction. | NOT_STARTED |  |  |  |
+| 0347 | Review — transport abstraction. | NOT_STARTED |  |  |  |
+| 0348 | Document — transport abstraction. | NOT_STARTED |  |  |  |
+| 0349 | Integrate — transport abstraction. | NOT_STARTED |  |  |  |
+| 0350 | Gate — transport abstraction. | NOT_STARTED |  |  |  |
+| 0351 | Inspect — session handshake. | NOT_STARTED |  |  |  |
+| 0352 | Trace — session handshake. | NOT_STARTED |  |  |  |
+| 0353 | Specify — session handshake. | NOT_STARTED |  |  |  |
+| 0354 | Implement — session handshake. | NOT_STARTED |  |  |  |
+| 0355 | Test — session handshake. | NOT_STARTED |  |  |  |
+| 0356 | Run — session handshake. | NOT_STARTED |  |  |  |
+| 0357 | Review — session handshake. | NOT_STARTED |  |  |  |
+| 0358 | Document — session handshake. | NOT_STARTED |  |  |  |
+| 0359 | Integrate — session handshake. | NOT_STARTED |  |  |  |
+| 0360 | Gate — session handshake. | NOT_STARTED |  |  |  |
+| 0361 | Inspect — ACK/NACK and sequence. | NOT_STARTED |  |  |  |
+| 0362 | Trace — ACK/NACK and sequence. | NOT_STARTED |  |  |  |
+| 0363 | Specify — ACK/NACK and sequence. | NOT_STARTED |  |  |  |
+| 0364 | Implement — ACK/NACK and sequence. | NOT_STARTED |  |  |  |
+| 0365 | Test — ACK/NACK and sequence. | NOT_STARTED |  |  |  |
+| 0366 | Run — ACK/NACK and sequence. | NOT_STARTED |  |  |  |
+| 0367 | Review — ACK/NACK and sequence. | NOT_STARTED |  |  |  |
+| 0368 | Document — ACK/NACK and sequence. | NOT_STARTED |  |  |  |
+| 0369 | Integrate — ACK/NACK and sequence. | NOT_STARTED |  |  |  |
+| 0370 | Gate — ACK/NACK and sequence. | NOT_STARTED |  |  |  |
+| 0371 | Inspect — retry and timeout policy. | NOT_STARTED |  |  |  |
+| 0372 | Trace — retry and timeout policy. | NOT_STARTED |  |  |  |
+| 0373 | Specify — retry and timeout policy. | NOT_STARTED |  |  |  |
+| 0374 | Implement — retry and timeout policy. | NOT_STARTED |  |  |  |
+| 0375 | Test — retry and timeout policy. | NOT_STARTED |  |  |  |
+| 0376 | Run — retry and timeout policy. | NOT_STARTED |  |  |  |
+| 0377 | Review — retry and timeout policy. | NOT_STARTED |  |  |  |
+| 0378 | Document — retry and timeout policy. | NOT_STARTED |  |  |  |
+| 0379 | Integrate — retry and timeout policy. | NOT_STARTED |  |  |  |
+| 0380 | Gate — retry and timeout policy. | NOT_STARTED |  |  |  |
+| 0381 | Inspect — reconnect and resynchronization. | NOT_STARTED |  |  |  |
+| 0382 | Trace — reconnect and resynchronization. | NOT_STARTED |  |  |  |
+| 0383 | Specify — reconnect and resynchronization. | NOT_STARTED |  |  |  |
+| 0384 | Implement — reconnect and resynchronization. | NOT_STARTED |  |  |  |
+| 0385 | Test — reconnect and resynchronization. | NOT_STARTED |  |  |  |
+| 0386 | Run — reconnect and resynchronization. | NOT_STARTED |  |  |  |
+| 0387 | Review — reconnect and resynchronization. | NOT_STARTED |  |  |  |
+| 0388 | Document — reconnect and resynchronization. | NOT_STARTED |  |  |  |
+| 0389 | Integrate — reconnect and resynchronization. | NOT_STARTED |  |  |  |
+| 0390 | Gate — reconnect and resynchronization. | NOT_STARTED |  |  |  |
+| 0391 | Inspect — protocol observability. | NOT_STARTED |  |  |  |
+| 0392 | Trace — protocol observability. | NOT_STARTED |  |  |  |
+| 0393 | Specify — protocol observability. | NOT_STARTED |  |  |  |
+| 0394 | Implement — protocol observability. | NOT_STARTED |  |  |  |
+| 0395 | Test — protocol observability. | NOT_STARTED |  |  |  |
+| 0396 | Run — protocol observability. | NOT_STARTED |  |  |  |
+| 0397 | Review — protocol observability. | NOT_STARTED |  |  |  |
+| 0398 | Document — protocol observability. | NOT_STARTED |  |  |  |
+| 0399 | Integrate — protocol observability. | NOT_STARTED |  |  |  |
+| 0400 | Gate — protocol observability. | NOT_STARTED |  |  |  |
+| 0401 | Inspect — ESP-IDF environment. | NOT_STARTED |  |  |  |
+| 0402 | Trace — ESP-IDF environment. | NOT_STARTED |  |  |  |
+| 0403 | Specify — ESP-IDF environment. | NOT_STARTED |  |  |  |
+| 0404 | Implement — ESP-IDF environment. | NOT_STARTED |  |  |  |
+| 0405 | Test — ESP-IDF environment. | NOT_STARTED |  |  |  |
+| 0406 | Run — ESP-IDF environment. | NOT_STARTED |  |  |  |
+| 0407 | Review — ESP-IDF environment. | NOT_STARTED |  |  |  |
+| 0408 | Document — ESP-IDF environment. | NOT_STARTED |  |  |  |
+| 0409 | Integrate — ESP-IDF environment. | NOT_STARTED |  |  |  |
+| 0410 | Gate — ESP-IDF environment. | NOT_STARTED |  |  |  |
+| 0411 | Inspect — board identity and pin audit. | NOT_STARTED |  |  |  |
+| 0412 | Trace — board identity and pin audit. | NOT_STARTED |  |  |  |
+| 0413 | Specify — board identity and pin audit. | NOT_STARTED |  |  |  |
+| 0414 | Implement — board identity and pin audit. | NOT_STARTED |  |  |  |
+| 0415 | Test — board identity and pin audit. | NOT_STARTED |  |  |  |
+| 0416 | Run — board identity and pin audit. | NOT_STARTED |  |  |  |
+| 0417 | Review — board identity and pin audit. | NOT_STARTED |  |  |  |
+| 0418 | Document — board identity and pin audit. | NOT_STARTED |  |  |  |
+| 0419 | Integrate — board identity and pin audit. | NOT_STARTED |  |  |  |
+| 0420 | Gate — board identity and pin audit. | NOT_STARTED |  |  |  |
+| 0421 | Inspect — firmware build skeleton. | NOT_STARTED |  |  |  |
+| 0422 | Trace — firmware build skeleton. | NOT_STARTED |  |  |  |
+| 0423 | Specify — firmware build skeleton. | NOT_STARTED |  |  |  |
+| 0424 | Implement — firmware build skeleton. | NOT_STARTED |  |  |  |
+| 0425 | Test — firmware build skeleton. | NOT_STARTED |  |  |  |
+| 0426 | Run — firmware build skeleton. | NOT_STARTED |  |  |  |
+| 0427 | Review — firmware build skeleton. | NOT_STARTED |  |  |  |
+| 0428 | Document — firmware build skeleton. | NOT_STARTED |  |  |  |
+| 0429 | Integrate — firmware build skeleton. | NOT_STARTED |  |  |  |
+| 0430 | Gate — firmware build skeleton. | NOT_STARTED |  |  |  |
+| 0431 | Inspect — RTOS task model. | NOT_STARTED |  |  |  |
+| 0432 | Trace — RTOS task model. | NOT_STARTED |  |  |  |
+| 0433 | Specify — RTOS task model. | NOT_STARTED |  |  |  |
+| 0434 | Implement — RTOS task model. | NOT_STARTED |  |  |  |
+| 0435 | Test — RTOS task model. | NOT_STARTED |  |  |  |
+| 0436 | Run — RTOS task model. | NOT_STARTED |  |  |  |
+| 0437 | Review — RTOS task model. | NOT_STARTED |  |  |  |
+| 0438 | Document — RTOS task model. | NOT_STARTED |  |  |  |
+| 0439 | Integrate — RTOS task model. | NOT_STARTED |  |  |  |
+| 0440 | Gate — RTOS task model. | NOT_STARTED |  |  |  |
+| 0441 | Inspect — I2S capture. | NOT_STARTED |  |  |  |
+| 0442 | Trace — I2S capture. | NOT_STARTED |  |  |  |
+| 0443 | Specify — I2S capture. | NOT_STARTED |  |  |  |
+| 0444 | Implement — I2S capture. | NOT_STARTED |  |  |  |
+| 0445 | Test — I2S capture. | NOT_STARTED |  |  |  |
+| 0446 | Run — I2S capture. | NOT_STARTED |  |  |  |
+| 0447 | Review — I2S capture. | NOT_STARTED |  |  |  |
+| 0448 | Document — I2S capture. | NOT_STARTED |  |  |  |
+| 0449 | Integrate — I2S capture. | NOT_STARTED |  |  |  |
+| 0450 | Gate — I2S capture. | NOT_STARTED |  |  |  |
+| 0451 | Inspect — PTT and physical controls. | NOT_STARTED |  |  |  |
+| 0452 | Trace — PTT and physical controls. | NOT_STARTED |  |  |  |
+| 0453 | Specify — PTT and physical controls. | NOT_STARTED |  |  |  |
+| 0454 | Implement — PTT and physical controls. | NOT_STARTED |  |  |  |
+| 0455 | Test — PTT and physical controls. | NOT_STARTED |  |  |  |
+| 0456 | Run — PTT and physical controls. | NOT_STARTED |  |  |  |
+| 0457 | Review — PTT and physical controls. | NOT_STARTED |  |  |  |
+| 0458 | Document — PTT and physical controls. | NOT_STARTED |  |  |  |
+| 0459 | Integrate — PTT and physical controls. | NOT_STARTED |  |  |  |
+| 0460 | Gate — PTT and physical controls. | NOT_STARTED |  |  |  |
+| 0461 | Inspect — status feedback. | NOT_STARTED |  |  |  |
+| 0462 | Trace — status feedback. | NOT_STARTED |  |  |  |
+| 0463 | Specify — status feedback. | NOT_STARTED |  |  |  |
+| 0464 | Implement — status feedback. | NOT_STARTED |  |  |  |
+| 0465 | Test — status feedback. | NOT_STARTED |  |  |  |
+| 0466 | Run — status feedback. | NOT_STARTED |  |  |  |
+| 0467 | Review — status feedback. | NOT_STARTED |  |  |  |
+| 0468 | Document — status feedback. | NOT_STARTED |  |  |  |
+| 0469 | Integrate — status feedback. | NOT_STARTED |  |  |  |
+| 0470 | Gate — status feedback. | NOT_STARTED |  |  |  |
+| 0471 | Inspect — DSP integration. | NOT_STARTED |  |  |  |
+| 0472 | Trace — DSP integration. | NOT_STARTED |  |  |  |
+| 0473 | Specify — DSP integration. | NOT_STARTED |  |  |  |
+| 0474 | Implement — DSP integration. | NOT_STARTED |  |  |  |
+| 0475 | Test — DSP integration. | NOT_STARTED |  |  |  |
+| 0476 | Run — DSP integration. | NOT_STARTED |  |  |  |
+| 0477 | Review — DSP integration. | NOT_STARTED |  |  |  |
+| 0478 | Document — DSP integration. | NOT_STARTED |  |  |  |
+| 0479 | Integrate — DSP integration. | NOT_STARTED |  |  |  |
+| 0480 | Gate — DSP integration. | NOT_STARTED |  |  |  |
+| 0481 | Inspect — device-side context. | NOT_STARTED |  |  |  |
+| 0482 | Trace — device-side context. | NOT_STARTED |  |  |  |
+| 0483 | Specify — device-side context. | NOT_STARTED |  |  |  |
+| 0484 | Implement — device-side context. | NOT_STARTED |  |  |  |
+| 0485 | Test — device-side context. | NOT_STARTED |  |  |  |
+| 0486 | Run — device-side context. | NOT_STARTED |  |  |  |
+| 0487 | Review — device-side context. | NOT_STARTED |  |  |  |
+| 0488 | Document — device-side context. | NOT_STARTED |  |  |  |
+| 0489 | Integrate — device-side context. | NOT_STARTED |  |  |  |
+| 0490 | Gate — device-side context. | NOT_STARTED |  |  |  |
+| 0491 | Inspect — firmware diagnostics. | NOT_STARTED |  |  |  |
+| 0492 | Trace — firmware diagnostics. | NOT_STARTED |  |  |  |
+| 0493 | Specify — firmware diagnostics. | NOT_STARTED |  |  |  |
+| 0494 | Implement — firmware diagnostics. | NOT_STARTED |  |  |  |
+| 0495 | Test — firmware diagnostics. | NOT_STARTED |  |  |  |
+| 0496 | Run — firmware diagnostics. | NOT_STARTED |  |  |  |
+| 0497 | Review — firmware diagnostics. | NOT_STARTED |  |  |  |
+| 0498 | Document — firmware diagnostics. | NOT_STARTED |  |  |  |
+| 0499 | Integrate — firmware diagnostics. | NOT_STARTED |  |  |  |
+| 0500 | Gate — firmware diagnostics. | NOT_STARTED |  |  |  |
+| 0501 | Inspect — intent vocabulary freeze. | NOT_STARTED |  |  |  |
+| 0502 | Trace — intent vocabulary freeze. | NOT_STARTED |  |  |  |
+| 0503 | Specify — intent vocabulary freeze. | NOT_STARTED |  |  |  |
+| 0504 | Implement — intent vocabulary freeze. | NOT_STARTED |  |  |  |
+| 0505 | Test — intent vocabulary freeze. | NOT_STARTED |  |  |  |
+| 0506 | Run — intent vocabulary freeze. | NOT_STARTED |  |  |  |
+| 0507 | Review — intent vocabulary freeze. | NOT_STARTED |  |  |  |
+| 0508 | Document — intent vocabulary freeze. | NOT_STARTED |  |  |  |
+| 0509 | Integrate — intent vocabulary freeze. | NOT_STARTED |  |  |  |
+| 0510 | Gate — intent vocabulary freeze. | NOT_STARTED |  |  |  |
+| 0511 | Inspect — recording protocol. | NOT_STARTED |  |  |  |
+| 0512 | Trace — recording protocol. | NOT_STARTED |  |  |  |
+| 0513 | Specify — recording protocol. | NOT_STARTED |  |  |  |
+| 0514 | Implement — recording protocol. | NOT_STARTED |  |  |  |
+| 0515 | Test — recording protocol. | NOT_STARTED |  |  |  |
+| 0516 | Run — recording protocol. | NOT_STARTED |  |  |  |
+| 0517 | Review — recording protocol. | NOT_STARTED |  |  |  |
+| 0518 | Document — recording protocol. | NOT_STARTED |  |  |  |
+| 0519 | Integrate — recording protocol. | NOT_STARTED |  |  |  |
+| 0520 | Gate — recording protocol. | NOT_STARTED |  |  |  |
+| 0521 | Inspect — recording tool validation. | NOT_STARTED |  |  |  |
+| 0522 | Trace — recording tool validation. | NOT_STARTED |  |  |  |
+| 0523 | Specify — recording tool validation. | NOT_STARTED |  |  |  |
+| 0524 | Implement — recording tool validation. | NOT_STARTED |  |  |  |
+| 0525 | Test — recording tool validation. | NOT_STARTED |  |  |  |
+| 0526 | Run — recording tool validation. | NOT_STARTED |  |  |  |
+| 0527 | Review — recording tool validation. | NOT_STARTED |  |  |  |
+| 0528 | Document — recording tool validation. | NOT_STARTED |  |  |  |
+| 0529 | Integrate — recording tool validation. | NOT_STARTED |  |  |  |
+| 0530 | Gate — recording tool validation. | NOT_STARTED |  |  |  |
+| 0531 | Inspect — dataset collection. | NOT_STARTED |  |  |  |
+| 0532 | Trace — dataset collection. | NOT_STARTED |  |  |  |
+| 0533 | Specify — dataset collection. | NOT_STARTED |  |  |  |
+| 0534 | Implement — dataset collection. | NOT_STARTED |  |  |  |
+| 0535 | Test — dataset collection. | NOT_STARTED |  |  |  |
+| 0536 | Run — dataset collection. | NOT_STARTED |  |  |  |
+| 0537 | Review — dataset collection. | NOT_STARTED |  |  |  |
+| 0538 | Document — dataset collection. | NOT_STARTED |  |  |  |
+| 0539 | Integrate — dataset collection. | NOT_STARTED |  |  |  |
+| 0540 | Gate — dataset collection. | NOT_STARTED |  |  |  |
+| 0541 | Inspect — dataset quality control. | NOT_STARTED |  |  |  |
+| 0542 | Trace — dataset quality control. | NOT_STARTED |  |  |  |
+| 0543 | Specify — dataset quality control. | NOT_STARTED |  |  |  |
+| 0544 | Implement — dataset quality control. | NOT_STARTED |  |  |  |
+| 0545 | Test — dataset quality control. | NOT_STARTED |  |  |  |
+| 0546 | Run — dataset quality control. | NOT_STARTED |  |  |  |
+| 0547 | Review — dataset quality control. | NOT_STARTED |  |  |  |
+| 0548 | Document — dataset quality control. | NOT_STARTED |  |  |  |
+| 0549 | Integrate — dataset quality control. | NOT_STARTED |  |  |  |
+| 0550 | Gate — dataset quality control. | NOT_STARTED |  |  |  |
+| 0551 | Inspect — split strategy. | NOT_STARTED |  |  |  |
+| 0552 | Trace — split strategy. | NOT_STARTED |  |  |  |
+| 0553 | Specify — split strategy. | NOT_STARTED |  |  |  |
+| 0554 | Implement — split strategy. | NOT_STARTED |  |  |  |
+| 0555 | Test — split strategy. | NOT_STARTED |  |  |  |
+| 0556 | Run — split strategy. | NOT_STARTED |  |  |  |
+| 0557 | Review — split strategy. | NOT_STARTED |  |  |  |
+| 0558 | Document — split strategy. | NOT_STARTED |  |  |  |
+| 0559 | Integrate — split strategy. | NOT_STARTED |  |  |  |
+| 0560 | Gate — split strategy. | NOT_STARTED |  |  |  |
+| 0561 | Inspect — feature pipeline. | NOT_STARTED |  |  |  |
+| 0562 | Trace — feature pipeline. | NOT_STARTED |  |  |  |
+| 0563 | Specify — feature pipeline. | NOT_STARTED |  |  |  |
+| 0564 | Implement — feature pipeline. | NOT_STARTED |  |  |  |
+| 0565 | Test — feature pipeline. | NOT_STARTED |  |  |  |
+| 0566 | Run — feature pipeline. | NOT_STARTED |  |  |  |
+| 0567 | Review — feature pipeline. | NOT_STARTED |  |  |  |
+| 0568 | Document — feature pipeline. | NOT_STARTED |  |  |  |
+| 0569 | Integrate — feature pipeline. | NOT_STARTED |  |  |  |
+| 0570 | Gate — feature pipeline. | NOT_STARTED |  |  |  |
+| 0571 | Inspect — training and selection. | NOT_STARTED |  |  |  |
+| 0572 | Trace — training and selection. | NOT_STARTED |  |  |  |
+| 0573 | Specify — training and selection. | NOT_STARTED |  |  |  |
+| 0574 | Implement — training and selection. | NOT_STARTED |  |  |  |
+| 0575 | Test — training and selection. | NOT_STARTED |  |  |  |
+| 0576 | Run — training and selection. | NOT_STARTED |  |  |  |
+| 0577 | Review — training and selection. | NOT_STARTED |  |  |  |
+| 0578 | Document — training and selection. | NOT_STARTED |  |  |  |
+| 0579 | Integrate — training and selection. | NOT_STARTED |  |  |  |
+| 0580 | Gate — training and selection. | NOT_STARTED |  |  |  |
+| 0581 | Inspect — quantization and export. | NOT_STARTED |  |  |  |
+| 0582 | Trace — quantization and export. | NOT_STARTED |  |  |  |
+| 0583 | Specify — quantization and export. | NOT_STARTED |  |  |  |
+| 0584 | Implement — quantization and export. | NOT_STARTED |  |  |  |
+| 0585 | Test — quantization and export. | NOT_STARTED |  |  |  |
+| 0586 | Run — quantization and export. | NOT_STARTED |  |  |  |
+| 0587 | Review — quantization and export. | NOT_STARTED |  |  |  |
+| 0588 | Document — quantization and export. | NOT_STARTED |  |  |  |
+| 0589 | Integrate — quantization and export. | NOT_STARTED |  |  |  |
+| 0590 | Gate — quantization and export. | NOT_STARTED |  |  |  |
+| 0591 | Inspect — on-device evaluation. | NOT_STARTED |  |  |  |
+| 0592 | Trace — on-device evaluation. | NOT_STARTED |  |  |  |
+| 0593 | Specify — on-device evaluation. | NOT_STARTED |  |  |  |
+| 0594 | Implement — on-device evaluation. | NOT_STARTED |  |  |  |
+| 0595 | Test — on-device evaluation. | NOT_STARTED |  |  |  |
+| 0596 | Run — on-device evaluation. | NOT_STARTED |  |  |  |
+| 0597 | Review — on-device evaluation. | NOT_STARTED |  |  |  |
+| 0598 | Document — on-device evaluation. | NOT_STARTED |  |  |  |
+| 0599 | Integrate — on-device evaluation. | NOT_STARTED |  |  |  |
+| 0600 | Gate — on-device evaluation. | NOT_STARTED |  |  |  |
+| 0601 | Inspect — source archive provenance. | NOT_STARTED |  |  |  |
+| 0602 | Trace — source archive provenance. | NOT_STARTED |  |  |  |
+| 0603 | Specify — source archive provenance. | NOT_STARTED |  |  |  |
+| 0604 | Implement — source archive provenance. | NOT_STARTED |  |  |  |
+| 0605 | Test — source archive provenance. | NOT_STARTED |  |  |  |
+| 0606 | Run — source archive provenance. | NOT_STARTED |  |  |  |
+| 0607 | Review — source archive provenance. | NOT_STARTED |  |  |  |
+| 0608 | Document — source archive provenance. | NOT_STARTED |  |  |  |
+| 0609 | Integrate — source archive provenance. | NOT_STARTED |  |  |  |
+| 0610 | Gate — source archive provenance. | NOT_STARTED |  |  |  |
+| 0611 | Inspect — KiCad project opening. | NOT_STARTED |  |  |  |
+| 0612 | Trace — KiCad project opening. | NOT_STARTED |  |  |  |
+| 0613 | Specify — KiCad project opening. | NOT_STARTED |  |  |  |
+| 0614 | Implement — KiCad project opening. | NOT_STARTED |  |  |  |
+| 0615 | Test — KiCad project opening. | NOT_STARTED |  |  |  |
+| 0616 | Run — KiCad project opening. | NOT_STARTED |  |  |  |
+| 0617 | Review — KiCad project opening. | NOT_STARTED |  |  |  |
+| 0618 | Document — KiCad project opening. | NOT_STARTED |  |  |  |
+| 0619 | Integrate — KiCad project opening. | NOT_STARTED |  |  |  |
+| 0620 | Gate — KiCad project opening. | NOT_STARTED |  |  |  |
+| 0621 | Inspect — schematic audit. | NOT_STARTED |  |  |  |
+| 0622 | Trace — schematic audit. | NOT_STARTED |  |  |  |
+| 0623 | Specify — schematic audit. | NOT_STARTED |  |  |  |
+| 0624 | Implement — schematic audit. | NOT_STARTED |  |  |  |
+| 0625 | Test — schematic audit. | NOT_STARTED |  |  |  |
+| 0626 | Run — schematic audit. | NOT_STARTED |  |  |  |
+| 0627 | Review — schematic audit. | NOT_STARTED |  |  |  |
+| 0628 | Document — schematic audit. | NOT_STARTED |  |  |  |
+| 0629 | Integrate — schematic audit. | NOT_STARTED |  |  |  |
+| 0630 | Gate — schematic audit. | NOT_STARTED |  |  |  |
+| 0631 | Inspect — pin compatibility. | NOT_STARTED |  |  |  |
+| 0632 | Trace — pin compatibility. | NOT_STARTED |  |  |  |
+| 0633 | Specify — pin compatibility. | NOT_STARTED |  |  |  |
+| 0634 | Implement — pin compatibility. | NOT_STARTED |  |  |  |
+| 0635 | Test — pin compatibility. | NOT_STARTED |  |  |  |
+| 0636 | Run — pin compatibility. | NOT_STARTED |  |  |  |
+| 0637 | Review — pin compatibility. | NOT_STARTED |  |  |  |
+| 0638 | Document — pin compatibility. | NOT_STARTED |  |  |  |
+| 0639 | Integrate — pin compatibility. | NOT_STARTED |  |  |  |
+| 0640 | Gate — pin compatibility. | NOT_STARTED |  |  |  |
+| 0641 | Inspect — power integrity. | NOT_STARTED |  |  |  |
+| 0642 | Trace — power integrity. | NOT_STARTED |  |  |  |
+| 0643 | Specify — power integrity. | NOT_STARTED |  |  |  |
+| 0644 | Implement — power integrity. | NOT_STARTED |  |  |  |
+| 0645 | Test — power integrity. | NOT_STARTED |  |  |  |
+| 0646 | Run — power integrity. | NOT_STARTED |  |  |  |
+| 0647 | Review — power integrity. | NOT_STARTED |  |  |  |
+| 0648 | Document — power integrity. | NOT_STARTED |  |  |  |
+| 0649 | Integrate — power integrity. | NOT_STARTED |  |  |  |
+| 0650 | Gate — power integrity. | NOT_STARTED |  |  |  |
+| 0651 | Inspect — USB and protection. | NOT_STARTED |  |  |  |
+| 0652 | Trace — USB and protection. | NOT_STARTED |  |  |  |
+| 0653 | Specify — USB and protection. | NOT_STARTED |  |  |  |
+| 0654 | Implement — USB and protection. | NOT_STARTED |  |  |  |
+| 0655 | Test — USB and protection. | NOT_STARTED |  |  |  |
+| 0656 | Run — USB and protection. | NOT_STARTED |  |  |  |
+| 0657 | Review — USB and protection. | NOT_STARTED |  |  |  |
+| 0658 | Document — USB and protection. | NOT_STARTED |  |  |  |
+| 0659 | Integrate — USB and protection. | NOT_STARTED |  |  |  |
+| 0660 | Gate — USB and protection. | NOT_STARTED |  |  |  |
+| 0661 | Inspect — audio and RF layout. | NOT_STARTED |  |  |  |
+| 0662 | Trace — audio and RF layout. | NOT_STARTED |  |  |  |
+| 0663 | Specify — audio and RF layout. | NOT_STARTED |  |  |  |
+| 0664 | Implement — audio and RF layout. | NOT_STARTED |  |  |  |
+| 0665 | Test — audio and RF layout. | NOT_STARTED |  |  |  |
+| 0666 | Run — audio and RF layout. | NOT_STARTED |  |  |  |
+| 0667 | Review — audio and RF layout. | NOT_STARTED |  |  |  |
+| 0668 | Document — audio and RF layout. | NOT_STARTED |  |  |  |
+| 0669 | Integrate — audio and RF layout. | NOT_STARTED |  |  |  |
+| 0670 | Gate — audio and RF layout. | NOT_STARTED |  |  |  |
+| 0671 | Inspect — ERC and DRC. | NOT_STARTED |  |  |  |
+| 0672 | Trace — ERC and DRC. | NOT_STARTED |  |  |  |
+| 0673 | Specify — ERC and DRC. | NOT_STARTED |  |  |  |
+| 0674 | Implement — ERC and DRC. | NOT_STARTED |  |  |  |
+| 0675 | Test — ERC and DRC. | NOT_STARTED |  |  |  |
+| 0676 | Run — ERC and DRC. | NOT_STARTED |  |  |  |
+| 0677 | Review — ERC and DRC. | NOT_STARTED |  |  |  |
+| 0678 | Document — ERC and DRC. | NOT_STARTED |  |  |  |
+| 0679 | Integrate — ERC and DRC. | NOT_STARTED |  |  |  |
+| 0680 | Gate — ERC and DRC. | NOT_STARTED |  |  |  |
+| 0681 | Inspect — mechanical and fabrication. | NOT_STARTED |  |  |  |
+| 0682 | Trace — mechanical and fabrication. | NOT_STARTED |  |  |  |
+| 0683 | Specify — mechanical and fabrication. | NOT_STARTED |  |  |  |
+| 0684 | Implement — mechanical and fabrication. | NOT_STARTED |  |  |  |
+| 0685 | Test — mechanical and fabrication. | NOT_STARTED |  |  |  |
+| 0686 | Run — mechanical and fabrication. | NOT_STARTED |  |  |  |
+| 0687 | Review — mechanical and fabrication. | NOT_STARTED |  |  |  |
+| 0688 | Document — mechanical and fabrication. | NOT_STARTED |  |  |  |
+| 0689 | Integrate — mechanical and fabrication. | NOT_STARTED |  |  |  |
+| 0690 | Gate — mechanical and fabrication. | NOT_STARTED |  |  |  |
+| 0691 | Inspect — bring-up readiness. | NOT_STARTED |  |  |  |
+| 0692 | Trace — bring-up readiness. | NOT_STARTED |  |  |  |
+| 0693 | Specify — bring-up readiness. | NOT_STARTED |  |  |  |
+| 0694 | Implement — bring-up readiness. | NOT_STARTED |  |  |  |
+| 0695 | Test — bring-up readiness. | NOT_STARTED |  |  |  |
+| 0696 | Run — bring-up readiness. | NOT_STARTED |  |  |  |
+| 0697 | Review — bring-up readiness. | NOT_STARTED |  |  |  |
+| 0698 | Document — bring-up readiness. | NOT_STARTED |  |  |  |
+| 0699 | Integrate — bring-up readiness. | NOT_STARTED |  |  |  |
+| 0700 | Gate — bring-up readiness. | NOT_STARTED |  |  |  |
+| 0701 | Inspect — interface requirements. | NOT_STARTED |  |  |  |
+| 0702 | Trace — interface requirements. | NOT_STARTED |  |  |  |
+| 0703 | Specify — interface requirements. | NOT_STARTED |  |  |  |
+| 0704 | Implement — interface requirements. | NOT_STARTED |  |  |  |
+| 0705 | Test — interface requirements. | NOT_STARTED |  |  |  |
+| 0706 | Run — interface requirements. | NOT_STARTED |  |  |  |
+| 0707 | Review — interface requirements. | NOT_STARTED |  |  |  |
+| 0708 | Document — interface requirements. | NOT_STARTED |  |  |  |
+| 0709 | Integrate — interface requirements. | NOT_STARTED |  |  |  |
+| 0710 | Gate — interface requirements. | NOT_STARTED |  |  |  |
+| 0711 | Inspect — application shell. | NOT_STARTED |  |  |  |
+| 0712 | Trace — application shell. | NOT_STARTED |  |  |  |
+| 0713 | Specify — application shell. | NOT_STARTED |  |  |  |
+| 0714 | Implement — application shell. | NOT_STARTED |  |  |  |
+| 0715 | Test — application shell. | NOT_STARTED |  |  |  |
+| 0716 | Run — application shell. | NOT_STARTED |  |  |  |
+| 0717 | Review — application shell. | NOT_STARTED |  |  |  |
+| 0718 | Document — application shell. | NOT_STARTED |  |  |  |
+| 0719 | Integrate — application shell. | NOT_STARTED |  |  |  |
+| 0720 | Gate — application shell. | NOT_STARTED |  |  |  |
+| 0721 | Inspect — device status view. | NOT_STARTED |  |  |  |
+| 0722 | Trace — device status view. | NOT_STARTED |  |  |  |
+| 0723 | Specify — device status view. | NOT_STARTED |  |  |  |
+| 0724 | Implement — device status view. | NOT_STARTED |  |  |  |
+| 0725 | Test — device status view. | NOT_STARTED |  |  |  |
+| 0726 | Run — device status view. | NOT_STARTED |  |  |  |
+| 0727 | Review — device status view. | NOT_STARTED |  |  |  |
+| 0728 | Document — device status view. | NOT_STARTED |  |  |  |
+| 0729 | Integrate — device status view. | NOT_STARTED |  |  |  |
+| 0730 | Gate — device status view. | NOT_STARTED |  |  |  |
+| 0731 | Inspect — intent and confidence view. | NOT_STARTED |  |  |  |
+| 0732 | Trace — intent and confidence view. | NOT_STARTED |  |  |  |
+| 0733 | Specify — intent and confidence view. | NOT_STARTED |  |  |  |
+| 0734 | Implement — intent and confidence view. | NOT_STARTED |  |  |  |
+| 0735 | Test — intent and confidence view. | NOT_STARTED |  |  |  |
+| 0736 | Run — intent and confidence view. | NOT_STARTED |  |  |  |
+| 0737 | Review — intent and confidence view. | NOT_STARTED |  |  |  |
+| 0738 | Document — intent and confidence view. | NOT_STARTED |  |  |  |
+| 0739 | Integrate — intent and confidence view. | NOT_STARTED |  |  |  |
+| 0740 | Gate — intent and confidence view. | NOT_STARTED |  |  |  |
+| 0741 | Inspect — task timeline. | NOT_STARTED |  |  |  |
+| 0742 | Trace — task timeline. | NOT_STARTED |  |  |  |
+| 0743 | Specify — task timeline. | NOT_STARTED |  |  |  |
+| 0744 | Implement — task timeline. | NOT_STARTED |  |  |  |
+| 0745 | Test — task timeline. | NOT_STARTED |  |  |  |
+| 0746 | Run — task timeline. | NOT_STARTED |  |  |  |
+| 0747 | Review — task timeline. | NOT_STARTED |  |  |  |
+| 0748 | Document — task timeline. | NOT_STARTED |  |  |  |
+| 0749 | Integrate — task timeline. | NOT_STARTED |  |  |  |
+| 0750 | Gate — task timeline. | NOT_STARTED |  |  |  |
+| 0751 | Inspect — project context view. | NOT_STARTED |  |  |  |
+| 0752 | Trace — project context view. | NOT_STARTED |  |  |  |
+| 0753 | Specify — project context view. | NOT_STARTED |  |  |  |
+| 0754 | Implement — project context view. | NOT_STARTED |  |  |  |
+| 0755 | Test — project context view. | NOT_STARTED |  |  |  |
+| 0756 | Run — project context view. | NOT_STARTED |  |  |  |
+| 0757 | Review — project context view. | NOT_STARTED |  |  |  |
+| 0758 | Document — project context view. | NOT_STARTED |  |  |  |
+| 0759 | Integrate — project context view. | NOT_STARTED |  |  |  |
+| 0760 | Gate — project context view. | NOT_STARTED |  |  |  |
+| 0761 | Inspect — approval and cancellation. | NOT_STARTED |  |  |  |
+| 0762 | Trace — approval and cancellation. | NOT_STARTED |  |  |  |
+| 0763 | Specify — approval and cancellation. | NOT_STARTED |  |  |  |
+| 0764 | Implement — approval and cancellation. | NOT_STARTED |  |  |  |
+| 0765 | Test — approval and cancellation. | NOT_STARTED |  |  |  |
+| 0766 | Run — approval and cancellation. | NOT_STARTED |  |  |  |
+| 0767 | Review — approval and cancellation. | NOT_STARTED |  |  |  |
+| 0768 | Document — approval and cancellation. | NOT_STARTED |  |  |  |
+| 0769 | Integrate — approval and cancellation. | NOT_STARTED |  |  |  |
+| 0770 | Gate — approval and cancellation. | NOT_STARTED |  |  |  |
+| 0771 | Inspect — diagnostic panel. | NOT_STARTED |  |  |  |
+| 0772 | Trace — diagnostic panel. | NOT_STARTED |  |  |  |
+| 0773 | Specify — diagnostic panel. | NOT_STARTED |  |  |  |
+| 0774 | Implement — diagnostic panel. | NOT_STARTED |  |  |  |
+| 0775 | Test — diagnostic panel. | NOT_STARTED |  |  |  |
+| 0776 | Run — diagnostic panel. | NOT_STARTED |  |  |  |
+| 0777 | Review — diagnostic panel. | NOT_STARTED |  |  |  |
+| 0778 | Document — diagnostic panel. | NOT_STARTED |  |  |  |
+| 0779 | Integrate — diagnostic panel. | NOT_STARTED |  |  |  |
+| 0780 | Gate — diagnostic panel. | NOT_STARTED |  |  |  |
+| 0781 | Inspect — accessibility and usability. | NOT_STARTED |  |  |  |
+| 0782 | Trace — accessibility and usability. | NOT_STARTED |  |  |  |
+| 0783 | Specify — accessibility and usability. | NOT_STARTED |  |  |  |
+| 0784 | Implement — accessibility and usability. | NOT_STARTED |  |  |  |
+| 0785 | Test — accessibility and usability. | NOT_STARTED |  |  |  |
+| 0786 | Run — accessibility and usability. | NOT_STARTED |  |  |  |
+| 0787 | Review — accessibility and usability. | NOT_STARTED |  |  |  |
+| 0788 | Document — accessibility and usability. | NOT_STARTED |  |  |  |
+| 0789 | Integrate — accessibility and usability. | NOT_STARTED |  |  |  |
+| 0790 | Gate — accessibility and usability. | NOT_STARTED |  |  |  |
+| 0791 | Inspect — demo mode separation. | NOT_STARTED |  |  |  |
+| 0792 | Trace — demo mode separation. | NOT_STARTED |  |  |  |
+| 0793 | Specify — demo mode separation. | NOT_STARTED |  |  |  |
+| 0794 | Implement — demo mode separation. | NOT_STARTED |  |  |  |
+| 0795 | Test — demo mode separation. | NOT_STARTED |  |  |  |
+| 0796 | Run — demo mode separation. | NOT_STARTED |  |  |  |
+| 0797 | Review — demo mode separation. | NOT_STARTED |  |  |  |
+| 0798 | Document — demo mode separation. | NOT_STARTED |  |  |  |
+| 0799 | Integrate — demo mode separation. | NOT_STARTED |  |  |  |
+| 0800 | Gate — demo mode separation. | NOT_STARTED |  |  |  |
+| 0801 | Inspect — test plan. | NOT_STARTED |  |  |  |
+| 0802 | Trace — test plan. | NOT_STARTED |  |  |  |
+| 0803 | Specify — test plan. | NOT_STARTED |  |  |  |
+| 0804 | Implement — test plan. | NOT_STARTED |  |  |  |
+| 0805 | Test — test plan. | NOT_STARTED |  |  |  |
+| 0806 | Run — test plan. | NOT_STARTED |  |  |  |
+| 0807 | Review — test plan. | NOT_STARTED |  |  |  |
+| 0808 | Document — test plan. | NOT_STARTED |  |  |  |
+| 0809 | Integrate — test plan. | NOT_STARTED |  |  |  |
+| 0810 | Gate — test plan. | NOT_STARTED |  |  |  |
+| 0811 | Inspect — virtual regression. | NOT_STARTED |  |  |  |
+| 0812 | Trace — virtual regression. | NOT_STARTED |  |  |  |
+| 0813 | Specify — virtual regression. | NOT_STARTED |  |  |  |
+| 0814 | Implement — virtual regression. | NOT_STARTED |  |  |  |
+| 0815 | Test — virtual regression. | NOT_STARTED |  |  |  |
+| 0816 | Run — virtual regression. | NOT_STARTED |  |  |  |
+| 0817 | Review — virtual regression. | NOT_STARTED |  |  |  |
+| 0818 | Document — virtual regression. | NOT_STARTED |  |  |  |
+| 0819 | Integrate — virtual regression. | NOT_STARTED |  |  |  |
+| 0820 | Gate — virtual regression. | NOT_STARTED |  |  |  |
+| 0821 | Inspect — firmware regression. | NOT_STARTED |  |  |  |
+| 0822 | Trace — firmware regression. | NOT_STARTED |  |  |  |
+| 0823 | Specify — firmware regression. | NOT_STARTED |  |  |  |
+| 0824 | Implement — firmware regression. | NOT_STARTED |  |  |  |
+| 0825 | Test — firmware regression. | NOT_STARTED |  |  |  |
+| 0826 | Run — firmware regression. | NOT_STARTED |  |  |  |
+| 0827 | Review — firmware regression. | NOT_STARTED |  |  |  |
+| 0828 | Document — firmware regression. | NOT_STARTED |  |  |  |
+| 0829 | Integrate — firmware regression. | NOT_STARTED |  |  |  |
+| 0830 | Gate — firmware regression. | NOT_STARTED |  |  |  |
+| 0831 | Inspect — physical end-to-end. | NOT_STARTED |  |  |  |
+| 0832 | Trace — physical end-to-end. | NOT_STARTED |  |  |  |
+| 0833 | Specify — physical end-to-end. | NOT_STARTED |  |  |  |
+| 0834 | Implement — physical end-to-end. | NOT_STARTED |  |  |  |
+| 0835 | Test — physical end-to-end. | NOT_STARTED |  |  |  |
+| 0836 | Run — physical end-to-end. | NOT_STARTED |  |  |  |
+| 0837 | Review — physical end-to-end. | NOT_STARTED |  |  |  |
+| 0838 | Document — physical end-to-end. | NOT_STARTED |  |  |  |
+| 0839 | Integrate — physical end-to-end. | NOT_STARTED |  |  |  |
+| 0840 | Gate — physical end-to-end. | NOT_STARTED |  |  |  |
+| 0841 | Inspect — failure injection. | NOT_STARTED |  |  |  |
+| 0842 | Trace — failure injection. | NOT_STARTED |  |  |  |
+| 0843 | Specify — failure injection. | NOT_STARTED |  |  |  |
+| 0844 | Implement — failure injection. | NOT_STARTED |  |  |  |
+| 0845 | Test — failure injection. | NOT_STARTED |  |  |  |
+| 0846 | Run — failure injection. | NOT_STARTED |  |  |  |
+| 0847 | Review — failure injection. | NOT_STARTED |  |  |  |
+| 0848 | Document — failure injection. | NOT_STARTED |  |  |  |
+| 0849 | Integrate — failure injection. | NOT_STARTED |  |  |  |
+| 0850 | Gate — failure injection. | NOT_STARTED |  |  |  |
+| 0851 | Inspect — performance measurements. | NOT_STARTED |  |  |  |
+| 0852 | Trace — performance measurements. | NOT_STARTED |  |  |  |
+| 0853 | Specify — performance measurements. | NOT_STARTED |  |  |  |
+| 0854 | Implement — performance measurements. | NOT_STARTED |  |  |  |
+| 0855 | Test — performance measurements. | NOT_STARTED |  |  |  |
+| 0856 | Run — performance measurements. | NOT_STARTED |  |  |  |
+| 0857 | Review — performance measurements. | NOT_STARTED |  |  |  |
+| 0858 | Document — performance measurements. | NOT_STARTED |  |  |  |
+| 0859 | Integrate — performance measurements. | NOT_STARTED |  |  |  |
+| 0860 | Gate — performance measurements. | NOT_STARTED |  |  |  |
+| 0861 | Inspect — security validation. | NOT_STARTED |  |  |  |
+| 0862 | Trace — security validation. | NOT_STARTED |  |  |  |
+| 0863 | Specify — security validation. | NOT_STARTED |  |  |  |
+| 0864 | Implement — security validation. | NOT_STARTED |  |  |  |
+| 0865 | Test — security validation. | NOT_STARTED |  |  |  |
+| 0866 | Run — security validation. | NOT_STARTED |  |  |  |
+| 0867 | Review — security validation. | NOT_STARTED |  |  |  |
+| 0868 | Document — security validation. | NOT_STARTED |  |  |  |
+| 0869 | Integrate — security validation. | NOT_STARTED |  |  |  |
+| 0870 | Gate — security validation. | NOT_STARTED |  |  |  |
+| 0871 | Inspect — evidence packaging. | NOT_STARTED |  |  |  |
+| 0872 | Trace — evidence packaging. | NOT_STARTED |  |  |  |
+| 0873 | Specify — evidence packaging. | NOT_STARTED |  |  |  |
+| 0874 | Implement — evidence packaging. | NOT_STARTED |  |  |  |
+| 0875 | Test — evidence packaging. | NOT_STARTED |  |  |  |
+| 0876 | Run — evidence packaging. | NOT_STARTED |  |  |  |
+| 0877 | Review — evidence packaging. | NOT_STARTED |  |  |  |
+| 0878 | Document — evidence packaging. | NOT_STARTED |  |  |  |
+| 0879 | Integrate — evidence packaging. | NOT_STARTED |  |  |  |
+| 0880 | Gate — evidence packaging. | NOT_STARTED |  |  |  |
+| 0881 | Inspect — presentation reconciliation. | NOT_STARTED |  |  |  |
+| 0882 | Trace — presentation reconciliation. | NOT_STARTED |  |  |  |
+| 0883 | Specify — presentation reconciliation. | NOT_STARTED |  |  |  |
+| 0884 | Implement — presentation reconciliation. | NOT_STARTED |  |  |  |
+| 0885 | Test — presentation reconciliation. | NOT_STARTED |  |  |  |
+| 0886 | Run — presentation reconciliation. | NOT_STARTED |  |  |  |
+| 0887 | Review — presentation reconciliation. | NOT_STARTED |  |  |  |
+| 0888 | Document — presentation reconciliation. | NOT_STARTED |  |  |  |
+| 0889 | Integrate — presentation reconciliation. | NOT_STARTED |  |  |  |
+| 0890 | Gate — presentation reconciliation. | NOT_STARTED |  |  |  |
+| 0891 | Inspect — release and handoff. | NOT_STARTED |  |  |  |
+| 0892 | Trace — release and handoff. | NOT_STARTED |  |  |  |
+| 0893 | Specify — release and handoff. | NOT_STARTED |  |  |  |
+| 0894 | Implement — release and handoff. | NOT_STARTED |  |  |  |
+| 0895 | Test — release and handoff. | NOT_STARTED |  |  |  |
+| 0896 | Run — release and handoff. | NOT_STARTED |  |  |  |
+| 0897 | Review — release and handoff. | NOT_STARTED |  |  |  |
+| 0898 | Document — release and handoff. | NOT_STARTED |  |  |  |
+| 0899 | Integrate — release and handoff. | NOT_STARTED |  |  |  |
+| 0900 | Gate — release and handoff. | NOT_STARTED |  |  |  |
+| 0901 | Inspect — installation packaging. | NOT_STARTED |  |  |  |
+| 0902 | Trace — installation packaging. | NOT_STARTED |  |  |  |
+| 0903 | Specify — installation packaging. | NOT_STARTED |  |  |  |
+| 0904 | Implement — installation packaging. | NOT_STARTED |  |  |  |
+| 0905 | Test — installation packaging. | NOT_STARTED |  |  |  |
+| 0906 | Run — installation packaging. | NOT_STARTED |  |  |  |
+| 0907 | Review — installation packaging. | NOT_STARTED |  |  |  |
+| 0908 | Document — installation packaging. | NOT_STARTED |  |  |  |
+| 0909 | Integrate — installation packaging. | NOT_STARTED |  |  |  |
+| 0910 | Gate — installation packaging. | NOT_STARTED |  |  |  |
+| 0911 | Inspect — first-run setup. | NOT_STARTED |  |  |  |
+| 0912 | Trace — first-run setup. | NOT_STARTED |  |  |  |
+| 0913 | Specify — first-run setup. | NOT_STARTED |  |  |  |
+| 0914 | Implement — first-run setup. | NOT_STARTED |  |  |  |
+| 0915 | Test — first-run setup. | NOT_STARTED |  |  |  |
+| 0916 | Run — first-run setup. | NOT_STARTED |  |  |  |
+| 0917 | Review — first-run setup. | NOT_STARTED |  |  |  |
+| 0918 | Document — first-run setup. | NOT_STARTED |  |  |  |
+| 0919 | Integrate — first-run setup. | NOT_STARTED |  |  |  |
+| 0920 | Gate — first-run setup. | NOT_STARTED |  |  |  |
+| 0921 | Inspect — configuration validation. | NOT_STARTED |  |  |  |
+| 0922 | Trace — configuration validation. | NOT_STARTED |  |  |  |
+| 0923 | Specify — configuration validation. | NOT_STARTED |  |  |  |
+| 0924 | Implement — configuration validation. | NOT_STARTED |  |  |  |
+| 0925 | Test — configuration validation. | NOT_STARTED |  |  |  |
+| 0926 | Run — configuration validation. | NOT_STARTED |  |  |  |
+| 0927 | Review — configuration validation. | NOT_STARTED |  |  |  |
+| 0928 | Document — configuration validation. | NOT_STARTED |  |  |  |
+| 0929 | Integrate — configuration validation. | NOT_STARTED |  |  |  |
+| 0930 | Gate — configuration validation. | NOT_STARTED |  |  |  |
+| 0931 | Inspect — logging and rotation. | NOT_STARTED |  |  |  |
+| 0932 | Trace — logging and rotation. | NOT_STARTED |  |  |  |
+| 0933 | Specify — logging and rotation. | NOT_STARTED |  |  |  |
+| 0934 | Implement — logging and rotation. | NOT_STARTED |  |  |  |
+| 0935 | Test — logging and rotation. | NOT_STARTED |  |  |  |
+| 0936 | Run — logging and rotation. | NOT_STARTED |  |  |  |
+| 0937 | Review — logging and rotation. | NOT_STARTED |  |  |  |
+| 0938 | Document — logging and rotation. | NOT_STARTED |  |  |  |
+| 0939 | Integrate — logging and rotation. | NOT_STARTED |  |  |  |
+| 0940 | Gate — logging and rotation. | NOT_STARTED |  |  |  |
+| 0941 | Inspect — backup and restore. | NOT_STARTED |  |  |  |
+| 0942 | Trace — backup and restore. | NOT_STARTED |  |  |  |
+| 0943 | Specify — backup and restore. | NOT_STARTED |  |  |  |
+| 0944 | Implement — backup and restore. | NOT_STARTED |  |  |  |
+| 0945 | Test — backup and restore. | NOT_STARTED |  |  |  |
+| 0946 | Run — backup and restore. | NOT_STARTED |  |  |  |
+| 0947 | Review — backup and restore. | NOT_STARTED |  |  |  |
+| 0948 | Document — backup and restore. | NOT_STARTED |  |  |  |
+| 0949 | Integrate — backup and restore. | NOT_STARTED |  |  |  |
+| 0950 | Gate — backup and restore. | NOT_STARTED |  |  |  |
+| 0951 | Inspect — version compatibility. | NOT_STARTED |  |  |  |
+| 0952 | Trace — version compatibility. | NOT_STARTED |  |  |  |
+| 0953 | Specify — version compatibility. | NOT_STARTED |  |  |  |
+| 0954 | Implement — version compatibility. | NOT_STARTED |  |  |  |
+| 0955 | Test — version compatibility. | NOT_STARTED |  |  |  |
+| 0956 | Run — version compatibility. | NOT_STARTED |  |  |  |
+| 0957 | Review — version compatibility. | NOT_STARTED |  |  |  |
+| 0958 | Document — version compatibility. | NOT_STARTED |  |  |  |
+| 0959 | Integrate — version compatibility. | NOT_STARTED |  |  |  |
+| 0960 | Gate — version compatibility. | NOT_STARTED |  |  |  |
+| 0961 | Inspect — operator runbook. | NOT_STARTED |  |  |  |
+| 0962 | Trace — operator runbook. | NOT_STARTED |  |  |  |
+| 0963 | Specify — operator runbook. | NOT_STARTED |  |  |  |
+| 0964 | Implement — operator runbook. | NOT_STARTED |  |  |  |
+| 0965 | Test — operator runbook. | NOT_STARTED |  |  |  |
+| 0966 | Run — operator runbook. | NOT_STARTED |  |  |  |
+| 0967 | Review — operator runbook. | NOT_STARTED |  |  |  |
+| 0968 | Document — operator runbook. | NOT_STARTED |  |  |  |
+| 0969 | Integrate — operator runbook. | NOT_STARTED |  |  |  |
+| 0970 | Gate — operator runbook. | NOT_STARTED |  |  |  |
+| 0971 | Inspect — demo environment. | NOT_STARTED |  |  |  |
+| 0972 | Trace — demo environment. | NOT_STARTED |  |  |  |
+| 0973 | Specify — demo environment. | NOT_STARTED |  |  |  |
+| 0974 | Implement — demo environment. | NOT_STARTED |  |  |  |
+| 0975 | Test — demo environment. | NOT_STARTED |  |  |  |
+| 0976 | Run — demo environment. | NOT_STARTED |  |  |  |
+| 0977 | Review — demo environment. | NOT_STARTED |  |  |  |
+| 0978 | Document — demo environment. | NOT_STARTED |  |  |  |
+| 0979 | Integrate — demo environment. | NOT_STARTED |  |  |  |
+| 0980 | Gate — demo environment. | NOT_STARTED |  |  |  |
+| 0981 | Inspect — maintenance workflow. | NOT_STARTED |  |  |  |
+| 0982 | Trace — maintenance workflow. | NOT_STARTED |  |  |  |
+| 0983 | Specify — maintenance workflow. | NOT_STARTED |  |  |  |
+| 0984 | Implement — maintenance workflow. | NOT_STARTED |  |  |  |
+| 0985 | Test — maintenance workflow. | NOT_STARTED |  |  |  |
+| 0986 | Run — maintenance workflow. | NOT_STARTED |  |  |  |
+| 0987 | Review — maintenance workflow. | NOT_STARTED |  |  |  |
+| 0988 | Document — maintenance workflow. | NOT_STARTED |  |  |  |
+| 0989 | Integrate — maintenance workflow. | NOT_STARTED |  |  |  |
+| 0990 | Gate — maintenance workflow. | NOT_STARTED |  |  |  |
+| 0991 | Inspect — handoff verification. | NOT_STARTED |  |  |  |
+| 0992 | Trace — handoff verification. | NOT_STARTED |  |  |  |
+| 0993 | Specify — handoff verification. | NOT_STARTED |  |  |  |
+| 0994 | Implement — handoff verification. | NOT_STARTED |  |  |  |
+| 0995 | Test — handoff verification. | NOT_STARTED |  |  |  |
+| 0996 | Run — handoff verification. | NOT_STARTED |  |  |  |
+| 0997 | Review — handoff verification. | NOT_STARTED |  |  |  |
+| 0998 | Document — handoff verification. | NOT_STARTED |  |  |  |
+| 0999 | Integrate — handoff verification. | NOT_STARTED |  |  |  |
+| 1000 | Gate — handoff verification. | NOT_STARTED |  |  |  |
+| 1001 | phase10.1001 | NOT_STARTED |  |  |  |
+| 1002 | phase10.1002 | NOT_STARTED |  |  |  |
+| 1003 | phase10.1003 | NOT_STARTED |  |  |  |
+| 1004 | phase10.1004 | NOT_STARTED |  |  |  |
+| 1005 | phase10.1005 | NOT_STARTED |  |  |  |
+| 1006 | phase10.1006 | NOT_STARTED |  |  |  |
+| 1007 | phase10.1007 | NOT_STARTED |  |  |  |
+| 1008 | phase10.1008 | NOT_STARTED |  |  |  |
+| 1009 | phase10.1009 | NOT_STARTED |  |  |  |
+| 1010 | phase10.1010 | NOT_STARTED |  |  |  |
+| 1011 | phase10.1011 | NOT_STARTED |  |  |  |
+| 1012 | phase10.1012 | NOT_STARTED |  |  |  |
+| 1013 | phase10.1013 | NOT_STARTED |  |  |  |
+| 1014 | phase10.1014 | NOT_STARTED |  |  |  |
+| 1015 | phase10.1015 | NOT_STARTED |  |  |  |
+| 1016 | phase10.1016 | NOT_STARTED |  |  |  |
+| 1017 | phase10.1017 | NOT_STARTED |  |  |  |
+| 1018 | phase10.1018 | NOT_STARTED |  |  |  |
+| 1019 | phase10.1019 | NOT_STARTED |  |  |  |
+| 1020 | phase10.1020 | NOT_STARTED |  |  |  |
+| 1021 | phase10.1021 | NOT_STARTED |  |  |  |
+| 1022 | phase10.1022 | NOT_STARTED |  |  |  |
+| 1023 | phase10.1023 | NOT_STARTED |  |  |  |
+| 1024 | phase10.1024 | NOT_STARTED |  |  |  |
+| 1025 | phase10.1025 | NOT_STARTED |  |  |  |
+| 1026 | phase10.1026 | NOT_STARTED |  |  |  |
+| 1027 | phase10.1027 | NOT_STARTED |  |  |  |
+| 1028 | phase10.1028 | NOT_STARTED |  |  |  |
+| 1029 | phase10.1029 | NOT_STARTED |  |  |  |
+| 1030 | phase10.1030 | NOT_STARTED |  |  |  |
+| 1031 | phase10.1031 | NOT_STARTED |  |  |  |
+| 1032 | phase10.1032 | NOT_STARTED |  |  |  |
+| 1033 | phase10.1033 | NOT_STARTED |  |  |  |
+| 1034 | phase10.1034 | NOT_STARTED |  |  |  |
+| 1035 | phase10.1035 | NOT_STARTED |  |  |  |
+| 1036 | phase10.1036 | NOT_STARTED |  |  |  |
+| 1037 | phase10.1037 | NOT_STARTED |  |  |  |
+| 1038 | phase10.1038 | NOT_STARTED |  |  |  |
+| 1039 | phase10.1039 | NOT_STARTED |  |  |  |
+| 1040 | phase10.1040 | NOT_STARTED |  |  |  |
+| 1041 | phase10.1041 | NOT_STARTED |  |  |  |
+| 1042 | phase10.1042 | NOT_STARTED |  |  |  |
+| 1043 | phase10.1043 | NOT_STARTED |  |  |  |
+| 1044 | phase10.1044 | NOT_STARTED |  |  |  |
+| 1045 | phase10.1045 | NOT_STARTED |  |  |  |
+| 1046 | phase10.1046 | NOT_STARTED |  |  |  |
+| 1047 | phase10.1047 | NOT_STARTED |  |  |  |
+| 1048 | phase10.1048 | NOT_STARTED |  |  |  |
+| 1049 | phase10.1049 | NOT_STARTED |  |  |  |
+| 1050 | phase10.1050 | NOT_STARTED |  |  |  |
+| 1051 | phase10.1051 | NOT_STARTED |  |  |  |
+| 1052 | phase10.1052 | NOT_STARTED |  |  |  |
+| 1053 | phase10.1053 | NOT_STARTED |  |  |  |
+| 1054 | phase10.1054 | NOT_STARTED |  |  |  |
+| 1055 | phase10.1055 | NOT_STARTED |  |  |  |
+| 1056 | phase10.1056 | NOT_STARTED |  |  |  |
+| 1057 | phase10.1057 | NOT_STARTED |  |  |  |
+| 1058 | phase10.1058 | NOT_STARTED |  |  |  |
+| 1059 | phase10.1059 | NOT_STARTED |  |  |  |
+| 1060 | phase10.1060 | NOT_STARTED |  |  |  |
+| 1061 | phase10.1061 | NOT_STARTED |  |  |  |
+| 1062 | phase10.1062 | NOT_STARTED |  |  |  |
+| 1063 | phase10.1063 | NOT_STARTED |  |  |  |
+| 1064 | phase10.1064 | NOT_STARTED |  |  |  |
+| 1065 | phase10.1065 | NOT_STARTED |  |  |  |
+| 1066 | phase10.1066 | NOT_STARTED |  |  |  |
+| 1067 | phase10.1067 | NOT_STARTED |  |  |  |
+| 1068 | phase10.1068 | NOT_STARTED |  |  |  |
+| 1069 | phase10.1069 | NOT_STARTED |  |  |  |
+| 1070 | phase10.1070 | NOT_STARTED |  |  |  |
+| 1071 | phase10.1071 | NOT_STARTED |  |  |  |
+| 1072 | phase10.1072 | NOT_STARTED |  |  |  |
+| 1073 | phase10.1073 | NOT_STARTED |  |  |  |
+| 1074 | phase10.1074 | NOT_STARTED |  |  |  |
+| 1075 | phase10.1075 | NOT_STARTED |  |  |  |
+| 1076 | phase10.1076 | NOT_STARTED |  |  |  |
+| 1077 | phase10.1077 | NOT_STARTED |  |  |  |
+| 1078 | phase10.1078 | NOT_STARTED |  |  |  |
+| 1079 | phase10.1079 | NOT_STARTED |  |  |  |
+| 1080 | phase10.1080 | NOT_STARTED |  |  |  |
+| 1081 | phase10.1081 | NOT_STARTED |  |  |  |
+| 1082 | phase10.1082 | NOT_STARTED |  |  |  |
+| 1083 | phase10.1083 | NOT_STARTED |  |  |  |
+| 1084 | phase10.1084 | NOT_STARTED |  |  |  |
+| 1085 | phase10.1085 | NOT_STARTED |  |  |  |
+| 1086 | phase10.1086 | NOT_STARTED |  |  |  |
+| 1087 | phase10.1087 | NOT_STARTED |  |  |  |
+| 1088 | phase10.1088 | NOT_STARTED |  |  |  |
+| 1089 | phase10.1089 | NOT_STARTED |  |  |  |
+| 1090 | phase10.1090 | NOT_STARTED |  |  |  |
+| 1091 | phase10.1091 | NOT_STARTED |  |  |  |
+| 1092 | phase10.1092 | NOT_STARTED |  |  |  |
+| 1093 | phase10.1093 | NOT_STARTED |  |  |  |
+| 1094 | phase10.1094 | NOT_STARTED |  |  |  |
+| 1095 | phase10.1095 | NOT_STARTED |  |  |  |
+| 1096 | phase10.1096 | NOT_STARTED |  |  |  |
+| 1097 | phase10.1097 | NOT_STARTED |  |  |  |
+| 1098 | phase10.1098 | NOT_STARTED |  |  |  |
+| 1099 | phase10.1099 | NOT_STARTED |  |  |  |
+| 1100 | phase10.1100 | NOT_STARTED |  |  |  |
+| 1101 | phase11.1101 | NOT_STARTED |  |  |  |
+| 1102 | phase11.1102 | NOT_STARTED |  |  |  |
+| 1103 | phase11.1103 | NOT_STARTED |  |  |  |
+| 1104 | phase11.1104 | NOT_STARTED |  |  |  |
+| 1105 | phase11.1105 | NOT_STARTED |  |  |  |
+| 1106 | phase11.1106 | NOT_STARTED |  |  |  |
+| 1107 | phase11.1107 | NOT_STARTED |  |  |  |
+| 1108 | phase11.1108 | NOT_STARTED |  |  |  |
+| 1109 | phase11.1109 | NOT_STARTED |  |  |  |
+| 1110 | phase11.1110 | NOT_STARTED |  |  |  |
+| 1111 | phase11.1111 | NOT_STARTED |  |  |  |
+| 1112 | phase11.1112 | NOT_STARTED |  |  |  |
+| 1113 | phase11.1113 | NOT_STARTED |  |  |  |
+| 1114 | phase11.1114 | NOT_STARTED |  |  |  |
+| 1115 | phase11.1115 | NOT_STARTED |  |  |  |
+| 1116 | phase11.1116 | NOT_STARTED |  |  |  |
+| 1117 | phase11.1117 | NOT_STARTED |  |  |  |
+| 1118 | phase11.1118 | NOT_STARTED |  |  |  |
+| 1119 | phase11.1119 | NOT_STARTED |  |  |  |
+| 1120 | phase11.1120 | NOT_STARTED |  |  |  |
+| 1121 | phase11.1121 | NOT_STARTED |  |  |  |
+| 1122 | phase11.1122 | NOT_STARTED |  |  |  |
+| 1123 | phase11.1123 | NOT_STARTED |  |  |  |
+| 1124 | phase11.1124 | NOT_STARTED |  |  |  |
+| 1125 | phase11.1125 | NOT_STARTED |  |  |  |
+| 1126 | phase11.1126 | NOT_STARTED |  |  |  |
+| 1127 | phase11.1127 | NOT_STARTED |  |  |  |
+| 1128 | phase11.1128 | NOT_STARTED |  |  |  |
+| 1129 | phase11.1129 | NOT_STARTED |  |  |  |
+| 1130 | phase11.1130 | NOT_STARTED |  |  |  |
+| 1131 | phase11.1131 | NOT_STARTED |  |  |  |
+| 1132 | phase11.1132 | NOT_STARTED |  |  |  |
+| 1133 | phase11.1133 | NOT_STARTED |  |  |  |
+| 1134 | phase11.1134 | NOT_STARTED |  |  |  |
+| 1135 | phase11.1135 | NOT_STARTED |  |  |  |
+| 1136 | phase11.1136 | NOT_STARTED |  |  |  |
+| 1137 | phase11.1137 | NOT_STARTED |  |  |  |
+| 1138 | phase11.1138 | NOT_STARTED |  |  |  |
+| 1139 | phase11.1139 | NOT_STARTED |  |  |  |
+| 1140 | phase11.1140 | NOT_STARTED |  |  |  |
+| 1141 | phase11.1141 | NOT_STARTED |  |  |  |
+| 1142 | phase11.1142 | NOT_STARTED |  |  |  |
+| 1143 | phase11.1143 | NOT_STARTED |  |  |  |
+| 1144 | phase11.1144 | NOT_STARTED |  |  |  |
+| 1145 | phase11.1145 | NOT_STARTED |  |  |  |
+| 1146 | phase11.1146 | NOT_STARTED |  |  |  |
+| 1147 | phase11.1147 | NOT_STARTED |  |  |  |
+| 1148 | phase11.1148 | NOT_STARTED |  |  |  |
+| 1149 | phase11.1149 | NOT_STARTED |  |  |  |
+| 1150 | phase11.1150 | NOT_STARTED |  |  |  |
+| 1151 | phase11.1151 | NOT_STARTED |  |  |  |
+| 1152 | phase11.1152 | NOT_STARTED |  |  |  |
+| 1153 | phase11.1153 | NOT_STARTED |  |  |  |
+| 1154 | phase11.1154 | NOT_STARTED |  |  |  |
+| 1155 | phase11.1155 | NOT_STARTED |  |  |  |
+| 1156 | phase11.1156 | NOT_STARTED |  |  |  |
+| 1157 | phase11.1157 | NOT_STARTED |  |  |  |
+| 1158 | phase11.1158 | NOT_STARTED |  |  |  |
+| 1159 | phase11.1159 | NOT_STARTED |  |  |  |
+| 1160 | phase12.1160 | NOT_STARTED |  |  |  |
+| 1161 | phase12.1161 | NOT_STARTED |  |  |  |
+| 1162 | phase12.1162 | NOT_STARTED |  |  |  |
+| 1163 | phase12.1163 | NOT_STARTED |  |  |  |
+| 1164 | phase12.1164 | NOT_STARTED |  |  |  |
+| 1165 | phase12.1165 | NOT_STARTED |  |  |  |
+| 1166 | phase12.1166 | NOT_STARTED |  |  |  |
+| 1167 | phase12.1167 | NOT_STARTED |  |  |  |
+| 1168 | phase12.1168 | NOT_STARTED |  |  |  |
+| 1169 | phase12.1169 | NOT_STARTED |  |  |  |
+| 1170 | phase12.1170 | NOT_STARTED |  |  |  |
+| 1171 | phase12.1171 | NOT_STARTED |  |  |  |
+| 1172 | phase12.1172 | NOT_STARTED |  |  |  |
+| 1173 | phase12.1173 | NOT_STARTED |  |  |  |
+| 1174 | phase12.1174 | NOT_STARTED |  |  |  |
+| 1175 | phase12.1175 | NOT_STARTED |  |  |  |
+| 1176 | phase12.1176 | NOT_STARTED |  |  |  |
+| 1177 | phase12.1177 | NOT_STARTED |  |  |  |
+| 1178 | phase12.1178 | NOT_STARTED |  |  |  |
+| 1179 | phase12.1179 | NOT_STARTED |  |  |  |
+| 1180 | phase12.1180 | NOT_STARTED |  |  |  |
+| 1181 | phase12.1181 | NOT_STARTED |  |  |  |
+| 1182 | phase12.1182 | NOT_STARTED |  |  |  |
+| 1183 | phase12.1183 | NOT_STARTED |  |  |  |
+| 1184 | phase12.1184 | NOT_STARTED |  |  |  |
+| 1185 | phase12.1185 | NOT_STARTED |  |  |  |
+| 1186 | phase12.1186 | NOT_STARTED |  |  |  |
+| 1187 | phase12.1187 | NOT_STARTED |  |  |  |
+| 1188 | phase12.1188 | NOT_STARTED |  |  |  |
+| 1189 | phase12.1189 | NOT_STARTED |  |  |  |
+| 1190 | phase12.1190 | NOT_STARTED |  |  |  |
+| 1191 | phase12.1191 | NOT_STARTED |  |  |  |
+| 1192 | phase12.1192 | NOT_STARTED |  |  |  |
+| 1193 | phase12.1193 | NOT_STARTED |  |  |  |
+| 1194 | phase12.1194 | NOT_STARTED |  |  |  |
+| 1195 | phase12.1195 | NOT_STARTED |  |  |  |
+| 1196 | phase12.1196 | NOT_STARTED |  |  |  |
+| 1197 | phase12.1197 | NOT_STARTED |  |  |  |
+| 1198 | phase12.1198 | NOT_STARTED |  |  |  |
+| 1199 | phase12.1199 | NOT_STARTED |  |  |  |
+| 1200 | phase12.1200 | NOT_STARTED |  |  |  |
+| 1201 | phase12.1201 | NOT_STARTED |  |  |  |
+| 1202 | phase12.1202 | NOT_STARTED |  |  |  |
+| 1203 | phase12.1203 | NOT_STARTED |  |  |  |
+| 1204 | phase12.1204 | NOT_STARTED |  |  |  |
+| 1205 | phase12.1205 | NOT_STARTED |  |  |  |
+| 1206 | phase12.1206 | NOT_STARTED |  |  |  |
+| 1207 | phase12.1207 | NOT_STARTED |  |  |  |
+| 1208 | phase12.1208 | NOT_STARTED |  |  |  |
+| 1209 | phase12.1209 | NOT_STARTED |  |  |  |
+| 1210 | phase12.1210 | NOT_STARTED |  |  |  |
+| 1211 | phase12.1211 | NOT_STARTED |  |  |  |
+| 1212 | phase12.1212 | NOT_STARTED |  |  |  |
+| 1213 | phase12.1213 | NOT_STARTED |  |  |  |
+| 1214 | phase12.1214 | NOT_STARTED |  |  |  |
+| 1215 | phase12.1215 | NOT_STARTED |  |  |  |
+| 1216 | phase12.1216 | NOT_STARTED |  |  |  |
+| 1217 | phase12.1217 | NOT_STARTED |  |  |  |
+| 1218 | phase12.1218 | NOT_STARTED |  |  |  |
+| 1219 | phase12.1219 | NOT_STARTED |  |  |  |
+| 1220 | phase12.1220 | NOT_STARTED |  |  |  |
+| 1221 | phase12.1221 | NOT_STARTED |  |  |  |
+| 1222 | phase12.1222 | NOT_STARTED |  |  |  |
+| 1223 | phase12.1223 | NOT_STARTED |  |  |  |
+| 1224 | phase12.1224 | NOT_STARTED |  |  |  |
+| 1225 | phase12.1225 | NOT_STARTED |  |  |  |
+| 1226 | phase12.1226 | NOT_STARTED |  |  |  |
+| 1227 | phase12.1227 | NOT_STARTED |  |  |  |
+| 1228 | phase12.1228 | NOT_STARTED |  |  |  |
+| 1229 | phase12.1229 | NOT_STARTED |  |  |  |
+| 1230 | phase12.1230 | NOT_STARTED |  |  |  |
+| 1231 | phase12.1231 | NOT_STARTED |  |  |  |
+| 1232 | phase12.1232 | NOT_STARTED |  |  |  |
+| 1233 | phase12.1233 | NOT_STARTED |  |  |  |
+| 1234 | phase12.1234 | NOT_STARTED |  |  |  |
+| 1235 | phase12.1235 | NOT_STARTED |  |  |  |
+| 1236 | phase12.1236 | NOT_STARTED |  |  |  |
+| 1237 | phase12.1237 | NOT_STARTED |  |  |  |
+| 1238 | phase12.1238 | NOT_STARTED |  |  |  |
+| 1239 | phase12.1239 | NOT_STARTED |  |  |  |
+| 1240 | phase12.1240 | NOT_STARTED |  |  |  |
+| 1241 | phase12.1241 | NOT_STARTED |  |  |  |
+| 1242 | phase12.1242 | NOT_STARTED |  |  |  |
+| 1243 | phase12.1243 | NOT_STARTED |  |  |  |
+| 1244 | phase12.1244 | NOT_STARTED |  |  |  |
+| 1245 | phase12.1245 | NOT_STARTED |  |  |  |
+| 1246 | phase12.1246 | NOT_STARTED |  |  |  |
+| 1247 | phase12.1247 | NOT_STARTED |  |  |  |
+| 1248 | phase12.1248 | NOT_STARTED |  |  |  |
+| 1249 | phase12.1249 | NOT_STARTED |  |  |  |
+| 1250 | phase12.1250 | NOT_STARTED |  |  |  |
+| 1251 | phase12.1251 | NOT_STARTED |  |  |  |
+| 1252 | phase12.1252 | NOT_STARTED |  |  |  |
+| 1253 | phase12.1253 | NOT_STARTED |  |  |  |
+| 1254 | phase12.1254 | NOT_STARTED |  |  |  |
+| 1255 | phase12.1255 | NOT_STARTED |  |  |  |
+| 1256 | phase12.1256 | NOT_STARTED |  |  |  |
+| 1257 | phase12.1257 | NOT_STARTED |  |  |  |
+| 1258 | phase12.1258 | NOT_STARTED |  |  |  |
+| 1259 | phase12.1259 | NOT_STARTED |  |  |  |
+| 1260 | phase12.1260 | NOT_STARTED |  |  |  |
+| 1261 | phase12.1261 | NOT_STARTED |  |  |  |
+| 1262 | phase12.1262 | NOT_STARTED |  |  |  |
+| 1263 | phase12.1263 | NOT_STARTED |  |  |  |
+| 1264 | phase12.1264 | NOT_STARTED |  |  |  |
+| 1265 | phase12.1265 | NOT_STARTED |  |  |  |
+| 1266 | phase12.1266 | NOT_STARTED |  |  |  |
+| 1267 | phase12.1267 | NOT_STARTED |  |  |  |
+| 1268 | phase12.1268 | NOT_STARTED |  |  |  |
+| 1269 | phase12.1269 | NOT_STARTED |  |  |  |
+| 1270 | phase12.1270 | NOT_STARTED |  |  |  |
+| 1271 | phase12.1271 | NOT_STARTED |  |  |  |
+| 1272 | phase12.1272 | NOT_STARTED |  |  |  |
+| 1273 | phase12.1273 | NOT_STARTED |  |  |  |
+| 1274 | phase12.1274 | NOT_STARTED |  |  |  |
+| 1275 | phase12.1275 | NOT_STARTED |  |  |  |
+| 1276 | phase1276.1276 | NOT_STARTED |  |  |  |
+| 1277 | phase1277.1277 | NOT_STARTED |  |  |  |
+| 1278 | phase1278.1278 | NOT_STARTED |  |  |  |
+| 1279 | phase1279.1279 | NOT_STARTED |  |  |  |
+| 1280 | phase1280.1280 | NOT_STARTED |  |  |  |
+| 1281 | phase1281.1281 | NOT_STARTED |  |  |  |
+| 1282 | phase1282.1282 | NOT_STARTED |  |  |  |
+| 1283 | phase1283.1283 | NOT_STARTED |  |  |  |
+| 1284 | phase1284.1284 | NOT_STARTED |  |  |  |
+| 1285 | phase1285.1285 | NOT_STARTED |  |  |  |
+| 1286 | phase1286.1286 | NOT_STARTED |  |  |  |
+| 1287 | phase1287.1287 | NOT_STARTED |  |  |  |
+| 1288 | phase1288.1288 | NOT_STARTED |  |  |  |
+| 1289 | phase1289.1289 | NOT_STARTED |  |  |  |
+| 1290 | phase1290.1290 | NOT_STARTED |  |  |  |
+| 1291 | phase1291.1291 | NOT_STARTED |  |  |  |
+| 1292 | phase1292.1292 | NOT_STARTED |  |  |  |
+| 1293 | phase1293.1293 | NOT_STARTED |  |  |  |
+| 1294 | phase1294.1294 | NOT_STARTED |  |  |  |
+| 1295 | phase1295.1295 | NOT_STARTED |  |  |  |
+| 1296 | phase1296.1296 | NOT_STARTED |  |  |  |
+| 1297 | phase1297.1297 | NOT_STARTED |  |  |  |
+| 1298 | phase1298.1298 | NOT_STARTED |  |  |  |
+| 1299 | phase1299.1299 | NOT_STARTED |  |  |  |
+| 1300 | phase1300.1300 | NOT_STARTED |  |  |  |
+| 1301 | phase1301.1301 | NOT_STARTED |  |  |  |
+| 1302 | phase1302.1302 | NOT_STARTED |  |  |  |
+| 1303 | phase1303.1303 | NOT_STARTED |  |  |  |
+| 1304 | phase1304.1304 | NOT_STARTED |  |  |  |
+| 1305 | phase1305.1305 | NOT_STARTED |  |  |  |
+| 1306 | phase1306.1306 | NOT_STARTED |  |  |  |
+| 1307 | phase1307.1307 | NOT_STARTED |  |  |  |
+| 1308 | phase1308.1308 | NOT_STARTED |  |  |  |
+| 1309 | phase1309.1309 | NOT_STARTED |  |  |  |
+| 1310 | phase1310.1310 | NOT_STARTED |  |  |  |
+| 1311 | phase1311.1311 | NOT_STARTED |  |  |  |
+| 1312 | phase1312.1312 | NOT_STARTED |  |  |  |
+| 1313 | phase1313.1313 | NOT_STARTED |  |  |  |
+| 1314 | phase1314.1314 | NOT_STARTED |  |  |  |
+| 1315 | phase1315.1315 | NOT_STARTED |  |  |  |
+| 1316 | phase1316.1316 | NOT_STARTED |  |  |  |
+| 1317 | phase1317.1317 | NOT_STARTED |  |  |  |
+| 1318 | phase1318.1318 | NOT_STARTED |  |  |  |
+| 1319 | phase1319.1319 | NOT_STARTED |  |  |  |
+| 1320 | phase1320.1320 | NOT_STARTED |  |  |  |
+| 1321 | phase1321.1321 | NOT_STARTED |  |  |  |
+| 1322 | phase1322.1322 | NOT_STARTED |  |  |  |
+| 1323 | phase1323.1323 | NOT_STARTED |  |  |  |
+| 1324 | phase1324.1324 | NOT_STARTED |  |  |  |
+| 1325 | phase1325.1325 | NOT_STARTED |  |  |  |
+| 1326 | phase1326.1326 | NOT_STARTED |  |  |  |
+| 1327 | phase1327.1327 | NOT_STARTED |  |  |  |
+| 1328 | phase1328.1328 | NOT_STARTED |  |  |  |
+| 1329 | phase1329.1329 | NOT_STARTED |  |  |  |
+| 1330 | phase1330.1330 | NOT_STARTED |  |  |  |
+| 1331 | phase1331.1331 | NOT_STARTED |  |  |  |
+| 1332 | phase1332.1332 | NOT_STARTED |  |  |  |
+| 1333 | phase1333.1333 | NOT_STARTED |  |  |  |
+| 1334 | phase1334.1334 | NOT_STARTED |  |  |  |
+| 1335 | phase1335.1335 | NOT_STARTED |  |  |  |
+| 1336 | phase1336.1336 | NOT_STARTED |  |  |  |
+| 1337 | phase1337.1337 | NOT_STARTED |  |  |  |
+| 1338 | phase1338.1338 | NOT_STARTED |  |  |  |
+| 1339 | phase1339.1339 | NOT_STARTED |  |  |  |
+| 1340 | phase1340.1340 | NOT_STARTED |  |  |  |
+| 1341 | phase1341.1341 | NOT_STARTED |  |  |  |
+| 1342 | phase1342.1342 | NOT_STARTED |  |  |  |
+| 1343 | phase1343.1343 | NOT_STARTED |  |  |  |
+| 1344 | phase1344.1344 | NOT_STARTED |  |  |  |
+| 1345 | phase1345.1345 | NOT_STARTED |  |  |  |
+| 1346 | phase1346.1346 | NOT_STARTED |  |  |  |
+| 1347 | phase1347.1347 | NOT_STARTED |  |  |  |
+| 1348 | phase1348.1348 | NOT_STARTED |  |  |  |
+| 1349 | phase1349.1349 | NOT_STARTED |  |  |  |
+| 1350 | phase1350.1350 | NOT_STARTED |  |  |  |
+| 1351 | phase1351.1351 | NOT_STARTED |  |  |  |
+| 1352 | phase1352.1352 | NOT_STARTED |  |  |  |
+| 1353 | phase1353.1353 | NOT_STARTED |  |  |  |
+| 1354 | phase1354.1354 | NOT_STARTED |  |  |  |
+| 1355 | phase1355.1355 | NOT_STARTED |  |  |  |
+| 1356 | phase1356.1356 | NOT_STARTED |  |  |  |
+| 1357 | phase1357.1357 | NOT_STARTED |  |  |  |
+| 1358 | phase1358.1358 | NOT_STARTED |  |  |  |
+| 1359 | phase1359.1359 | NOT_STARTED |  |  |  |
+| 1360 | phase1360.1360 | NOT_STARTED |  |  |  |
+| 1361 | phase1361.1361 | NOT_STARTED |  |  |  |
+| 1362 | phase1362.1362 | NOT_STARTED |  |  |  |
+| 1363 | phase1363.1363 | NOT_STARTED |  |  |  |
+| 1364 | phase1364.1364 | NOT_STARTED |  |  |  |
+| 1365 | phase1365.1365 | NOT_STARTED |  |  |  |
+| 1366 | phase1366.1366 | NOT_STARTED |  |  |  |
+| 1367 | phase1367.1367 | NOT_STARTED |  |  |  |
+| 1368 | phase1368.1368 | NOT_STARTED |  |  |  |
+| 1369 | phase1369.1369 | NOT_STARTED |  |  |  |
+| 1370 | phase1370.1370 | NOT_STARTED |  |  |  |
+| 1371 | phase1371.1371 | NOT_STARTED |  |  |  |
+| 1372 | phase1372.1372 | NOT_STARTED |  |  |  |
+| 1373 | phase1373.1373 | NOT_STARTED |  |  |  |
+| 1374 | phase1374.1374 | NOT_STARTED |  |  |  |
+| 1375 | phase1375.1375 | NOT_STARTED |  |  |  |
+| 1376 | phase1376.1376 | NOT_STARTED |  |  |  |
+| 1377 | phase1377.1377 | NOT_STARTED |  |  |  |
+| 1378 | phase1378.1378 | NOT_STARTED |  |  |  |
+| 1379 | phase1379.1379 | NOT_STARTED |  |  |  |
+| 1380 | phase1380.1380 | NOT_STARTED |  |  |  |
+| 1381 | phase1381.1381 | NOT_STARTED |  |  |  |
+| 1382 | phase1382.1382 | NOT_STARTED |  |  |  |
+| 1383 | phase1383.1383 | NOT_STARTED |  |  |  |
+| 1384 | phase1384.1384 | NOT_STARTED |  |  |  |
+| 1385 | phase1385.1385 | NOT_STARTED |  |  |  |
+| 1386 | phase1386.1386 | NOT_STARTED |  |  |  |
+| 1387 | phase1387.1387 | NOT_STARTED |  |  |  |
+| 1388 | phase1388.1388 | NOT_STARTED |  |  |  |
+| 1389 | phase1389.1389 | NOT_STARTED |  |  |  |
+| 1390 | phase1390.1390 | NOT_STARTED |  |  |  |
+| 1391 | phase1391.1391 | NOT_STARTED |  |  |  |
+| 1392 | phase1392.1392 | NOT_STARTED |  |  |  |
+| 1393 | phase1393.1393 | NOT_STARTED |  |  |  |
+| 1394 | phase1394.1394 | NOT_STARTED |  |  |  |
+| 1395 | phase1395.1395 | NOT_STARTED |  |  |  |
+| 1396 | phase1396.1396 | NOT_STARTED |  |  |  |
+| 1397 | phase1397.1397 | NOT_STARTED |  |  |  |
+| 1398 | phase1398.1398 | NOT_STARTED |  |  |  |
+| 1399 | phase1399.1399 | NOT_STARTED |  |  |  |
+| 1400 | phase1400.1400 | NOT_STARTED |  |  |  |
+| 1401 | phase1401.1401 | NOT_STARTED |  |  |  |
+| 1402 | phase1402.1402 | NOT_STARTED |  |  |  |
+| 1403 | phase1403.1403 | NOT_STARTED |  |  |  |
+| 1404 | phase1404.1404 | NOT_STARTED |  |  |  |
+| 1405 | phase1405.1405 | NOT_STARTED |  |  |  |
+| 1406 | phase1406.1406 | NOT_STARTED |  |  |  |
+| 1407 | phase1407.1407 | NOT_STARTED |  |  |  |
+| 1408 | phase1408.1408 | NOT_STARTED |  |  |  |
+| 1409 | phase1409.1409 | NOT_STARTED |  |  |  |
+| 1410 | phase1410.1410 | NOT_STARTED |  |  |  |
+| 1411 | phase1411.1411 | NOT_STARTED |  |  |  |
+| 1412 | phase1412.1412 | NOT_STARTED |  |  |  |
+| 1413 | phase1413.1413 | NOT_STARTED |  |  |  |
+| 1414 | phase1414.1414 | NOT_STARTED |  |  |  |
+| 1415 | phase1415.1415 | NOT_STARTED |  |  |  |
+| 1416 | phase1416.1416 | NOT_STARTED |  |  |  |
+| 1417 | phase1417.1417 | NOT_STARTED |  |  |  |
+| 1418 | phase1418.1418 | NOT_STARTED |  |  |  |
+| 1419 | phase1419.1419 | NOT_STARTED |  |  |  |
+| 1420 | phase1420.1420 | NOT_STARTED |  |  |  |
+| 1421 | phase1421.1421 | NOT_STARTED |  |  |  |
+| 1422 | phase1422.1422 | NOT_STARTED |  |  |  |
+| 1423 | phase1423.1423 | NOT_STARTED |  |  |  |
+| 1424 | phase1424.1424 | NOT_STARTED |  |  |  |
+| 1425 | phase1425.1425 | NOT_STARTED |  |  |  |
+| 1426 | phase1426.1426 | NOT_STARTED |  |  |  |
+| 1427 | phase1427.1427 | NOT_STARTED |  |  |  |
+| 1428 | phase1428.1428 | NOT_STARTED |  |  |  |
+| 1429 | phase1429.1429 | NOT_STARTED |  |  |  |
+| 1430 | phase1430.1430 | NOT_STARTED |  |  |  |
+| 1431 | phase1431.1431 | NOT_STARTED |  |  |  |
+| 1432 | phase1432.1432 | NOT_STARTED |  |  |  |
+| 1433 | phase1433.1433 | NOT_STARTED |  |  |  |
+| 1434 | phase1434.1434 | NOT_STARTED |  |  |  |
+| 1435 | phase1435.1435 | NOT_STARTED |  |  |  |
+| 1436 | phase1436.1436 | NOT_STARTED |  |  |  |
+| 1437 | phase1437.1437 | NOT_STARTED |  |  |  |
+| 1438 | phase1438.1438 | NOT_STARTED |  |  |  |
+| 1439 | phase1439.1439 | NOT_STARTED |  |  |  |
+| 1440 | phase1440.1440 | NOT_STARTED |  |  |  |
+| 1441 | phase1441.1441 | NOT_STARTED |  |  |  |
+| 1442 | phase1442.1442 | NOT_STARTED |  |  |  |
+| 1443 | phase1443.1443 | NOT_STARTED |  |  |  |
+| 1444 | phase1444.1444 | NOT_STARTED |  |  |  |
+| 1445 | phase1445.1445 | NOT_STARTED |  |  |  |
+| 1446 | phase1446.1446 | NOT_STARTED |  |  |  |
+| 1447 | phase1447.1447 | NOT_STARTED |  |  |  |
+| 1448 | phase1448.1448 | NOT_STARTED |  |  |  |
+| 1449 | phase1449.1449 | NOT_STARTED |  |  |  |
+| 1450 | phase1450.1450 | NOT_STARTED |  |  |  |
+| 1451 | phase1451.1451 | NOT_STARTED |  |  |  |
+| 1452 | phase1452.1452 | NOT_STARTED |  |  |  |
+| 1453 | phase1453.1453 | NOT_STARTED |  |  |  |
+| 1454 | phase1454.1454 | NOT_STARTED |  |  |  |
+| 1455 | phase1455.1455 | NOT_STARTED |  |  |  |
+| 1456 | phase1456.1456 | NOT_STARTED |  |  |  |
+| 1457 | phase1457.1457 | NOT_STARTED |  |  |  |
+| 1458 | phase1458.1458 | NOT_STARTED |  |  |  |
+| 1459 | phase1459.1459 | NOT_STARTED |  |  |  |
+| 1460 | phase1460.1460 | NOT_STARTED |  |  |  |
+| 1461 | phase1461.1461 | NOT_STARTED |  |  |  |
+| 1462 | phase1462.1462 | NOT_STARTED |  |  |  |
+| 1463 | phase1463.1463 | NOT_STARTED |  |  |  |
+| 1464 | phase1464.1464 | NOT_STARTED |  |  |  |
+| 1465 | phase1465.1465 | NOT_STARTED |  |  |  |
+| 1466 | phase1466.1466 | NOT_STARTED |  |  |  |
+| 1467 | phase1467.1467 | NOT_STARTED |  |  |  |
+| 1468 | phase1468.1468 | NOT_STARTED |  |  |  |
+| 1469 | phase1469.1469 | NOT_STARTED |  |  |  |
+| 1470 | phase1470.1470 | NOT_STARTED |  |  |  |
+| 1471 | phase1471.1471 | NOT_STARTED |  |  |  |
+| 1472 | phase1472.1472 | NOT_STARTED |  |  |  |
+| 1473 | phase1473.1473 | NOT_STARTED |  |  |  |
+| 1474 | phase1474.1474 | NOT_STARTED |  |  |  |
+| 1475 | phase1475.1475 | NOT_STARTED |  |  |  |
+| 1476 | phase1476.1476 | NOT_STARTED |  |  |  |
+| 1477 | phase1477.1477 | NOT_STARTED |  |  |  |
+| 1478 | phase1478.1478 | NOT_STARTED |  |  |  |
+| 1479 | phase1479.1479 | NOT_STARTED |  |  |  |
+| 1480 | phase1480.1480 | NOT_STARTED |  |  |  |
+| 1481 | phase1481.1481 | NOT_STARTED |  |  |  |
+| 1482 | phase1482.1482 | NOT_STARTED |  |  |  |
+| 1483 | phase1483.1483 | NOT_STARTED |  |  |  |
+| 1484 | phase1484.1484 | NOT_STARTED |  |  |  |
+| 1485 | phase1485.1485 | NOT_STARTED |  |  |  |
+| 1486 | phase1486.1486 | NOT_STARTED |  |  |  |
+| 1487 | phase1487.1487 | NOT_STARTED |  |  |  |
+| 1488 | phase1488.1488 | NOT_STARTED |  |  |  |
+| 1489 | phase1489.1489 | NOT_STARTED |  |  |  |
+| 1490 | phase1490.1490 | NOT_STARTED |  |  |  |
+| 1491 | phase1491.1491 | NOT_STARTED |  |  |  |
+| 1492 | phase1492.1492 | NOT_STARTED |  |  |  |
+| 1493 | phase1493.1493 | NOT_STARTED |  |  |  |
+| 1494 | phase1494.1494 | NOT_STARTED |  |  |  |
+| 1495 | phase1495.1495 | NOT_STARTED |  |  |  |
+| 1496 | phase1496.1496 | NOT_STARTED |  |  |  |
+| 1497 | phase1497.1497 | NOT_STARTED |  |  |  |
+| 1498 | phase1498.1498 | NOT_STARTED |  |  |  |
+| 1499 | phase1499.1499 | NOT_STARTED |  |  |  |
+| 1500 | phase1500.1500 | NOT_STARTED |  |  |  |
+| 1501 | phase1501.1501 | NOT_STARTED |  |  |  |
+| 1502 | phase1502.1502 | NOT_STARTED |  |  |  |
+| 1503 | phase1503.1503 | NOT_STARTED |  |  |  |
+| 1504 | phase1504.1504 | NOT_STARTED |  |  |  |
+| 1505 | phase1505.1505 | NOT_STARTED |  |  |  |
+| 1506 | phase1506.1506 | NOT_STARTED |  |  |  |
+| 1507 | phase1507.1507 | NOT_STARTED |  |  |  |
+| 1508 | phase1508.1508 | NOT_STARTED |  |  |  |
+| 1509 | phase1509.1509 | NOT_STARTED |  |  |  |
+| 1510 | phase1510.1510 | NOT_STARTED |  |  |  |
+| 1511 | phase1511.1511 | NOT_STARTED |  |  |  |
+| 1512 | phase1512.1512 | NOT_STARTED |  |  |  |
+| 1513 | phase1513.1513 | NOT_STARTED |  |  |  |
+| 1514 | phase1514.1514 | NOT_STARTED |  |  |  |
+| 1515 | phase1515.1515 | NOT_STARTED |  |  |  |
+| 1516 | phase1516.1516 | NOT_STARTED |  |  |  |
+| 1517 | phase1517.1517 | NOT_STARTED |  |  |  |
+| 1518 | phase1518.1518 | NOT_STARTED |  |  |  |
+| 1519 | phase1519.1519 | NOT_STARTED |  |  |  |
+| 1520 | phase1520.1520 | NOT_STARTED |  |  |  |
+| 1521 | phase1521.1521 | NOT_STARTED |  |  |  |
+| 1522 | phase1522.1522 | NOT_STARTED |  |  |  |
+| 1523 | phase1523.1523 | NOT_STARTED |  |  |  |
+| 1524 | phase1524.1524 | NOT_STARTED |  |  |  |
+| 1525 | phase1525.1525 | NOT_STARTED |  |  |  |
+| 1526 | phase1526.1526 | NOT_STARTED |  |  |  |
+| 1527 | phase1527.1527 | NOT_STARTED |  |  |  |
+| 1528 | phase1528.1528 | NOT_STARTED |  |  |  |
+| 1529 | phase1529.1529 | NOT_STARTED |  |  |  |
+| 1530 | phase1530.1530 | NOT_STARTED |  |  |  |
+| 1531 | phase1531.1531 | NOT_STARTED |  |  |  |
+| 1532 | phase1532.1532 | NOT_STARTED |  |  |  |
+| 1533 | phase1533.1533 | NOT_STARTED |  |  |  |
+| 1534 | phase1534.1534 | NOT_STARTED |  |  |  |
+| 1535 | phase1535.1535 | NOT_STARTED |  |  |  |
+| 1536 | phase1536.1536 | NOT_STARTED |  |  |  |
+| 1537 | phase1537.1537 | NOT_STARTED |  |  |  |
+| 1538 | phase1538.1538 | NOT_STARTED |  |  |  |
+| 1539 | phase1539.1539 | NOT_STARTED |  |  |  |
+| 1540 | phase1540.1540 | NOT_STARTED |  |  |  |
+| 1541 | phase1541.1541 | NOT_STARTED |  |  |  |
+| 1542 | phase1542.1542 | NOT_STARTED |  |  |  |
+| 1543 | phase1543.1543 | NOT_STARTED |  |  |  |
+| 1544 | phase1544.1544 | NOT_STARTED |  |  |  |
+| 1545 | phase1545.1545 | NOT_STARTED |  |  |  |
+| 1546 | phase1546.1546 | NOT_STARTED |  |  |  |
+| 1547 | phase1547.1547 | NOT_STARTED |  |  |  |
+| 1548 | phase1548.1548 | NOT_STARTED |  |  |  |
+| 1549 | phase1549.1549 | NOT_STARTED |  |  |  |
+| 1550 | phase1550.1550 | NOT_STARTED |  |  |  |
+| 1551 | phase1551.1551 | NOT_STARTED |  |  |  |
+| 1552 | phase1552.1552 | NOT_STARTED |  |  |  |
+| 1553 | phase1553.1553 | NOT_STARTED |  |  |  |
+| 1554 | phase1554.1554 | NOT_STARTED |  |  |  |
+| 1555 | phase1555.1555 | NOT_STARTED |  |  |  |
+| 1556 | phase1556.1556 | NOT_STARTED |  |  |  |
+| 1557 | phase1557.1557 | NOT_STARTED |  |  |  |
+| 1558 | phase1558.1558 | NOT_STARTED |  |  |  |
+| 1559 | phase1559.1559 | NOT_STARTED |  |  |  |
+| 1560 | phase1560.1560 | NOT_STARTED |  |  |  |
+| 1561 | phase1561.1561 | NOT_STARTED |  |  |  |
+| 1562 | phase1562.1562 | NOT_STARTED |  |  |  |
+| 1563 | phase1563.1563 | NOT_STARTED |  |  |  |
+| 1564 | phase1564.1564 | NOT_STARTED |  |  |  |
+| 1565 | phase1565.1565 | NOT_STARTED |  |  |  |
+| 1566 | phase1566.1566 | NOT_STARTED |  |  |  |
+| 1567 | phase1567.1567 | NOT_STARTED |  |  |  |
+| 1568 | phase1568.1568 | NOT_STARTED |  |  |  |
+| 1569 | phase1569.1569 | NOT_STARTED |  |  |  |
+| 1570 | phase1570.1570 | NOT_STARTED |  |  |  |
+| 1571 | phase1571.1571 | NOT_STARTED |  |  |  |
+| 1572 | phase1572.1572 | NOT_STARTED |  |  |  |
+| 1573 | phase1573.1573 | NOT_STARTED |  |  |  |
+| 1574 | phase1574.1574 | NOT_STARTED |  |  |  |
+| 1575 | phase1575.1575 | NOT_STARTED |  |  |  |
+| 1576 | phase1576.1576 | NOT_STARTED |  |  |  |
+| 1577 | phase1577.1577 | NOT_STARTED |  |  |  |
+| 1578 | phase1578.1578 | NOT_STARTED |  |  |  |
+| 1579 | phase1579.1579 | NOT_STARTED |  |  |  |
+| 1580 | phase1580.1580 | NOT_STARTED |  |  |  |
+| 1581 | phase1581.1581 | NOT_STARTED |  |  |  |
+| 1582 | phase1582.1582 | NOT_STARTED |  |  |  |
+| 1583 | phase1583.1583 | NOT_STARTED |  |  |  |
+| 1584 | phase1584.1584 | NOT_STARTED |  |  |  |
+| 1585 | phase1585.1585 | NOT_STARTED |  |  |  |
+| 1586 | phase1586.1586 | NOT_STARTED |  |  |  |
+| 1587 | phase1587.1587 | NOT_STARTED |  |  |  |
+| 1588 | phase1588.1588 | NOT_STARTED |  |  |  |
+| 1589 | phase1589.1589 | NOT_STARTED |  |  |  |
+| 1590 | phase1590.1590 | NOT_STARTED |  |  |  |
+| 1591 | phase1591.1591 | NOT_STARTED |  |  |  |
+| 1592 | phase1592.1592 | NOT_STARTED |  |  |  |
+| 1593 | phase1593.1593 | NOT_STARTED |  |  |  |
+| 1594 | phase1594.1594 | NOT_STARTED |  |  |  |
+| 1595 | phase1595.1595 | NOT_STARTED |  |  |  |
+| 1596 | phase1596.1596 | NOT_STARTED |  |  |  |
+| 1597 | phase1597.1597 | NOT_STARTED |  |  |  |
+| 1598 | phase1598.1598 | NOT_STARTED |  |  |  |
+| 1599 | phase1599.1599 | NOT_STARTED |  |  |  |
+| 1600 | phase1600.1600 | NOT_STARTED |  |  |  |
+| 1601 | phase1601.1601 | NOT_STARTED |  |  |  |
+| 1602 | phase1602.1602 | NOT_STARTED |  |  |  |
+| 1603 | phase1603.1603 | NOT_STARTED |  |  |  |
+| 1604 | phase1604.1604 | NOT_STARTED |  |  |  |
+| 1605 | phase1605.1605 | NOT_STARTED |  |  |  |
+| 1606 | phase1606.1606 | NOT_STARTED |  |  |  |
+| 1607 | phase1607.1607 | NOT_STARTED |  |  |  |
+| 1608 | phase1608.1608 | NOT_STARTED |  |  |  |
+| 1609 | phase1609.1609 | NOT_STARTED |  |  |  |
+| 1610 | phase1610.1610 | NOT_STARTED |  |  |  |
+| 1611 | phase1611.1611 | NOT_STARTED |  |  |  |
+| 1612 | phase1612.1612 | NOT_STARTED |  |  |  |
+| 1613 | phase1613.1613 | NOT_STARTED |  |  |  |
+| 1614 | phase1614.1614 | NOT_STARTED |  |  |  |
+| 1615 | phase1615.1615 | NOT_STARTED |  |  |  |
+| 1616 | phase1616.1616 | NOT_STARTED |  |  |  |
+| 1617 | phase1617.1617 | NOT_STARTED |  |  |  |
+| 1618 | phase1618.1618 | NOT_STARTED |  |  |  |
+| 1619 | phase1619.1619 | NOT_STARTED |  |  |  |
+| 1620 | phase1620.1620 | NOT_STARTED |  |  |  |
+| 1621 | phase1621.1621 | NOT_STARTED |  |  |  |
+| 1622 | phase1622.1622 | NOT_STARTED |  |  |  |
+| 1623 | phase1623.1623 | NOT_STARTED |  |  |  |
+| 1624 | phase1624.1624 | NOT_STARTED |  |  |  |
+| 1625 | phase1625.1625 | NOT_STARTED |  |  |  |
+| 1626 | phase1626.1626 | NOT_STARTED |  |  |  |
+| 1627 | phase1627.1627 | NOT_STARTED |  |  |  |
+| 1628 | phase1628.1628 | NOT_STARTED |  |  |  |
+| 1629 | phase1629.1629 | NOT_STARTED |  |  |  |
+| 1630 | phase1630.1630 | NOT_STARTED |  |  |  |
+| 1631 | phase1631.1631 | NOT_STARTED |  |  |  |
+| 1632 | phase1632.1632 | NOT_STARTED |  |  |  |
+| 1633 | phase1633.1633 | NOT_STARTED |  |  |  |
+| 1634 | phase1634.1634 | NOT_STARTED |  |  |  |
+| 1635 | phase1635.1635 | NOT_STARTED |  |  |  |
+| 1636 | phase1636.1636 | NOT_STARTED |  |  |  |
+| 1637 | phase1637.1637 | NOT_STARTED |  |  |  |
+| 1638 | phase1638.1638 | NOT_STARTED |  |  |  |
+| 1639 | phase1639.1639 | NOT_STARTED |  |  |  |
+| 1640 | phase1640.1640 | NOT_STARTED |  |  |  |
+| 1641 | phase1641.1641 | NOT_STARTED |  |  |  |
+| 1642 | phase1642.1642 | NOT_STARTED |  |  |  |
+| 1643 | phase1643.1643 | NOT_STARTED |  |  |  |
+| 1644 | phase1644.1644 | NOT_STARTED |  |  |  |
+| 1645 | phase1645.1645 | NOT_STARTED |  |  |  |
+| 1646 | phase1646.1646 | NOT_STARTED |  |  |  |
+| 1647 | phase1647.1647 | NOT_STARTED |  |  |  |
+| 1648 | phase1648.1648 | NOT_STARTED |  |  |  |
+| 1649 | phase1649.1649 | NOT_STARTED |  |  |  |
+| 1650 | phase1650.1650 | NOT_STARTED |  |  |  |
+| 1651 | phase1651.1651 | NOT_STARTED |  |  |  |
+| 1652 | phase1652.1652 | NOT_STARTED |  |  |  |
+| 1653 | phase1653.1653 | NOT_STARTED |  |  |  |
+| 1654 | phase1654.1654 | NOT_STARTED |  |  |  |
+| 1655 | phase1655.1655 | NOT_STARTED |  |  |  |
+| 1656 | phase1656.1656 | NOT_STARTED |  |  |  |
+| 1657 | phase1657.1657 | NOT_STARTED |  |  |  |
+| 1658 | phase1658.1658 | NOT_STARTED |  |  |  |
+| 1659 | phase1659.1659 | NOT_STARTED |  |  |  |
+| 1660 | phase1660.1660 | NOT_STARTED |  |  |  |
+| 1661 | phase1661.1661 | NOT_STARTED |  |  |  |
+| 1662 | phase1662.1662 | NOT_STARTED |  |  |  |
+| 1663 | phase1663.1663 | NOT_STARTED |  |  |  |
+| 1664 | phase1664.1664 | NOT_STARTED |  |  |  |
+| 1665 | phase1665.1665 | NOT_STARTED |  |  |  |
+| 1666 | phase1666.1666 | NOT_STARTED |  |  |  |
+| 1667 | phase1667.1667 | NOT_STARTED |  |  |  |
+| 1668 | phase1668.1668 | NOT_STARTED |  |  |  |
+| 1669 | phase1669.1669 | NOT_STARTED |  |  |  |
+| 1670 | phase1670.1670 | NOT_STARTED |  |  |  |
+| 1671 | phase1671.1671 | NOT_STARTED |  |  |  |
+| 1672 | phase1672.1672 | NOT_STARTED |  |  |  |
+| 1673 | phase1673.1673 | NOT_STARTED |  |  |  |
+| 1674 | phase1674.1674 | NOT_STARTED |  |  |  |
+| 1675 | phase1675.1675 | NOT_STARTED |  |  |  |
+| 1676 | phase1676.1676 | NOT_STARTED |  |  |  |
+| 1677 | phase1677.1677 | NOT_STARTED |  |  |  |
+| 1678 | phase1678.1678 | NOT_STARTED |  |  |  |
+| 1679 | phase1679.1679 | NOT_STARTED |  |  |  |
+| 1680 | phase1680.1680 | NOT_STARTED |  |  |  |
+| 1681 | phase1681.1681 | NOT_STARTED |  |  |  |
+| 1682 | phase1682.1682 | NOT_STARTED |  |  |  |
+| 1683 | phase1683.1683 | NOT_STARTED |  |  |  |
+| 1684 | phase1684.1684 | NOT_STARTED |  |  |  |
+| 1685 | phase1685.1685 | NOT_STARTED |  |  |  |
+| 1686 | phase1686.1686 | NOT_STARTED |  |  |  |
+| 1687 | phase1687.1687 | NOT_STARTED |  |  |  |
+| 1688 | phase1688.1688 | NOT_STARTED |  |  |  |
+| 1689 | phase1689.1689 | NOT_STARTED |  |  |  |
+| 1690 | phase1690.1690 | NOT_STARTED |  |  |  |
+| 1691 | phase1691.1691 | NOT_STARTED |  |  |  |
+| 1692 | phase1692.1692 | NOT_STARTED |  |  |  |
+| 1693 | phase1693.1693 | NOT_STARTED |  |  |  |
+| 1694 | phase1694.1694 | NOT_STARTED |  |  |  |
+| 1695 | phase1695.1695 | NOT_STARTED |  |  |  |
+| 1696 | phase1696.1696 | NOT_STARTED |  |  |  |
+| 1697 | phase1697.1697 | NOT_STARTED |  |  |  |
+| 1698 | phase1698.1698 | NOT_STARTED |  |  |  |
+| 1699 | phase1699.1699 | NOT_STARTED |  |  |  |
+| 1700 | phase1700.1700 | NOT_STARTED |  |  |  |
+| 1701 | phase1701.1701 | NOT_STARTED |  |  |  |
+| 1702 | phase1702.1702 | NOT_STARTED |  |  |  |
+| 1703 | phase1703.1703 | NOT_STARTED |  |  |  |
+| 1704 | phase1704.1704 | NOT_STARTED |  |  |  |
+| 1705 | phase1705.1705 | NOT_STARTED |  |  |  |
+| 1706 | phase1706.1706 | NOT_STARTED |  |  |  |
+| 1707 | phase1707.1707 | NOT_STARTED |  |  |  |
+| 1708 | phase1708.1708 | NOT_STARTED |  |  |  |
+| 1709 | phase1709.1709 | NOT_STARTED |  |  |  |
+| 1710 | phase1710.1710 | NOT_STARTED |  |  |  |
+| 1711 | phase1711.1711 | NOT_STARTED |  |  |  |
+| 1712 | phase1712.1712 | NOT_STARTED |  |  |  |
+| 1713 | phase1713.1713 | NOT_STARTED |  |  |  |
+| 1714 | phase1714.1714 | NOT_STARTED |  |  |  |
+| 1715 | phase1715.1715 | NOT_STARTED |  |  |  |
+| 1716 | phase1716.1716 | NOT_STARTED |  |  |  |
+| 1717 | phase1717.1717 | NOT_STARTED |  |  |  |
+| 1718 | phase1718.1718 | NOT_STARTED |  |  |  |
+| 1719 | phase1719.1719 | NOT_STARTED |  |  |  |
+| 1720 | phase1720.1720 | NOT_STARTED |  |  |  |
+| 1721 | phase1721.1721 | NOT_STARTED |  |  |  |
+| 1722 | phase1722.1722 | NOT_STARTED |  |  |  |
+| 1723 | phase1723.1723 | NOT_STARTED |  |  |  |
+| 1724 | phase1724.1724 | NOT_STARTED |  |  |  |
+| 1725 | phase1725.1725 | NOT_STARTED |  |  |  |
+| 1726 | phase1726.1726 | NOT_STARTED |  |  |  |
+| 1727 | phase1727.1727 | NOT_STARTED |  |  |  |
+| 1728 | phase1728.1728 | NOT_STARTED |  |  |  |
+| 1729 | phase1729.1729 | NOT_STARTED |  |  |  |
+| 1730 | phase1730.1730 | NOT_STARTED |  |  |  |
+| 1731 | phase1731.1731 | NOT_STARTED |  |  |  |
+| 1732 | phase1732.1732 | NOT_STARTED |  |  |  |
+| 1733 | phase1733.1733 | NOT_STARTED |  |  |  |
+| 1734 | phase1734.1734 | NOT_STARTED |  |  |  |
+| 1735 | phase1735.1735 | NOT_STARTED |  |  |  |
+| 1736 | phase1736.1736 | NOT_STARTED |  |  |  |
+| 1737 | phase1737.1737 | NOT_STARTED |  |  |  |
+| 1738 | phase1738.1738 | NOT_STARTED |  |  |  |
+| 1739 | phase1739.1739 | NOT_STARTED |  |  |  |
+| 1740 | phase1740.1740 | NOT_STARTED |  |  |  |
+| 1741 | phase1741.1741 | NOT_STARTED |  |  |  |
+| 1742 | phase1742.1742 | NOT_STARTED |  |  |  |
+| 1743 | phase1743.1743 | NOT_STARTED |  |  |  |
+| 1744 | phase1744.1744 | NOT_STARTED |  |  |  |
+| 1745 | phase1745.1745 | NOT_STARTED |  |  |  |
+| 1746 | phase1746.1746 | NOT_STARTED |  |  |  |
+| 1747 | phase1747.1747 | NOT_STARTED |  |  |  |
+| 1748 | phase1748.1748 | NOT_STARTED |  |  |  |
+| 1749 | phase1749.1749 | NOT_STARTED |  |  |  |
+| 1750 | phase1750.1750 | NOT_STARTED |  |  |  |
+| 1751 | phase1751.1751 | NOT_STARTED |  |  |  |
+| 1752 | phase1752.1752 | NOT_STARTED |  |  |  |
+| 1753 | phase1753.1753 | NOT_STARTED |  |  |  |
+| 1754 | phase1754.1754 | NOT_STARTED |  |  |  |
+| 1755 | phase1755.1755 | NOT_STARTED |  |  |  |
+| 1756 | phase1756.1756 | NOT_STARTED |  |  |  |
+| 1757 | phase1757.1757 | NOT_STARTED |  |  |  |
+| 1758 | phase1758.1758 | NOT_STARTED |  |  |  |
+| 1759 | phase1759.1759 | NOT_STARTED |  |  |  |
+| 1760 | phase1760.1760 | NOT_STARTED |  |  |  |
+| 1761 | phase1761.1761 | NOT_STARTED |  |  |  |
+| 1762 | phase1762.1762 | NOT_STARTED |  |  |  |
+| 1763 | phase1763.1763 | NOT_STARTED |  |  |  |
+| 1764 | phase1764.1764 | NOT_STARTED |  |  |  |
+| 1765 | phase1765.1765 | NOT_STARTED |  |  |  |
+| 1766 | phase1766.1766 | NOT_STARTED |  |  |  |
+| 1767 | phase1767.1767 | NOT_STARTED |  |  |  |
+| 1768 | phase1768.1768 | NOT_STARTED |  |  |  |
+| 1769 | phase1769.1769 | NOT_STARTED |  |  |  |
+| 1770 | phase1770.1770 | NOT_STARTED |  |  |  |
+| 1771 | phase1771.1771 | NOT_STARTED |  |  |  |
+| 1772 | phase1772.1772 | NOT_STARTED |  |  |  |
+| 1773 | phase1773.1773 | NOT_STARTED |  |  |  |
+| 1774 | phase1774.1774 | NOT_STARTED |  |  |  |
+| 1775 | phase1775.1775 | NOT_STARTED |  |  |  |
+| 1776 | phase1776.1776 | NOT_STARTED |  |  |  |
+| 1777 | phase1777.1777 | NOT_STARTED |  |  |  |
+| 1778 | phase1778.1778 | NOT_STARTED |  |  |  |
+| 1779 | phase1779.1779 | NOT_STARTED |  |  |  |
+| 1780 | phase1780.1780 | NOT_STARTED |  |  |  |
+| 1781 | phase1781.1781 | NOT_STARTED |  |  |  |
+| 1782 | phase1782.1782 | NOT_STARTED |  |  |  |
+| 1783 | phase1783.1783 | NOT_STARTED |  |  |  |
+| 1784 | phase1784.1784 | NOT_STARTED |  |  |  |
+| 1785 | phase1785.1785 | NOT_STARTED |  |  |  |
+| 1786 | phase1786.1786 | NOT_STARTED |  |  |  |
+| 1787 | phase1787.1787 | NOT_STARTED |  |  |  |
+| 1788 | phase1788.1788 | NOT_STARTED |  |  |  |
+| 1789 | phase1789.1789 | NOT_STARTED |  |  |  |
+| 1790 | phase1790.1790 | NOT_STARTED |  |  |  |
+| 1791 | phase1791.1791 | NOT_STARTED |  |  |  |
+| 1792 | phase1792.1792 | NOT_STARTED |  |  |  |
+| 1793 | phase1793.1793 | NOT_STARTED |  |  |  |
+| 1794 | phase1794.1794 | NOT_STARTED |  |  |  |
+| 1795 | phase1795.1795 | NOT_STARTED |  |  |  |
+| 1796 | phase1796.1796 | NOT_STARTED |  |  |  |
+| 1797 | phase1797.1797 | NOT_STARTED |  |  |  |
+| 1798 | phase1798.1798 | NOT_STARTED |  |  |  |
+| 1799 | phase1799.1799 | NOT_STARTED |  |  |  |
+| 1800 | phase1800.1800 | NOT_STARTED |  |  |  |
+| 1801 | phase1801.1801 | NOT_STARTED |  |  |  |
+| 1802 | phase1802.1802 | NOT_STARTED |  |  |  |
+| 1803 | phase1803.1803 | NOT_STARTED |  |  |  |
+| 1804 | phase1804.1804 | NOT_STARTED |  |  |  |
+| 1805 | phase1805.1805 | NOT_STARTED |  |  |  |
+| 1806 | phase1806.1806 | NOT_STARTED |  |  |  |
+| 1807 | phase1807.1807 | NOT_STARTED |  |  |  |
+| 1808 | phase1808.1808 | NOT_STARTED |  |  |  |
+| 1809 | phase1809.1809 | NOT_STARTED |  |  |  |
+| 1810 | phase1810.1810 | NOT_STARTED |  |  |  |
+| 1811 | phase1811.1811 | NOT_STARTED |  |  |  |
+| 1812 | phase1812.1812 | NOT_STARTED |  |  |  |
+| 1813 | phase1813.1813 | NOT_STARTED |  |  |  |
+| 1814 | phase1814.1814 | NOT_STARTED |  |  |  |
+| 1815 | phase1815.1815 | NOT_STARTED |  |  |  |
+| 1816 | phase1816.1816 | NOT_STARTED |  |  |  |
+| 1817 | phase1817.1817 | NOT_STARTED |  |  |  |
+| 1818 | phase1818.1818 | NOT_STARTED |  |  |  |
+| 1819 | phase1819.1819 | NOT_STARTED |  |  |  |
+| 1820 | phase1820.1820 | NOT_STARTED |  |  |  |
+| 1821 | phase1821.1821 | NOT_STARTED |  |  |  |
+| 1822 | phase1822.1822 | NOT_STARTED |  |  |  |
+| 1823 | phase1823.1823 | NOT_STARTED |  |  |  |
+| 1824 | phase1824.1824 | NOT_STARTED |  |  |  |
+| 1825 | phase1825.1825 | NOT_STARTED |  |  |  |
+| 1826 | phase1826.1826 | NOT_STARTED |  |  |  |
+| 1827 | phase1827.1827 | NOT_STARTED |  |  |  |
+| 1828 | phase1828.1828 | NOT_STARTED |  |  |  |
+| 1829 | phase1829.1829 | NOT_STARTED |  |  |  |
+| 1830 | phase1830.1830 | NOT_STARTED |  |  |  |
+| 1831 | phase1831.1831 | NOT_STARTED |  |  |  |
+| 1832 | phase1832.1832 | NOT_STARTED |  |  |  |
+| 1833 | phase1833.1833 | NOT_STARTED |  |  |  |
+| 1834 | phase1834.1834 | NOT_STARTED |  |  |  |
+| 1835 | phase1835.1835 | NOT_STARTED |  |  |  |
+| 1836 | phase1836.1836 | NOT_STARTED |  |  |  |
+| 1837 | phase1837.1837 | NOT_STARTED |  |  |  |
+| 1838 | phase1838.1838 | NOT_STARTED |  |  |  |
+| 1839 | phase1839.1839 | NOT_STARTED |  |  |  |
+| 1840 | phase1840.1840 | NOT_STARTED |  |  |  |
+| 1841 | phase1841.1841 | NOT_STARTED |  |  |  |
+| 1842 | phase1842.1842 | NOT_STARTED |  |  |  |
+| 1843 | phase1843.1843 | NOT_STARTED |  |  |  |
+| 1844 | phase1844.1844 | NOT_STARTED |  |  |  |
+| 1845 | phase1845.1845 | NOT_STARTED |  |  |  |
+| 1846 | phase1846.1846 | NOT_STARTED |  |  |  |
+| 1847 | phase1847.1847 | NOT_STARTED |  |  |  |
+| 1848 | phase1848.1848 | NOT_STARTED |  |  |  |
+| 1849 | phase1849.1849 | NOT_STARTED |  |  |  |
+| 1850 | phase1850.1850 | NOT_STARTED |  |  |  |
+| 1851 | phase1851.1851 | NOT_STARTED |  |  |  |
+| 1852 | phase1852.1852 | NOT_STARTED |  |  |  |
+| 1853 | phase1853.1853 | NOT_STARTED |  |  |  |
+| 1854 | phase1854.1854 | NOT_STARTED |  |  |  |
+| 1855 | phase1855.1855 | NOT_STARTED |  |  |  |
+| 1856 | phase1856.1856 | NOT_STARTED |  |  |  |
+| 1857 | phase1857.1857 | NOT_STARTED |  |  |  |
+| 1858 | phase1858.1858 | NOT_STARTED |  |  |  |
+| 1859 | phase1859.1859 | NOT_STARTED |  |  |  |
+| 1860 | phase1860.1860 | NOT_STARTED |  |  |  |
+| 1861 | phase1861.1861 | NOT_STARTED |  |  |  |
+| 1862 | phase1862.1862 | NOT_STARTED |  |  |  |
+| 1863 | phase1863.1863 | NOT_STARTED |  |  |  |
+| 1864 | phase1864.1864 | NOT_STARTED |  |  |  |
+| 1865 | phase1865.1865 | NOT_STARTED |  |  |  |
+| 1866 | phase1866.1866 | NOT_STARTED |  |  |  |
+| 1867 | phase1867.1867 | NOT_STARTED |  |  |  |
+| 1868 | phase1868.1868 | NOT_STARTED |  |  |  |
+| 1869 | phase1869.1869 | NOT_STARTED |  |  |  |
+| 1870 | phase1870.1870 | NOT_STARTED |  |  |  |
+| 1871 | phase1871.1871 | NOT_STARTED |  |  |  |
+| 1872 | phase1872.1872 | NOT_STARTED |  |  |  |
+| 1873 | phase1873.1873 | NOT_STARTED |  |  |  |
+| 1874 | phase1874.1874 | NOT_STARTED |  |  |  |
+| 1875 | phase1875.1875 | NOT_STARTED |  |  |  |
+| 1876 | phase1876.1876 | NOT_STARTED |  |  |  |
+| 1877 | phase1877.1877 | NOT_STARTED |  |  |  |
+| 1878 | phase1878.1878 | NOT_STARTED |  |  |  |
+| 1879 | phase1879.1879 | NOT_STARTED |  |  |  |
+| 1880 | phase1880.1880 | NOT_STARTED |  |  |  |
+| 1881 | phase1881.1881 | NOT_STARTED |  |  |  |
+| 1882 | phase1882.1882 | NOT_STARTED |  |  |  |
+| 1883 | phase1883.1883 | NOT_STARTED |  |  |  |
+| 1884 | phase1884.1884 | NOT_STARTED |  |  |  |
+| 1885 | phase1885.1885 | NOT_STARTED |  |  |  |
+| 1886 | phase1886.1886 | NOT_STARTED |  |  |  |
+| 1887 | phase1887.1887 | NOT_STARTED |  |  |  |
+| 1888 | phase1888.1888 | NOT_STARTED |  |  |  |
+| 1889 | phase1889.1889 | NOT_STARTED |  |  |  |
+| 1890 | phase1890.1890 | NOT_STARTED |  |  |  |
+| 1891 | phase1891.1891 | NOT_STARTED |  |  |  |
+| 1892 | phase1892.1892 | NOT_STARTED |  |  |  |
+| 1893 | phase1893.1893 | NOT_STARTED |  |  |  |
+| 1894 | phase1894.1894 | NOT_STARTED |  |  |  |
+| 1895 | phase1895.1895 | NOT_STARTED |  |  |  |
+| 1896 | phase1896.1896 | NOT_STARTED |  |  |  |
+| 1897 | phase1897.1897 | NOT_STARTED |  |  |  |
+| 1898 | phase1898.1898 | NOT_STARTED |  |  |  |
+| 1899 | phase1899.1899 | NOT_STARTED |  |  |  |
+| 1900 | phase1900.1900 | NOT_STARTED |  |  |  |
+| 1901 | phase1901.1901 | NOT_STARTED |  |  |  |
+| 1902 | phase1902.1902 | NOT_STARTED |  |  |  |
+| 1903 | phase1903.1903 | NOT_STARTED |  |  |  |
+| 1904 | phase1904.1904 | NOT_STARTED |  |  |  |
+| 1905 | phase1905.1905 | NOT_STARTED |  |  |  |
+| 1906 | phase1906.1906 | NOT_STARTED |  |  |  |
+| 1907 | phase1907.1907 | NOT_STARTED |  |  |  |
+| 1908 | phase1908.1908 | NOT_STARTED |  |  |  |
+| 1909 | phase1909.1909 | NOT_STARTED |  |  |  |
+| 1910 | phase1910.1910 | NOT_STARTED |  |  |  |
+| 1911 | phase1911.1911 | NOT_STARTED |  |  |  |
+| 1912 | phase1912.1912 | NOT_STARTED |  |  |  |
+| 1913 | phase1913.1913 | NOT_STARTED |  |  |  |
+| 1914 | phase1914.1914 | NOT_STARTED |  |  |  |
+| 1915 | phase1915.1915 | NOT_STARTED |  |  |  |
+| 1916 | phase1916.1916 | NOT_STARTED |  |  |  |
+| 1917 | phase1917.1917 | NOT_STARTED |  |  |  |
+| 1918 | phase1918.1918 | NOT_STARTED |  |  |  |
+| 1919 | phase1919.1919 | NOT_STARTED |  |  |  |
+| 1920 | phase1920.1920 | NOT_STARTED |  |  |  |
+| 1921 | phase1921.1921 | NOT_STARTED |  |  |  |
+| 1922 | phase1922.1922 | NOT_STARTED |  |  |  |
+| 1923 | phase1923.1923 | NOT_STARTED |  |  |  |
+| 1924 | phase1924.1924 | NOT_STARTED |  |  |  |
+| 1925 | phase1925.1925 | NOT_STARTED |  |  |  |
+| 1926 | phase1926.1926 | NOT_STARTED |  |  |  |
+| 1927 | phase1927.1927 | NOT_STARTED |  |  |  |
+| 1928 | phase1928.1928 | NOT_STARTED |  |  |  |
+| 1929 | phase1929.1929 | NOT_STARTED |  |  |  |
+| 1930 | phase1930.1930 | NOT_STARTED |  |  |  |
+| 1931 | phase1931.1931 | NOT_STARTED |  |  |  |
+| 1932 | phase1932.1932 | NOT_STARTED |  |  |  |
+| 1933 | phase1933.1933 | NOT_STARTED |  |  |  |
+| 1934 | phase1934.1934 | NOT_STARTED |  |  |  |
+| 1935 | phase1935.1935 | NOT_STARTED |  |  |  |
+| 1936 | phase1936.1936 | NOT_STARTED |  |  |  |
+| 1937 | phase1937.1937 | NOT_STARTED |  |  |  |
+| 1938 | phase1938.1938 | NOT_STARTED |  |  |  |
+| 1939 | phase1939.1939 | NOT_STARTED |  |  |  |
+| 1940 | phase1940.1940 | NOT_STARTED |  |  |  |
+| 1941 | phase1941.1941 | NOT_STARTED |  |  |  |
+| 1942 | phase1942.1942 | NOT_STARTED |  |  |  |
+| 1943 | phase1943.1943 | NOT_STARTED |  |  |  |
+| 1944 | phase1944.1944 | NOT_STARTED |  |  |  |
+| 1945 | phase1945.1945 | NOT_STARTED |  |  |  |
+| 1946 | phase1946.1946 | NOT_STARTED |  |  |  |
+| 1947 | phase1947.1947 | NOT_STARTED |  |  |  |
+| 1948 | phase1948.1948 | NOT_STARTED |  |  |  |
+| 1949 | phase1949.1949 | NOT_STARTED |  |  |  |
+| 1950 | phase1950.1950 | NOT_STARTED |  |  |  |
+| 1951 | phase1951.1951 | NOT_STARTED |  |  |  |
+| 1952 | phase1952.1952 | NOT_STARTED |  |  |  |
+| 1953 | phase1953.1953 | NOT_STARTED |  |  |  |
+| 1954 | phase1954.1954 | NOT_STARTED |  |  |  |
+| 1955 | phase1955.1955 | NOT_STARTED |  |  |  |
+| 1956 | phase1956.1956 | NOT_STARTED |  |  |  |
+| 1957 | phase1957.1957 | NOT_STARTED |  |  |  |
+| 1958 | phase1958.1958 | NOT_STARTED |  |  |  |
+| 1959 | phase1959.1959 | NOT_STARTED |  |  |  |
+| 1960 | phase1960.1960 | NOT_STARTED |  |  |  |
+| 1961 | phase1961.1961 | NOT_STARTED |  |  |  |
+| 1962 | phase1962.1962 | NOT_STARTED |  |  |  |
+| 1963 | phase1963.1963 | NOT_STARTED |  |  |  |
+| 1964 | phase1964.1964 | NOT_STARTED |  |  |  |
+| 1965 | phase1965.1965 | NOT_STARTED |  |  |  |
+| 1966 | phase1966.1966 | NOT_STARTED |  |  |  |
+| 1967 | phase1967.1967 | NOT_STARTED |  |  |  |
+| 1968 | phase1968.1968 | NOT_STARTED |  |  |  |
+| 1969 | phase1969.1969 | NOT_STARTED |  |  |  |
+| 1970 | phase1970.1970 | NOT_STARTED |  |  |  |
+| 1971 | phase1971.1971 | NOT_STARTED |  |  |  |
+| 1972 | phase1972.1972 | NOT_STARTED |  |  |  |
+| 1973 | phase1973.1973 | NOT_STARTED |  |  |  |
+| 1974 | phase1974.1974 | NOT_STARTED |  |  |  |
+| 1975 | phase1975.1975 | NOT_STARTED |  |  |  |
+| 1976 | phase1976.1976 | NOT_STARTED |  |  |  |
+| 1977 | phase1977.1977 | NOT_STARTED |  |  |  |
+| 1978 | phase1978.1978 | NOT_STARTED |  |  |  |
+| 1979 | phase1979.1979 | NOT_STARTED |  |  |  |
+| 1980 | phase1980.1980 | NOT_STARTED |  |  |  |
+| 1981 | phase1981.1981 | NOT_STARTED |  |  |  |
+| 1982 | phase1982.1982 | NOT_STARTED |  |  |  |
+| 1983 | phase1983.1983 | NOT_STARTED |  |  |  |
+| 1984 | phase1984.1984 | NOT_STARTED |  |  |  |
+| 1985 | phase1985.1985 | NOT_STARTED |  |  |  |
+| 1986 | phase1986.1986 | NOT_STARTED |  |  |  |
+| 1987 | phase1987.1987 | NOT_STARTED |  |  |  |
+| 1988 | phase1988.1988 | NOT_STARTED |  |  |  |
+| 1989 | phase1989.1989 | NOT_STARTED |  |  |  |
+| 1990 | phase1990.1990 | NOT_STARTED |  |  |  |
+| 1991 | phase1991.1991 | NOT_STARTED |  |  |  |
+| 1992 | phase1992.1992 | NOT_STARTED |  |  |  |
+| 1993 | phase1993.1993 | NOT_STARTED |  |  |  |
+| 1994 | phase1994.1994 | NOT_STARTED |  |  |  |
+| 1995 | phase1995.1995 | NOT_STARTED |  |  |  |
+| 1996 | phase1996.1996 | NOT_STARTED |  |  |  |
+| 1997 | phase1997.1997 | NOT_STARTED |  |  |  |
+| 1998 | phase1998.1998 | NOT_STARTED |  |  |  |
+| 1999 | phase1999.1999 | NOT_STARTED |  |  |  |
+| 2000 | phase2000.2000 | NOT_STARTED |  |  |  |
+| 2001 | phase2001.2001 | NOT_STARTED |  |  |  |
+| 2002 | phase2002.2002 | NOT_STARTED |  |  |  |
+| 2003 | phase2003.2003 | NOT_STARTED |  |  |  |
+| 2004 | phase2004.2004 | NOT_STARTED |  |  |  |
+| 2005 | phase2005.2005 | NOT_STARTED |  |  |  |
+| 2006 | phase2006.2006 | NOT_STARTED |  |  |  |
+| 2007 | phase2007.2007 | NOT_STARTED |  |  |  |
+| 2008 | phase2008.2008 | NOT_STARTED |  |  |  |
+| 2009 | phase2009.2009 | NOT_STARTED |  |  |  |
+| 2010 | phase2010.2010 | NOT_STARTED |  |  |  |
+| 2011 | phase2011.2011 | NOT_STARTED |  |  |  |
+| 2012 | phase2012.2012 | NOT_STARTED |  |  |  |
+| 2013 | phase2013.2013 | NOT_STARTED |  |  |  |
+| 2014 | phase2014.2014 | NOT_STARTED |  |  |  |
+| 2015 | phase2015.2015 | NOT_STARTED |  |  |  |
+| 2016 | phase2016.2016 | NOT_STARTED |  |  |  |
+| 2017 | phase2017.2017 | NOT_STARTED |  |  |  |
+| 2018 | phase2018.2018 | NOT_STARTED |  |  |  |
+| 2019 | phase2019.2019 | NOT_STARTED |  |  |  |
+| 2020 | phase2020.2020 | NOT_STARTED |  |  |  |
+| 2021 | phase2021.2021 | NOT_STARTED |  |  |  |
+| 2022 | phase2022.2022 | NOT_STARTED |  |  |  |
+| 2023 | phase2023.2023 | NOT_STARTED |  |  |  |
+| 2024 | phase2024.2024 | NOT_STARTED |  |  |  |
+| 2025 | phase2025.2025 | NOT_STARTED |  |  |  |
+| 2026 | phase2026.2026 | NOT_STARTED |  |  |  |
+| 2027 | phase2027.2027 | NOT_STARTED |  |  |  |
+| 2028 | phase2028.2028 | NOT_STARTED |  |  |  |
+| 2029 | phase2029.2029 | NOT_STARTED |  |  |  |
+| 2030 | phase2030.2030 | NOT_STARTED |  |  |  |
+| 2031 | phase2031.2031 | NOT_STARTED |  |  |  |
+| 2032 | phase2032.2032 | NOT_STARTED |  |  |  |
+| 2033 | phase2033.2033 | NOT_STARTED |  |  |  |
+| 2034 | phase2034.2034 | NOT_STARTED |  |  |  |
+| 2035 | phase2035.2035 | NOT_STARTED |  |  |  |
+| 2036 | phase2036.2036 | NOT_STARTED |  |  |  |
+| 2037 | phase2037.2037 | NOT_STARTED |  |  |  |
+| 2038 | phase2038.2038 | NOT_STARTED |  |  |  |
+| 2039 | phase2039.2039 | NOT_STARTED |  |  |  |
+| 2040 | phase2040.2040 | NOT_STARTED |  |  |  |
+| 2041 | phase2041.2041 | NOT_STARTED |  |  |  |
+| 2042 | phase2042.2042 | NOT_STARTED |  |  |  |
+| 2043 | phase2043.2043 | NOT_STARTED |  |  |  |
+| 2044 | phase2044.2044 | NOT_STARTED |  |  |  |
+| 2045 | phase2045.2045 | NOT_STARTED |  |  |  |
+| 2046 | phase2046.2046 | NOT_STARTED |  |  |  |
+| 2047 | phase2047.2047 | NOT_STARTED |  |  |  |
+| 2048 | phase2048.2048 | NOT_STARTED |  |  |  |
+| 2049 | phase2049.2049 | NOT_STARTED |  |  |  |
+| 2050 | phase2050.2050 | NOT_STARTED |  |  |  |
+| 2051 | phase2051.2051 | NOT_STARTED |  |  |  |
+| 2052 | phase2052.2052 | NOT_STARTED |  |  |  |
+| 2053 | phase2053.2053 | NOT_STARTED |  |  |  |
+| 2054 | phase2054.2054 | NOT_STARTED |  |  |  |
+| 2055 | phase2055.2055 | NOT_STARTED |  |  |  |
+| 2056 | phase2056.2056 | NOT_STARTED |  |  |  |
+| 2057 | phase2057.2057 | NOT_STARTED |  |  |  |
+| 2058 | phase2058.2058 | NOT_STARTED |  |  |  |
+| 2059 | phase2059.2059 | NOT_STARTED |  |  |  |
+| 2060 | phase2060.2060 | NOT_STARTED |  |  |  |
+| 2061 | phase2061.2061 | NOT_STARTED |  |  |  |
+| 2062 | phase2062.2062 | NOT_STARTED |  |  |  |
+| 2063 | phase2063.2063 | NOT_STARTED |  |  |  |
+| 2064 | phase2064.2064 | NOT_STARTED |  |  |  |
+| 2065 | phase2065.2065 | NOT_STARTED |  |  |  |
+| 2066 | phase2066.2066 | NOT_STARTED |  |  |  |
+| 2067 | phase2067.2067 | NOT_STARTED |  |  |  |
+| 2068 | phase2068.2068 | NOT_STARTED |  |  |  |
+| 2069 | phase2069.2069 | NOT_STARTED |  |  |  |
+| 2070 | phase2070.2070 | NOT_STARTED |  |  |  |
+| 2071 | phase2071.2071 | NOT_STARTED |  |  |  |
+| 2072 | phase2072.2072 | NOT_STARTED |  |  |  |
+| 2073 | phase2073.2073 | NOT_STARTED |  |  |  |
+| 2074 | phase2074.2074 | NOT_STARTED |  |  |  |
+| 2075 | phase2075.2075 | NOT_STARTED |  |  |  |
+| 2076 | phase2076.2076 | NOT_STARTED |  |  |  |
+| 2077 | phase2077.2077 | NOT_STARTED |  |  |  |
+| 2078 | phase2078.2078 | NOT_STARTED |  |  |  |
+| 2079 | phase2079.2079 | NOT_STARTED |  |  |  |
+| 2080 | phase2080.2080 | NOT_STARTED |  |  |  |
+| 2081 | phase2081.2081 | NOT_STARTED |  |  |  |
+| 2082 | phase2082.2082 | NOT_STARTED |  |  |  |
+| 2083 | phase2083.2083 | NOT_STARTED |  |  |  |
+| 2084 | phase2084.2084 | NOT_STARTED |  |  |  |
+| 2085 | phase2085.2085 | NOT_STARTED |  |  |  |
+| 2086 | phase2086.2086 | NOT_STARTED |  |  |  |
+| 2087 | phase2087.2087 | NOT_STARTED |  |  |  |
+| 2088 | phase2088.2088 | NOT_STARTED |  |  |  |
+| 2089 | phase2089.2089 | NOT_STARTED |  |  |  |
+| 2090 | phase2090.2090 | NOT_STARTED |  |  |  |
+| 2091 | phase2091.2091 | NOT_STARTED |  |  |  |
+| 2092 | phase2092.2092 | NOT_STARTED |  |  |  |
+| 2093 | phase2093.2093 | NOT_STARTED |  |  |  |
+| 2094 | phase2094.2094 | NOT_STARTED |  |  |  |
+| 2095 | phase2095.2095 | NOT_STARTED |  |  |  |
+| 2096 | phase2096.2096 | NOT_STARTED |  |  |  |
+| 2097 | phase2097.2097 | NOT_STARTED |  |  |  |
+| 2098 | phase2098.2098 | NOT_STARTED |  |  |  |
+| 2099 | phase2099.2099 | NOT_STARTED |  |  |  |
+| 2100 | phase2100.2100 | NOT_STARTED |  |  |  |
+| 2101 | phase2101.2101 | NOT_STARTED |  |  |  |
+| 2102 | phase2102.2102 | NOT_STARTED |  |  |  |
+| 2103 | phase2103.2103 | NOT_STARTED |  |  |  |
+| 2104 | phase2104.2104 | NOT_STARTED |  |  |  |
+| 2105 | phase2105.2105 | NOT_STARTED |  |  |  |
+| 2106 | phase2106.2106 | NOT_STARTED |  |  |  |
+| 2107 | phase2107.2107 | NOT_STARTED |  |  |  |
+| 2108 | phase2108.2108 | NOT_STARTED |  |  |  |
+| 2109 | phase2109.2109 | NOT_STARTED |  |  |  |
+| 2110 | phase2110.2110 | NOT_STARTED |  |  |  |
+| 2111 | phase2111.2111 | NOT_STARTED |  |  |  |
+| 2112 | phase2112.2112 | NOT_STARTED |  |  |  |
+| 2113 | phase2113.2113 | NOT_STARTED |  |  |  |
+| 2114 | phase2114.2114 | NOT_STARTED |  |  |  |
+| 2115 | phase2115.2115 | NOT_STARTED |  |  |  |
+| 2116 | phase2116.2116 | NOT_STARTED |  |  |  |
+| 2117 | phase2117.2117 | NOT_STARTED |  |  |  |
+| 2118 | phase2118.2118 | NOT_STARTED |  |  |  |
+| 2119 | phase2119.2119 | NOT_STARTED |  |  |  |
+| 2120 | phase2120.2120 | NOT_STARTED |  |  |  |
+| 2121 | phase2121.2121 | NOT_STARTED |  |  |  |
+| 2122 | phase2122.2122 | NOT_STARTED |  |  |  |
+| 2123 | phase2123.2123 | NOT_STARTED |  |  |  |
+| 2124 | phase2124.2124 | NOT_STARTED |  |  |  |
+| 2125 | phase2125.2125 | NOT_STARTED |  |  |  |
+| 2126 | phase2126.2126 | NOT_STARTED |  |  |  |
+| 2127 | phase2127.2127 | NOT_STARTED |  |  |  |
+| 2128 | phase2128.2128 | NOT_STARTED |  |  |  |
+| 2129 | phase2129.2129 | NOT_STARTED |  |  |  |
+| 2130 | phase2130.2130 | NOT_STARTED |  |  |  |
+| 2131 | phase2131.2131 | NOT_STARTED |  |  |  |
+| 2132 | phase2132.2132 | NOT_STARTED |  |  |  |
+| 2133 | phase2133.2133 | NOT_STARTED |  |  |  |
+| 2134 | phase2134.2134 | NOT_STARTED |  |  |  |
+| 2135 | phase2135.2135 | NOT_STARTED |  |  |  |
+| 2136 | phase2136.2136 | NOT_STARTED |  |  |  |
+| 2137 | phase2137.2137 | NOT_STARTED |  |  |  |
+| 2138 | phase2138.2138 | NOT_STARTED |  |  |  |
+| 2139 | phase2139.2139 | NOT_STARTED |  |  |  |
+| 2140 | phase2140.2140 | NOT_STARTED |  |  |  |
+| 2141 | phase2141.2141 | NOT_STARTED |  |  |  |
+| 2142 | phase2142.2142 | NOT_STARTED |  |  |  |
+| 2143 | phase2143.2143 | NOT_STARTED |  |  |  |
+| 2144 | phase2144.2144 | NOT_STARTED |  |  |  |
+| 2145 | phase2145.2145 | NOT_STARTED |  |  |  |
+| 2146 | phase2146.2146 | NOT_STARTED |  |  |  |
+| 2147 | phase2147.2147 | NOT_STARTED |  |  |  |
+| 2148 | phase2148.2148 | NOT_STARTED |  |  |  |
+| 2149 | phase2149.2149 | NOT_STARTED |  |  |  |
+| 2150 | phase2150.2150 | NOT_STARTED |  |  |  |
+| 2151 | phase2151.2151 | NOT_STARTED |  |  |  |
+| 2152 | phase2152.2152 | NOT_STARTED |  |  |  |
+| 2153 | phase2153.2153 | NOT_STARTED |  |  |  |
+| 2154 | phase2154.2154 | NOT_STARTED |  |  |  |
+| 2155 | phase2155.2155 | NOT_STARTED |  |  |  |
+| 2156 | phase2156.2156 | NOT_STARTED |  |  |  |
+| 2157 | phase2157.2157 | NOT_STARTED |  |  |  |
+| 2158 | phase2158.2158 | NOT_STARTED |  |  |  |
+| 2159 | phase2159.2159 | NOT_STARTED |  |  |  |
+| 2160 | phase2160.2160 | NOT_STARTED |  |  |  |
+| 2161 | phase2161.2161 | NOT_STARTED |  |  |  |
+| 2162 | phase2162.2162 | NOT_STARTED |  |  |  |
+| 2163 | phase2163.2163 | NOT_STARTED |  |  |  |
+| 2164 | phase2164.2164 | NOT_STARTED |  |  |  |
+| 2165 | phase2165.2165 | NOT_STARTED |  |  |  |
+| 2166 | phase2166.2166 | NOT_STARTED |  |  |  |
+| 2167 | phase2167.2167 | NOT_STARTED |  |  |  |
+| 2168 | phase2168.2168 | NOT_STARTED |  |  |  |
+| 2169 | phase2169.2169 | NOT_STARTED |  |  |  |
+| 2170 | phase2170.2170 | NOT_STARTED |  |  |  |
+| 2171 | phase2171.2171 | NOT_STARTED |  |  |  |
+| 2172 | phase2172.2172 | NOT_STARTED |  |  |  |
+| 2173 | phase2173.2173 | NOT_STARTED |  |  |  |
+| 2174 | phase2174.2174 | NOT_STARTED |  |  |  |
+| 2175 | phase2175.2175 | NOT_STARTED |  |  |  |
+| 2176 | phase2176.2176 | NOT_STARTED |  |  |  |
+| 2177 | phase2177.2177 | NOT_STARTED |  |  |  |
+| 2178 | phase2178.2178 | NOT_STARTED |  |  |  |
+| 2179 | phase2179.2179 | NOT_STARTED |  |  |  |
+| 2180 | phase2180.2180 | NOT_STARTED |  |  |  |
+| 2181 | phase2181.2181 | NOT_STARTED |  |  |  |
+| 2182 | phase2182.2182 | NOT_STARTED |  |  |  |
+| 2183 | phase2183.2183 | NOT_STARTED |  |  |  |
+| 2184 | phase2184.2184 | NOT_STARTED |  |  |  |
+| 2185 | phase2185.2185 | NOT_STARTED |  |  |  |
+| 2186 | phase2186.2186 | NOT_STARTED |  |  |  |
+| 2187 | phase2187.2187 | NOT_STARTED |  |  |  |
+| 2188 | phase2188.2188 | NOT_STARTED |  |  |  |
+| 2189 | phase2189.2189 | NOT_STARTED |  |  |  |
+| 2190 | phase2190.2190 | NOT_STARTED |  |  |  |
+| 2191 | phase2191.2191 | NOT_STARTED |  |  |  |
+| 2192 | phase2192.2192 | NOT_STARTED |  |  |  |
+| 2193 | phase2193.2193 | NOT_STARTED |  |  |  |
+| 2194 | phase2194.2194 | NOT_STARTED |  |  |  |
+| 2195 | phase2195.2195 | NOT_STARTED |  |  |  |
+| 2196 | phase2196.2196 | NOT_STARTED |  |  |  |
+| 2197 | phase2197.2197 | NOT_STARTED |  |  |  |
+| 2198 | phase2198.2198 | NOT_STARTED |  |  |  |
+| 2199 | phase2199.2199 | NOT_STARTED |  |  |  |
+| 2200 | phase2200.2200 | NOT_STARTED |  |  |  |
+| 2201 | phase2201.2201 | NOT_STARTED |  |  |  |
+| 2202 | phase2202.2202 | NOT_STARTED |  |  |  |
+| 2203 | phase2203.2203 | NOT_STARTED |  |  |  |
+| 2204 | phase2204.2204 | NOT_STARTED |  |  |  |
+| 2205 | phase2205.2205 | NOT_STARTED |  |  |  |
+| 2206 | phase2206.2206 | NOT_STARTED |  |  |  |
+| 2207 | phase2207.2207 | NOT_STARTED |  |  |  |
+| 2208 | phase2208.2208 | NOT_STARTED |  |  |  |
+| 2209 | phase2209.2209 | NOT_STARTED |  |  |  |
+| 2210 | phase2210.2210 | NOT_STARTED |  |  |  |
+| 2211 | phase2211.2211 | NOT_STARTED |  |  |  |
+| 2212 | phase2212.2212 | NOT_STARTED |  |  |  |
+| 2213 | phase2213.2213 | NOT_STARTED |  |  |  |
+| 2214 | phase2214.2214 | NOT_STARTED |  |  |  |
+| 2215 | phase2215.2215 | NOT_STARTED |  |  |  |
+| 2216 | phase2216.2216 | NOT_STARTED |  |  |  |
+| 2217 | phase2217.2217 | NOT_STARTED |  |  |  |
+| 2218 | phase2218.2218 | NOT_STARTED |  |  |  |
+| 2219 | phase2219.2219 | NOT_STARTED |  |  |  |
+| 2220 | phase2220.2220 | NOT_STARTED |  |  |  |
+| 2221 | phase2221.2221 | NOT_STARTED |  |  |  |
+| 2222 | phase2222.2222 | NOT_STARTED |  |  |  |
+| 2223 | phase2223.2223 | NOT_STARTED |  |  |  |
+| 2224 | phase2224.2224 | NOT_STARTED |  |  |  |
+| 2225 | phase2225.2225 | NOT_STARTED |  |  |  |
+| 2226 | phase2226.2226 | NOT_STARTED |  |  |  |
+| 2227 | phase2227.2227 | NOT_STARTED |  |  |  |
+| 2228 | phase2228.2228 | NOT_STARTED |  |  |  |
+| 2229 | phase2229.2229 | NOT_STARTED |  |  |  |
+| 2230 | phase2230.2230 | NOT_STARTED |  |  |  |
+| 2231 | phase2231.2231 | NOT_STARTED |  |  |  |
+| 2232 | phase2232.2232 | NOT_STARTED |  |  |  |
+| 2233 | phase2233.2233 | NOT_STARTED |  |  |  |
+| 2234 | phase2234.2234 | NOT_STARTED |  |  |  |
+| 2235 | phase2235.2235 | NOT_STARTED |  |  |  |
+| 2236 | phase2236.2236 | NOT_STARTED |  |  |  |
+| 2237 | phase2237.2237 | NOT_STARTED |  |  |  |
+| 2238 | phase2238.2238 | NOT_STARTED |  |  |  |
+| 2239 | phase2239.2239 | NOT_STARTED |  |  |  |
+| 2240 | phase2240.2240 | NOT_STARTED |  |  |  |
+| 2241 | phase2241.2241 | NOT_STARTED |  |  |  |
+| 2242 | phase2242.2242 | NOT_STARTED |  |  |  |
+| 2243 | phase2243.2243 | NOT_STARTED |  |  |  |
+| 2244 | phase2244.2244 | NOT_STARTED |  |  |  |
+| 2245 | phase2245.2245 | NOT_STARTED |  |  |  |
+| 2246 | phase2246.2246 | NOT_STARTED |  |  |  |
+| 2247 | phase2247.2247 | NOT_STARTED |  |  |  |
+| 2248 | phase2248.2248 | NOT_STARTED |  |  |  |
+| 2249 | phase2249.2249 | NOT_STARTED |  |  |  |
+| 2250 | phase2250.2250 | NOT_STARTED |  |  |  |
+| 2251 | phase2251.2251 | NOT_STARTED |  |  |  |
+| 2252 | phase2252.2252 | NOT_STARTED |  |  |  |
+| 2253 | phase2253.2253 | NOT_STARTED |  |  |  |
+| 2254 | phase2254.2254 | NOT_STARTED |  |  |  |
+| 2255 | phase2255.2255 | NOT_STARTED |  |  |  |
+| 2256 | phase2256.2256 | NOT_STARTED |  |  |  |
+| 2257 | phase2257.2257 | NOT_STARTED |  |  |  |
+| 2258 | phase2258.2258 | NOT_STARTED |  |  |  |
+| 2259 | phase2259.2259 | NOT_STARTED |  |  |  |
+| 2260 | phase2260.2260 | NOT_STARTED |  |  |  |
+| 2261 | phase2261.2261 | NOT_STARTED |  |  |  |
+| 2262 | phase2262.2262 | NOT_STARTED |  |  |  |
+| 2263 | phase2263.2263 | NOT_STARTED |  |  |  |
+| 2264 | phase2264.2264 | NOT_STARTED |  |  |  |
+| 2265 | phase2265.2265 | NOT_STARTED |  |  |  |
+| 2266 | phase2266.2266 | NOT_STARTED |  |  |  |
+| 2267 | phase2267.2267 | NOT_STARTED |  |  |  |
+| 2268 | phase2268.2268 | NOT_STARTED |  |  |  |
+| 2269 | phase2269.2269 | NOT_STARTED |  |  |  |
+| 2270 | phase2270.2270 | NOT_STARTED |  |  |  |
+| 2271 | phase2271.2271 | NOT_STARTED |  |  |  |
+| 2272 | phase2272.2272 | NOT_STARTED |  |  |  |
+| 2273 | phase2273.2273 | NOT_STARTED |  |  |  |
+| 2274 | phase2274.2274 | NOT_STARTED |  |  |  |
+| 2275 | phase2275.2275 | NOT_STARTED |  |  |  |
+| 2276 | phase2276.2276 | NOT_STARTED |  |  |  |
+| 2277 | phase2277.2277 | NOT_STARTED |  |  |  |
+| 2278 | phase2278.2278 | NOT_STARTED |  |  |  |
+| 2279 | phase2279.2279 | NOT_STARTED |  |  |  |
+| 2280 | phase2280.2280 | NOT_STARTED |  |  |  |
+| 2281 | phase2281.2281 | NOT_STARTED |  |  |  |
+| 2282 | phase2282.2282 | NOT_STARTED |  |  |  |
+| 2283 | phase2283.2283 | NOT_STARTED |  |  |  |
+| 2284 | phase2284.2284 | NOT_STARTED |  |  |  |
+| 2285 | phase2285.2285 | NOT_STARTED |  |  |  |
+| 2286 | phase2286.2286 | NOT_STARTED |  |  |  |
+| 2287 | phase2287.2287 | NOT_STARTED |  |  |  |
+| 2288 | phase2288.2288 | NOT_STARTED |  |  |  |
+| 2289 | phase2289.2289 | NOT_STARTED |  |  |  |
+| 2290 | phase2290.2290 | NOT_STARTED |  |  |  |
+| 2291 | phase2291.2291 | NOT_STARTED |  |  |  |
+| 2292 | phase2292.2292 | NOT_STARTED |  |  |  |
+| 2293 | phase2293.2293 | NOT_STARTED |  |  |  |
+| 2294 | phase2294.2294 | NOT_STARTED |  |  |  |
+| 2295 | phase2295.2295 | NOT_STARTED |  |  |  |
+| 2296 | phase2296.2296 | NOT_STARTED |  |  |  |
+| 2297 | phase2297.2297 | NOT_STARTED |  |  |  |
+| 2298 | phase2298.2298 | NOT_STARTED |  |  |  |
+| 2299 | phase2299.2299 | NOT_STARTED |  |  |  |
+| 2300 | phase2300.2300 | NOT_STARTED |  |  |  |
+| 2301 | phase2301.2301 | NOT_STARTED |  |  |  |
+| 2302 | phase2302.2302 | NOT_STARTED |  |  |  |
+| 2303 | phase2303.2303 | NOT_STARTED |  |  |  |
+| 2304 | phase2304.2304 | NOT_STARTED |  |  |  |
+| 2305 | phase2305.2305 | NOT_STARTED |  |  |  |
+| 2306 | phase2306.2306 | NOT_STARTED |  |  |  |
+| 2307 | phase2307.2307 | NOT_STARTED |  |  |  |
+| 2308 | phase2308.2308 | NOT_STARTED |  |  |  |
+| 2309 | phase2309.2309 | NOT_STARTED |  |  |  |
+| 2310 | phase2310.2310 | NOT_STARTED |  |  |  |
+| 2311 | phase2311.2311 | NOT_STARTED |  |  |  |
+| 2312 | phase2312.2312 | NOT_STARTED |  |  |  |
+| 2313 | phase2313.2313 | NOT_STARTED |  |  |  |
+| 2314 | phase2314.2314 | NOT_STARTED |  |  |  |
+| 2315 | phase2315.2315 | NOT_STARTED |  |  |  |
+| 2316 | phase2316.2316 | NOT_STARTED |  |  |  |
+| 2317 | phase2317.2317 | NOT_STARTED |  |  |  |
+| 2318 | phase2318.2318 | NOT_STARTED |  |  |  |
+| 2319 | phase2319.2319 | NOT_STARTED |  |  |  |
+| 2320 | phase2320.2320 | NOT_STARTED |  |  |  |
+| 2321 | phase2321.2321 | NOT_STARTED |  |  |  |
+| 2322 | phase2322.2322 | NOT_STARTED |  |  |  |
+| 2323 | phase2323.2323 | NOT_STARTED |  |  |  |
+| 2324 | phase2324.2324 | NOT_STARTED |  |  |  |
+| 2325 | phase2325.2325 | NOT_STARTED |  |  |  |
+| 2326 | phase2326.2326 | NOT_STARTED |  |  |  |
+| 2327 | phase2327.2327 | NOT_STARTED |  |  |  |
+| 2328 | phase2328.2328 | NOT_STARTED |  |  |  |
+| 2329 | phase2329.2329 | NOT_STARTED |  |  |  |
+| 2330 | phase2330.2330 | NOT_STARTED |  |  |  |
+| 2331 | phase2331.2331 | NOT_STARTED |  |  |  |
+| 2332 | phase2332.2332 | NOT_STARTED |  |  |  |
+| 2333 | phase2333.2333 | NOT_STARTED |  |  |  |
+| 2334 | phase2334.2334 | NOT_STARTED |  |  |  |
+| 2335 | phase2335.2335 | NOT_STARTED |  |  |  |
+| 2336 | phase2336.2336 | NOT_STARTED |  |  |  |
+| 2337 | phase2337.2337 | NOT_STARTED |  |  |  |
+| 2338 | phase2338.2338 | NOT_STARTED |  |  |  |
+| 2339 | phase2339.2339 | NOT_STARTED |  |  |  |
+| 2340 | phase2340.2340 | NOT_STARTED |  |  |  |
+| 2341 | phase2341.2341 | NOT_STARTED |  |  |  |
+| 2342 | phase2342.2342 | NOT_STARTED |  |  |  |
+| 2343 | phase2343.2343 | NOT_STARTED |  |  |  |
+| 2344 | phase2344.2344 | NOT_STARTED |  |  |  |
+| 2345 | phase2345.2345 | NOT_STARTED |  |  |  |
+| 2346 | phase2346.2346 | NOT_STARTED |  |  |  |
+| 2347 | phase2347.2347 | NOT_STARTED |  |  |  |
+| 2348 | phase2348.2348 | NOT_STARTED |  |  |  |
+| 2349 | phase2349.2349 | NOT_STARTED |  |  |  |
+| 2350 | phase2350.2350 | NOT_STARTED |  |  |  |
+| 2351 | phase2351.2351 | NOT_STARTED |  |  |  |
+| 2352 | phase2352.2352 | NOT_STARTED |  |  |  |
+| 2353 | phase2353.2353 | NOT_STARTED |  |  |  |
+| 2354 | phase2354.2354 | NOT_STARTED |  |  |  |
+| 2355 | phase2355.2355 | NOT_STARTED |  |  |  |
+| 2356 | phase2356.2356 | NOT_STARTED |  |  |  |
+| 2357 | phase2357.2357 | NOT_STARTED |  |  |  |
+| 2358 | phase2358.2358 | NOT_STARTED |  |  |  |
+| 2359 | phase2359.2359 | NOT_STARTED |  |  |  |
+| 2360 | phase2360.2360 | NOT_STARTED |  |  |  |
+| 2361 | phase2361.2361 | NOT_STARTED |  |  |  |
+| 2362 | phase2362.2362 | NOT_STARTED |  |  |  |
+| 2363 | phase2363.2363 | NOT_STARTED |  |  |  |
+| 2364 | phase2364.2364 | NOT_STARTED |  |  |  |
+| 2365 | phase2365.2365 | NOT_STARTED |  |  |  |
+| 2366 | phase2366.2366 | NOT_STARTED |  |  |  |
+| 2367 | phase2367.2367 | NOT_STARTED |  |  |  |
+| 2368 | phase2368.2368 | NOT_STARTED |  |  |  |
+| 2369 | phase2369.2369 | NOT_STARTED |  |  |  |
+| 2370 | phase2370.2370 | NOT_STARTED |  |  |  |
+| 2371 | phase2371.2371 | NOT_STARTED |  |  |  |
+| 2372 | phase2372.2372 | NOT_STARTED |  |  |  |
+| 2373 | phase2373.2373 | NOT_STARTED |  |  |  |
+| 2374 | phase2374.2374 | NOT_STARTED |  |  |  |
+| 2375 | phase2375.2375 | NOT_STARTED |  |  |  |
+| 2376 | phase2376.2376 | NOT_STARTED |  |  |  |
+| 2377 | phase2377.2377 | NOT_STARTED |  |  |  |
+| 2378 | phase2378.2378 | NOT_STARTED |  |  |  |
+| 2379 | phase2379.2379 | NOT_STARTED |  |  |  |
+| 2380 | phase2380.2380 | NOT_STARTED |  |  |  |
+| 2381 | phase2381.2381 | NOT_STARTED |  |  |  |
+| 2382 | phase2382.2382 | NOT_STARTED |  |  |  |
+| 2383 | phase2383.2383 | NOT_STARTED |  |  |  |
+| 2384 | phase2384.2384 | NOT_STARTED |  |  |  |
+| 2385 | phase2385.2385 | NOT_STARTED |  |  |  |
+| 2386 | phase2386.2386 | NOT_STARTED |  |  |  |
+| 2387 | phase2387.2387 | NOT_STARTED |  |  |  |
+| 2388 | phase2388.2388 | NOT_STARTED |  |  |  |
+| 2389 | phase2389.2389 | NOT_STARTED |  |  |  |
+| 2390 | phase2390.2390 | NOT_STARTED |  |  |  |
+| 2391 | phase2391.2391 | NOT_STARTED |  |  |  |
+| 2392 | phase2392.2392 | NOT_STARTED |  |  |  |
+| 2393 | phase2393.2393 | NOT_STARTED |  |  |  |
+| 2394 | phase2394.2394 | NOT_STARTED |  |  |  |
+| 2395 | phase2395.2395 | NOT_STARTED |  |  |  |
+| 2396 | phase2396.2396 | NOT_STARTED |  |  |  |
+| 2397 | phase2397.2397 | NOT_STARTED |  |  |  |
+| 2398 | phase2398.2398 | NOT_STARTED |  |  |  |
+| 2399 | phase2399.2399 | NOT_STARTED |  |  |  |
+| 2400 | phase2400.2400 | NOT_STARTED |  |  |  |
+| 2401 | phase2401.2401 | NOT_STARTED |  |  |  |
+| 2402 | phase2402.2402 | NOT_STARTED |  |  |  |
+| 2403 | phase2403.2403 | NOT_STARTED |  |  |  |
+| 2404 | phase2404.2404 | NOT_STARTED |  |  |  |
+| 2405 | phase2405.2405 | NOT_STARTED |  |  |  |
+| 2406 | phase2406.2406 | NOT_STARTED |  |  |  |
+| 2407 | phase2407.2407 | NOT_STARTED |  |  |  |
+| 2408 | phase2408.2408 | NOT_STARTED |  |  |  |
+| 2409 | phase2409.2409 | NOT_STARTED |  |  |  |
+| 2410 | phase2410.2410 | NOT_STARTED |  |  |  |
+| 2411 | phase2411.2411 | NOT_STARTED |  |  |  |
+| 2412 | phase2412.2412 | NOT_STARTED |  |  |  |
+| 2413 | phase2413.2413 | NOT_STARTED |  |  |  |
+| 2414 | phase2414.2414 | NOT_STARTED |  |  |  |
+| 2415 | phase2415.2415 | NOT_STARTED |  |  |  |
+| 2416 | phase2416.2416 | NOT_STARTED |  |  |  |
+| 2417 | phase2417.2417 | NOT_STARTED |  |  |  |
+| 2418 | phase2418.2418 | NOT_STARTED |  |  |  |
+| 2419 | phase2419.2419 | NOT_STARTED |  |  |  |
+| 2420 | phase2420.2420 | NOT_STARTED |  |  |  |
+| 2421 | phase2421.2421 | NOT_STARTED |  |  |  |
+| 2422 | phase2422.2422 | NOT_STARTED |  |  |  |
+| 2423 | phase2423.2423 | NOT_STARTED |  |  |  |
+| 2424 | phase2424.2424 | NOT_STARTED |  |  |  |
+| 2425 | phase2425.2425 | NOT_STARTED |  |  |  |
+| 2426 | phase2426.2426 | NOT_STARTED |  |  |  |
+| 2427 | phase2427.2427 | NOT_STARTED |  |  |  |
+| 2428 | phase2428.2428 | NOT_STARTED |  |  |  |
+| 2429 | phase2429.2429 | NOT_STARTED |  |  |  |
+| 2430 | phase2430.2430 | NOT_STARTED |  |  |  |
+| 2431 | phase2431.2431 | NOT_STARTED |  |  |  |
+| 2432 | phase2432.2432 | NOT_STARTED |  |  |  |
+| 2433 | phase2433.2433 | NOT_STARTED |  |  |  |
+| 2434 | phase2434.2434 | NOT_STARTED |  |  |  |
+| 2435 | phase2435.2435 | NOT_STARTED |  |  |  |
+| 2436 | phase2436.2436 | NOT_STARTED |  |  |  |
+| 2437 | phase2437.2437 | NOT_STARTED |  |  |  |
+| 2438 | phase2438.2438 | NOT_STARTED |  |  |  |
+| 2439 | phase2439.2439 | NOT_STARTED |  |  |  |
+| 2440 | phase2440.2440 | NOT_STARTED |  |  |  |
+| 2441 | phase2441.2441 | NOT_STARTED |  |  |  |
+| 2442 | phase2442.2442 | NOT_STARTED |  |  |  |
+| 2443 | phase2443.2443 | NOT_STARTED |  |  |  |
+| 2444 | phase2444.2444 | NOT_STARTED |  |  |  |
+| 2445 | phase2445.2445 | NOT_STARTED |  |  |  |
+| 2446 | phase2446.2446 | NOT_STARTED |  |  |  |
+| 2447 | phase2447.2447 | NOT_STARTED |  |  |  |
+| 2448 | phase2448.2448 | NOT_STARTED |  |  |  |
+| 2449 | phase2449.2449 | NOT_STARTED |  |  |  |
+| 2450 | phase2450.2450 | NOT_STARTED |  |  |  |
+| 2451 | phase2451.2451 | NOT_STARTED |  |  |  |
+| 2452 | phase2452.2452 | NOT_STARTED |  |  |  |
+| 2453 | phase2453.2453 | NOT_STARTED |  |  |  |
+| 2454 | phase2454.2454 | NOT_STARTED |  |  |  |
+| 2455 | phase2455.2455 | NOT_STARTED |  |  |  |
+| 2456 | phase2456.2456 | NOT_STARTED |  |  |  |
+| 2457 | phase2457.2457 | NOT_STARTED |  |  |  |
+| 2458 | phase2458.2458 | NOT_STARTED |  |  |  |
+| 2459 | phase2459.2459 | NOT_STARTED |  |  |  |
+| 2460 | phase2460.2460 | NOT_STARTED |  |  |  |
+| 2461 | phase2461.2461 | NOT_STARTED |  |  |  |
+| 2462 | phase2462.2462 | NOT_STARTED |  |  |  |
+| 2463 | phase2463.2463 | NOT_STARTED |  |  |  |
+| 2464 | phase2464.2464 | NOT_STARTED |  |  |  |
+| 2465 | phase2465.2465 | NOT_STARTED |  |  |  |
+| 2466 | phase2466.2466 | NOT_STARTED |  |  |  |
+| 2467 | phase2467.2467 | NOT_STARTED |  |  |  |
+| 2468 | phase2468.2468 | NOT_STARTED |  |  |  |
+| 2469 | phase2469.2469 | NOT_STARTED |  |  |  |
+| 2470 | phase2470.2470 | NOT_STARTED |  |  |  |
+| 2471 | phase2471.2471 | NOT_STARTED |  |  |  |
+| 2472 | phase2472.2472 | NOT_STARTED |  |  |  |
+| 2473 | phase2473.2473 | NOT_STARTED |  |  |  |
+| 2474 | phase2474.2474 | NOT_STARTED |  |  |  |
+| 2475 | phase2475.2475 | NOT_STARTED |  |  |  |
+| 2476 | phase2476.2476 | NOT_STARTED |  |  |  |
+| 2477 | phase2477.2477 | NOT_STARTED |  |  |  |
+| 2478 | phase2478.2478 | NOT_STARTED |  |  |  |
+| 2479 | phase2479.2479 | NOT_STARTED |  |  |  |
+| 2480 | phase2480.2480 | NOT_STARTED |  |  |  |
+| 2481 | phase2481.2481 | NOT_STARTED |  |  |  |
+| 2482 | phase2482.2482 | NOT_STARTED |  |  |  |
+| 2483 | phase2483.2483 | NOT_STARTED |  |  |  |
+| 2484 | phase2484.2484 | NOT_STARTED |  |  |  |
+| 2485 | phase2485.2485 | NOT_STARTED |  |  |  |
+| 2486 | phase2486.2486 | NOT_STARTED |  |  |  |
+| 2487 | phase2487.2487 | NOT_STARTED |  |  |  |
+| 2488 | phase2488.2488 | NOT_STARTED |  |  |  |
+| 2489 | phase2489.2489 | NOT_STARTED |  |  |  |
+| 2490 | phase2490.2490 | NOT_STARTED |  |  |  |
+| 2491 | phase2491.2491 | NOT_STARTED |  |  |  |
+| 2492 | phase2492.2492 | NOT_STARTED |  |  |  |
+| 2493 | phase2493.2493 | NOT_STARTED |  |  |  |
+| 2494 | phase2494.2494 | NOT_STARTED |  |  |  |
+| 2495 | phase2495.2495 | NOT_STARTED |  |  |  |
+| 2496 | phase2496.2496 | NOT_STARTED |  |  |  |
+| 2497 | phase2497.2497 | NOT_STARTED |  |  |  |
+| 2498 | phase2498.2498 | NOT_STARTED |  |  |  |
+| 2499 | phase2499.2499 | NOT_STARTED |  |  |  |
+| 2500 | phase2500.2500 | NOT_STARTED |  |  |  |
+| 2501 | phase2501.2501 | NOT_STARTED |  |  |  |
+| 2502 | phase2502.2502 | NOT_STARTED |  |  |  |
+| 2503 | phase2503.2503 | NOT_STARTED |  |  |  |
+| 2504 | phase2504.2504 | NOT_STARTED |  |  |  |
+| 2505 | phase2505.2505 | NOT_STARTED |  |  |  |
+| 2506 | phase2506.2506 | NOT_STARTED |  |  |  |
+| 2507 | phase2507.2507 | NOT_STARTED |  |  |  |
+| 2508 | phase2508.2508 | NOT_STARTED |  |  |  |
+| 2509 | phase2509.2509 | NOT_STARTED |  |  |  |
+| 2510 | phase2510.2510 | NOT_STARTED |  |  |  |
+| 2511 | phase2511.2511 | NOT_STARTED |  |  |  |
+| 2512 | phase2512.2512 | NOT_STARTED |  |  |  |
+| 2513 | phase2513.2513 | NOT_STARTED |  |  |  |
+| 2514 | phase2514.2514 | NOT_STARTED |  |  |  |
+| 2515 | phase2515.2515 | NOT_STARTED |  |  |  |
+| 2516 | phase2516.2516 | NOT_STARTED |  |  |  |
+| 2517 | phase2517.2517 | NOT_STARTED |  |  |  |
+| 2518 | phase2518.2518 | NOT_STARTED |  |  |  |
+| 2519 | phase2519.2519 | NOT_STARTED |  |  |  |
+| 2520 | phase2520.2520 | NOT_STARTED |  |  |  |
+| 2521 | phase2521.2521 | NOT_STARTED |  |  |  |
+| 2522 | phase2522.2522 | NOT_STARTED |  |  |  |
+| 2523 | phase2523.2523 | NOT_STARTED |  |  |  |
+| 2524 | phase2524.2524 | NOT_STARTED |  |  |  |
+| 2525 | phase2525.2525 | NOT_STARTED |  |  |  |
+| 2526 | phase2526.2526 | NOT_STARTED |  |  |  |
+| 2527 | phase2527.2527 | NOT_STARTED |  |  |  |
+| 2528 | phase2528.2528 | NOT_STARTED |  |  |  |
+| 2529 | phase2529.2529 | NOT_STARTED |  |  |  |
+| 2530 | phase2530.2530 | NOT_STARTED |  |  |  |
+| 2531 | phase2531.2531 | NOT_STARTED |  |  |  |
+| 2532 | phase2532.2532 | NOT_STARTED |  |  |  |
+| 2533 | phase2533.2533 | NOT_STARTED |  |  |  |
+| 2534 | phase2534.2534 | NOT_STARTED |  |  |  |
+| 2535 | phase2535.2535 | NOT_STARTED |  |  |  |
+| 2536 | phase2536.2536 | NOT_STARTED |  |  |  |
+| 2537 | phase2537.2537 | NOT_STARTED |  |  |  |
+| 2538 | phase2538.2538 | NOT_STARTED |  |  |  |
+| 2539 | phase2539.2539 | NOT_STARTED |  |  |  |
+| 2540 | phase2540.2540 | NOT_STARTED |  |  |  |
+| 2541 | phase2541.2541 | NOT_STARTED |  |  |  |
+| 2542 | phase2542.2542 | NOT_STARTED |  |  |  |
+| 2543 | phase2543.2543 | NOT_STARTED |  |  |  |
+| 2544 | phase2544.2544 | NOT_STARTED |  |  |  |
+| 2545 | phase2545.2545 | NOT_STARTED |  |  |  |
+| 2546 | phase2546.2546 | NOT_STARTED |  |  |  |
+| 2547 | phase2547.2547 | NOT_STARTED |  |  |  |
+| 2548 | phase2548.2548 | NOT_STARTED |  |  |  |
+| 2549 | phase2549.2549 | NOT_STARTED |  |  |  |
+| 2550 | phase2550.2550 | NOT_STARTED |  |  |  |
+| 2551 | phase2551.2551 | NOT_STARTED |  |  |  |
+| 2552 | phase2552.2552 | NOT_STARTED |  |  |  |
+| 2553 | phase2553.2553 | NOT_STARTED |  |  |  |
+| 2554 | phase2554.2554 | NOT_STARTED |  |  |  |
+| 2555 | phase2555.2555 | NOT_STARTED |  |  |  |
+| 2556 | phase2556.2556 | NOT_STARTED |  |  |  |
+| 2557 | phase2557.2557 | NOT_STARTED |  |  |  |
+| 2558 | phase2558.2558 | NOT_STARTED |  |  |  |
+| 2559 | phase2559.2559 | NOT_STARTED |  |  |  |
+| 2560 | phase2560.2560 | NOT_STARTED |  |  |  |
+| 2561 | phase2561.2561 | NOT_STARTED |  |  |  |
+| 2562 | phase2562.2562 | NOT_STARTED |  |  |  |
+| 2563 | phase2563.2563 | NOT_STARTED |  |  |  |
+| 2564 | phase2564.2564 | NOT_STARTED |  |  |  |
+| 2565 | phase2565.2565 | NOT_STARTED |  |  |  |
+| 2566 | phase2566.2566 | NOT_STARTED |  |  |  |
+| 2567 | phase2567.2567 | NOT_STARTED |  |  |  |
+| 2568 | phase2568.2568 | NOT_STARTED |  |  |  |
+| 2569 | phase2569.2569 | NOT_STARTED |  |  |  |
+| 2570 | phase2570.2570 | NOT_STARTED |  |  |  |
+| 2571 | phase2571.2571 | NOT_STARTED |  |  |  |
+| 2572 | phase2572.2572 | NOT_STARTED |  |  |  |
+| 2573 | phase2573.2573 | NOT_STARTED |  |  |  |
+| 2574 | phase2574.2574 | NOT_STARTED |  |  |  |
+| 2575 | phase2575.2575 | NOT_STARTED |  |  |  |
