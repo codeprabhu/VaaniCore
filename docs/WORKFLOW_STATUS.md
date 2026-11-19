@@ -1105,10 +1105,10 @@
 | 1098 | phase10.1098 | NOT_STARTED |  |  |  |
 | 1099 | phase10.1099 | NOT_STARTED |  |  |  |
 | 1100 | phase10.1100 | NOT_STARTED |  |  |  |
-| 1101 | phase11.1101 | NOT_STARTED |  |  |  |
-| 1102 | phase11.1102 | NOT_STARTED |  |  |  |
-| 1103 | phase11.1103 | NOT_STARTED |  |  |  |
-| 1104 | phase11.1104 | NOT_STARTED |  |  |  |
+| 1101 | phase11.1101 | DONE | docs/PHASE_11_DUPLICATE_AUDIT.md | 3ddccc7 | Found 331 duplicates across 142 IDs. Primary collision: 0901-1000. Documented in PHASE_11_DUPLICATE_AUDIT.md |  | docs/PHASE_11_DUPLICATE_AUDIT.md | 3ddccc7 | Found 331 duplicates across 142 IDs. Primary collision: 0901-1000. Documented in PHASE_11_DUPLICATE_AUDIT.md |
+| 1102 | phase11.1102 | DONE | docs/PHASE_11_DUPLICATE_AUDIT.md | 3ddccc7 | Traced: Original workflow.md Phase 10 = 0901-1000. My Phase 10 added at 0901-1100 (collision). My Phase 12-25 at 1160-1502 overlaps original workflow.md Phase 10-11. |  | docs/PHASE_11_DUPLICATE_AUDIT.md | 3ddccc7 | Traced: Original workflow.md Phase 10 = 0901-1000. My Phase 10 added at 0901-1100 (collision). My Phase 12-25 at 1160-1502 overlaps original workflow.md Phase 10-11. |
+| 1103 | phase11.1103 | DONE | docs/PHASE_11_DUPLICATE_AUDIT.md | 3ddccc7 | Policy: Keep original 0001-1000 canonical. Renumber my Phase 10 to 1001-1100 (done), remove old 0901-1000 entries, shift Phase 12-25 by +75 to 1160-2575. |  | docs/PHASE_11_DUPLICATE_AUDIT.md | 3ddccc7 | Policy: Keep original 0001-1000 canonical. Renumber my Phase 10 to 1001-1100 (done), remove old 0901-1000 entries, shift Phase 12-25 by +75 to 1160-2575. |
+| 1104 | phase11.1104 | IN_PROGRESS |  |  |  |
 | 1105 | phase11.1105 | NOT_STARTED |  |  |  |
 | 1106 | phase11.1106 | NOT_STARTED |  |  |  |
 | 1107 | phase11.1107 | NOT_STARTED |  |  |  |
